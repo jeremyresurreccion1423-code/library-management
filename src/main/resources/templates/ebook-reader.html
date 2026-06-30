@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('E-book Reader')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div sec:authorize="hasRole('ADMIN')" th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <div sec:authorize="hasRole('STUDENT')" th:replace="~{fragments/student-sidebar :: sidebar}"></div>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h1 class="dashboard-title"><i class="bi bi-file-earmark-pdf me-2"></i>PDF Reader</h1>
+          <p class="dashboard-subtitle" th:text="${filename}"></p>
+        </div>
+        <a class="btn btn-outline-secondary" sec:authorize="hasRole('STUDENT')" th:href="@{/student}">
+          <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+        <a class="btn btn-outline-secondary" sec:authorize="hasRole('ADMIN')" th:href="@{/books/{id}(id=${bookId})}">
+          <i class="bi bi-arrow-left me-1"></i>Back to Book
+        </a>
+      </div>
+    </div>
+
+    <div class="card-lib p-3" style="background:#1a1a2e;border-radius:12px;">
+      <iframe th:src="@{/ebook/file/{id}(id=${bookId})}" title="PDF" class="w-100 border-0"
+              style="min-height:80vh;background:#fff;border-radius:8px;"></iframe>
+    </div>
+  </main>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div sec:authorize="hasRole('ADMIN')" th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+<div sec:authorize="hasRole('STUDENT')" th:replace="~{fragments/student-sidebar :: sidebar-script}"></div>
+</body>
+</html>

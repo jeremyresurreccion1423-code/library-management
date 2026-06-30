@@ -1,0 +1,14 @@
+package com.smartlibrary.repository;
+
+import com.smartlibrary.entity.OtpCode;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface OtpRepository extends JpaRepository<OtpCode, Long> {
+    Optional<OtpCode> findByEmailAndCodeAndVerifiedFalse(String email, String code);
+
+    Optional<OtpCode> findByEmailAndVerifiedFalse(String email);
+}

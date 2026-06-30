@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Admin dashboard')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Admin Dashboard</h1>
+      <p class="dashboard-subtitle">Overview of books, students, and loan activity</p>
+    </div>
+    
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    
+    <div class="dashboard-cards">
+      <div class="dashboard-card">
+        <div class="card-icon bg-blue">
+          <i class="bi bi-book"></i>
+        </div>
+        <div class="card-info">
+          <h6 class="card-label">Books</h6>
+          <p class="card-value" th:text="${bookCount}"></p>
+        </div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon bg-green">
+          <i class="bi bi-people"></i>
+        </div>
+        <div class="card-info">
+          <h6 class="card-label">Students</h6>
+          <p class="card-value" th:text="${studentCount}"></p>
+        </div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon bg-teal">
+          <i class="bi bi-journal-check"></i>
+        </div>
+        <div class="card-info">
+          <h6 class="card-label">Active Loans</h6>
+          <p class="card-value text-success" th:text="${activeLoans}"></p>
+        </div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon bg-red">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="card-info">
+          <h6 class="card-label">Overdue</h6>
+          <p class="card-value text-danger" th:text="${overdueLoans}"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 mb-2">
+      <h2 class="h5">Quick Actions</h2>
+    </div>
+    <div class="row g-3">
+      <div class="col-6 col-md-3">
+        <a th:href="@{/admin/books}" class="card-lib text-decoration-none d-block p-3 text-center h-100">
+          <i class="bi bi-book fs-2 mb-2 d-block text-secondary"></i>
+          <span class="fw-medium">All Books</span>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a th:href="@{/admin/students}" class="card-lib text-decoration-none d-block p-3 text-center h-100">
+          <i class="bi bi-people fs-2 mb-2 d-block text-secondary"></i>
+          <span class="fw-medium">All Students</span>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a th:href="@{/admin/scan-issue}" class="card-lib text-decoration-none d-block p-3 text-center h-100">
+          <i class="bi bi-upc-scan fs-2 mb-2 d-block text-success"></i>
+          <span class="fw-medium">Scan Issue</span>
+        </a>
+      </div>
+      <div class="col-6 col-md-3">
+        <a th:href="@{/admin/books/new}" class="card-lib text-decoration-none d-block p-3 text-center h-100">
+          <i class="bi bi-plus-circle fs-2 mb-2 d-block text-accent"></i>
+          <span class="fw-medium">Add Book</span>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+</body>
+</html>

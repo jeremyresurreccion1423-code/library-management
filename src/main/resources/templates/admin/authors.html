@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Authors')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Authors</h1>
+      <p class="dashboard-subtitle">Manage book authors</p>
+    </div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+  <form class="row g-2 mb-4" th:action="@{/admin/authors}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <div class="col-auto"><input class="form-control" name="name" placeholder="Author name" required/></div>
+    <div class="col-auto"><button class="btn btn-accent" type="submit">Add</button></div>
+  </form>
+  <div class="table-responsive card-lib p-0">
+    <table class="table table-dark-lib mb-0">
+      <thead><tr><th>Name</th><th></th></tr></thead>
+      <tbody>
+      <tr th:each="a : ${authors}">
+        <td>
+          <form th:action="@{/admin/authors/{id}/edit(id=${a.id})}" method="post" class="d-flex gap-2">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input class="form-control form-control-sm" name="name" th:value="${a.name}"/>
+            <button class="btn btn-sm btn-outline-light" type="submit">Save</button>
+          </form>
+        </td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-danger delete-author-btn" type="button"
+                  th:attr="data-author-id=${a.id},data-author-name=${a.name}">
+            Delete
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.delete-author-btn');
+    buttons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        const authorId = button.getAttribute('data-author-id');
+        const authorName = button.getAttribute('data-author-name');
+        const message = 'Are you sure you want to delete "' + authorName + '"?';
+
+        const submitDelete = function() {
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = '/admin/authors/' + authorId + '/delete';
+
+          const csrfToken = document.querySelector('meta[name="_csrf"]');
+          if (csrfToken) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = '_csrf';
+            input.value = csrfToken.getAttribute('content');
+            form.appendChild(input);
+          }
+
+          document.body.appendChild(form);
+          form.submit();
+        };
+
+        if (typeof confirmAction === 'function') {
+          confirmAction(message, submitDelete);
+        } else if (confirm(message)) {
+          submitDelete();
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

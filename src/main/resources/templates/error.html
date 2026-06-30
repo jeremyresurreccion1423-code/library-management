@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Error</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+<div class="container">
+    <div class="error-page">
+        <h1>Oops! Something went wrong.</h1>
+        <p th:text="${message} ?: 'An unexpected error occurred while processing your request.'"></p>
+        <div class="error-details">
+            <p><strong>Status:</strong> <span th:text="${status}">500</span></p>
+            <p><strong>Error:</strong> <span th:text="${error}">Internal Server Error</span></p>
+            <p><strong>Path:</strong> <span th:text="${path}"></span></p>
+        </div>
+        <a class="button" th:href="@{/}">Return to Home</a>
+    </div>
+</div>
+</body>
+</html>

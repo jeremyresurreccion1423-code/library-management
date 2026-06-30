@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Scan & Issue')}"></head>
+<body class="dashboard-body">
+<style>
+  #reader video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 12px;
+  }
+</style>
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Scan & Issue</h1>
+      <p class="dashboard-subtitle">Scan a book to see details, then scan a student ID to issue.</p>
+    </div>
+
+  <div id="flash" class="alert d-none"></div>
+
+  <div id="bookCard" class="card-lib p-3 mb-3 d-none">
+    <div class="d-flex align-items-center gap-3">
+      <div class="bg-primary bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
+        <i class="bi bi-book fs-2 text-primary"></i>
+      </div>
+      <div class="flex-grow-1">
+        <h5 class="mb-1 fw-bold" id="bookCardTitle">Book Title</h5>
+        <p class="mb-1 text-muted" id="bookCardAuthor">Author</p>
+        <span class="badge" id="bookCardStatus">Available</span>
+      </div>
+      <a th:href="@{/books/0}" id="bookCardLink" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-eye me-1"></i>View
+      </a>
+    </div>
+  </div>
+
+  <div id="studentCard" class="card-lib p-3 mb-3 d-none">
+    <div class="d-flex align-items-center gap-3">
+      <div class="bg-success bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
+        <i class="bi bi-person fs-2 text-success"></i>
+      </div>
+      <div class="flex-grow-1">
+        <h5 class="mb-1 fw-bold">Student</h5>
+        <p class="mb-0 text-muted" id="studentCardId">ID</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card-lib p-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h2 class="h6 mb-0">Camera</h2>
+          <button type="button" class="btn btn-sm btn-secondary" id="btnReset">Reset</button>
+        </div>
+        <div id="reader" style="width:100%; aspect-ratio:1/1; background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1; overflow:hidden;"></div>
+        <p class="small text-muted-lib mt-2 mb-0" id="status"></p>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="manual-entry-card">
+        <h3><i class="bi bi-pencil-square me-2" style="color:#22c55e;"></i>Manual Entry</h3>
+        <p class="text-muted">Enter book barcode and student ID manually, then click <strong>Issue Now</strong>.</p>
+
+        <input type="hidden" id="bookId"/>
+        <input type="hidden" id="studentId"/>
+
+        <div class="manual-input-group">
+          <label>Book Barcode / QR</label>
+          <input class="form-control" id="manualBarcode" placeholder="Barcode or BOOK:ID"/>
+        </div>
+
+        <button type="button" class="btn btn-info w-100 mb-3" id="btnSearchBarcode" style="border-radius:10px;">
+          <i class="bi bi-search me-1"></i>Search Book
+        </button>
+
+        <div class="manual-input-group">
+          <label>Student ID / Username</label>
+          <input class="form-control" id="manualStudent" placeholder="101-000 or username"/>
+        </div>
+
+        <button class="manual-issue-btn" id="btnIssueManual" type="button" disabled>
+          <i class="bi bi-check-circle me-2"></i>Issue Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="issueSuccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content" style="background:#fff;border:none;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div class="modal-body text-center p-4">
+          <div class="mb-3">
+            <i class="bi bi-check-circle-fill" style="font-size:3rem;color:#22c55e;"></i>
+          </div>
+          <h5 class="mb-2" style="color:#1f2937;font-weight:600;">Issued Successfully!</h5>
+          <p class="mb-0" style="color:#6b7280;">The book has been issued to the student.</p>
+        </div>
+        <div class="modal-footer border-0 justify-content-center pb-4 pt-0">
+          <button type="button" class="btn btn-accent" data-bs-dismiss="modal" style="border-radius:10px;padding:8px 24px;" onclick="clearInputsAfterIssue()">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+  const csrfMeta = document.querySelector('meta[name="_csrf"]');
+  const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : null;
+  const statusEl = document.getElementById('status');
+  const flashEl = document.getElementById('flash');
+
+  const bookIdEl = document.getElementById('bookId');
+  const studentIdEl = document.getElementById('studentId');
+
+  let lastScannedCode = '';
+  let lastScanTime = 0;
+  const SCAN_COOLDOWN_MS = 2000;
+
+  function showFlash(kind, msg) {
+    flashEl.classList.remove('d-none', 'alert-success', 'alert-danger', 'alert-info', 'alert-warning');
+    flashEl.classList.add(kind === 'success' ? 'alert-success' : (kind === 'error' ? 'alert-danger' : 'alert-info'));
+    flashEl.textContent = msg;
+  }
+
+  function clearFlash() {
+    flashEl.classList.add('d-none');
+    flashEl.textContent = '';
+  }
+
+  function parseBookIdFromPayload(payload) {
+    if (!payload) return null;
+    const t = String(payload).trim();
+    if (!t.startsWith('BOOK:')) return null;
+    const id = t.substring('BOOK:'.length).trim();
+    if (!/^\d+$/.test(id)) return null;
+    return id;
+  }
+
+  function normalizeStudentValue(raw) {
+    if (!raw) return '';
+    let t = String(raw).trim();
+    if (t.toUpperCase().startsWith('STUDENT:')) {
+      t = t.substring('STUDENT:'.length).trim();
+    }
+    return t;
+  }
+
+  function refreshIssueButton() {
+    const ok = !!bookIdEl.value && !!normalizeStudentValue(studentIdEl.value);
+    const manualIssueBtn = document.getElementById('btnIssueManual');
+    if (manualIssueBtn) manualIssueBtn.disabled = !ok;
+  }
+
+  async function issueNow() {
+    clearFlash();
+    const bookId = bookIdEl.value;
+    const studentId = normalizeStudentValue(studentIdEl.value);
+    if (!bookId || !studentId) return;
+
+    const manualIssueBtn = document.getElementById('btnIssueManual');
+    if (manualIssueBtn) manualIssueBtn.disabled = true;
+    statusEl.textContent = 'Issuing...';
+    try {
+      const body = new URLSearchParams();
+      body.set('bookId', bookId);
+      body.set('studentId', studentId);
+      if (csrfToken) body.set('_csrf', csrfToken);
+
+      const r = await fetch('/admin/issues/issue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString()
+      });
+
+      if (r.redirected) {
+        window.location.href = r.url;
+        return;
+      }
+
+      if (!r.ok) {
+        showFlash('error', 'Issue failed. Please check the inputs.');
+      } else {
+        const successModal = new bootstrap.Modal(document.getElementById('issueSuccessModal'));
+        successModal.show();
+      }
+    } catch (e) {
+      showFlash('error', 'Issue error: ' + e);
+    } finally {
+      statusEl.textContent = '';
+      refreshIssueButton();
+    }
+  }
+
+  function clearInputsAfterIssue() {
+    bookIdEl.value = '';
+    studentIdEl.value = '';
+    document.getElementById('manualBarcode').value = '';
+    document.getElementById('manualStudent').value = '';
+    hideBookCard();
+    hideStudentCard();
+    statusEl.textContent = '';
+    clearFlash();
+    refreshIssueButton();
+  }
+
+  function showBookCard(book) {
+    document.getElementById('bookCardTitle').textContent = book.title;
+    document.getElementById('bookCardAuthor').textContent = book.author || 'Unknown Author';
+    const statusBadge = document.getElementById('bookCardStatus');
+    if (book.isAvailable) {
+      statusBadge.className = 'badge bg-success';
+      statusBadge.textContent = book.availableCopies + ' copy(s) available';
+    } else {
+      statusBadge.className = 'badge bg-danger';
+      statusBadge.textContent = 'Not available';
+    }
+    document.getElementById('bookCardLink').href = '/books/' + book.bookId;
+    document.getElementById('bookCard').classList.remove('d-none');
+  }
+
+  function hideBookCard() {
+    document.getElementById('bookCard').classList.add('d-none');
+  }
+
+  function showStudentCard(studentId) {
+    document.getElementById('studentCardId').textContent = studentId;
+    document.getElementById('studentCard').classList.remove('d-none');
+  }
+
+  function hideStudentCard() {
+    document.getElementById('studentCard').classList.add('d-none');
+  }
+
+  async function lookupBook(code) {
+    if (!code) return null;
+    try {
+      const r = await fetch('/api/lookup/any?code=' + encodeURIComponent(code.trim()));
+      if (!r.ok) { showFlash('error', 'Book not found: ' + code); return null; }
+      return await r.json();
+    } catch (e) {
+      showFlash('error', 'Book lookup error.');
+      return null;
+    }
+  }
+
+  async function lookupBarcodeAndSetBookId(code) {
+    const book = await lookupBook(code);
+    if (book) {
+      bookIdEl.value = book.bookId;
+      showBookCard(book);
+      showFlash('info', 'Book: ' + book.title);
+      return true;
+    }
+    return false;
+  }
+
+  async function issueManualNow() {
+    const barcodeVal = document.getElementById('manualBarcode').value.trim();
+    if (barcodeVal && !bookIdEl.value) {
+      await lookupBarcodeAndSetBookId(barcodeVal);
+    }
+    const studentVal = document.getElementById('manualStudent').value.trim();
+    if (studentVal && !studentIdEl.value) {
+      const s = normalizeStudentValue(studentVal);
+      if (s) {
+        studentIdEl.value = s;
+        showFlash('info', 'Student set: ' + s);
+      }
+    }
+    refreshIssueButton();
+    const manualIssueBtn = document.getElementById('btnIssueManual');
+    if (manualIssueBtn && !manualIssueBtn.disabled) {
+      issueNow();
+    } else {
+      showFlash('error', 'Please provide a valid book barcode and student ID.');
+    }
+  }
+
+  async function onScan(decodedText) {
+    const now = Date.now();
+    if (decodedText === lastScannedCode && (now - lastScanTime) < SCAN_COOLDOWN_MS) {
+      return;
+    }
+    lastScannedCode = decodedText;
+    lastScanTime = now;
+    statusEl.textContent = 'Scanned: ' + decodedText;
+
+    // 1. Try parse as QR payload (BOOK:xxx)
+    const qrBookId = parseBookIdFromPayload(decodedText);
+    if (qrBookId) {
+      const book = await lookupBook(decodedText);
+      if (book) {
+        bookIdEl.value = book.bookId;
+        showBookCard(book);
+        showFlash('info', 'Book: ' + book.title);
+        refreshIssueButton();
+      }
+      return;
+    }
+
+    // 2. Try lookup as barcode
+    const book = await lookupBook(decodedText);
+    if (book) {
+      bookIdEl.value = book.bookId;
+      showBookCard(book);
+      showFlash('info', 'Book: ' + book.title);
+      refreshIssueButton();
+      return;
+    }
+
+    // 3. Treat as student ID
+    const student = normalizeStudentValue(decodedText);
+    if (student) {
+      studentIdEl.value = student;
+      showStudentCard(student);
+      showFlash('info', 'Student: ' + student);
+      refreshIssueButton();
+      // Auto-issue only if book is already scanned
+      const manualIssueBtn = document.getElementById('btnIssueManual');
+      if (manualIssueBtn && !manualIssueBtn.disabled) {
+        issueNow();
+      }
+    }
+  }
+
+  async function startScanner() {
+    statusEl.textContent = 'Initializing camera...';
+
+    if (html5QrCode) {
+      try { await html5QrCode.stop(); } catch(e) {}
+      try { html5QrCode.clear(); } catch(e) {}
+    }
+
+    const reader = document.getElementById('reader');
+    reader.innerHTML = '';
+
+    html5QrCode = new Html5Qrcode('reader');
+    lastScannedCode = '';
+    lastScanTime = 0;
+
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras.length) {
+        statusEl.textContent = 'No camera found.';
+        return;
+      }
+
+      let cameraId = cameras[0].id;
+      const backCamera = cameras.find(c =>
+        c.label.toLowerCase().includes('back') ||
+        c.label.toLowerCase().includes('environment') ||
+        c.label.toLowerCase().includes('rear')
+      );
+      if (backCamera) cameraId = backCamera.id;
+
+      await html5QrCode.start(
+        cameraId,
+        { fps: 15, qrbox: { width: 250, height: 250 } },
+        (decodedText) => { onScan(decodedText); },
+        (error) => {}
+      );
+      statusEl.textContent = 'Camera ready. Point at QR/barcode...';
+    } catch (e) {
+      console.error('Scanner error:', e);
+      statusEl.textContent = 'Camera error: ' + e;
+    }
+  }
+
+  document.getElementById('btnReset').addEventListener('click', function () {
+    bookIdEl.value = '';
+    studentIdEl.value = '';
+    document.getElementById('manualBarcode').value = '';
+    document.getElementById('manualStudent').value = '';
+    hideBookCard();
+    hideStudentCard();
+    clearFlash();
+    refreshIssueButton();
+    startScanner();
+  });
+
+  const manualIssueBtn = document.getElementById('btnIssueManual');
+  if (manualIssueBtn) {
+    manualIssueBtn.addEventListener('click', issueManualNow);
+  }
+
+  const btnSearchBarcode = document.getElementById('btnSearchBarcode');
+  if (btnSearchBarcode) {
+    btnSearchBarcode.addEventListener('click', async () => {
+      const barcodeVal = document.getElementById('manualBarcode').value.trim();
+      if (!barcodeVal) {
+        showFlash('error', 'Please enter a barcode.');
+        return;
+      }
+      await lookupBarcodeAndSetBookId(barcodeVal);
+      refreshIssueButton();
+    });
+  }
+
+  document.getElementById('manualBarcode').addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+      const barcodeVal = document.getElementById('manualBarcode').value.trim();
+      if (barcodeVal) {
+        await lookupBarcodeAndSetBookId(barcodeVal);
+        refreshIssueButton();
+      }
+    }
+  });
+
+  document.getElementById('manualStudent').addEventListener('input', (e) => {
+    const studentVal = e.target.value.trim();
+    if (studentVal) {
+      const s = normalizeStudentValue(studentVal);
+      if (s) {
+        studentIdEl.value = s;
+      } else {
+        studentIdEl.value = '';
+      }
+    } else {
+      studentIdEl.value = '';
+    }
+    refreshIssueButton();
+  });
+
+  document.getElementById('manualStudent').addEventListener('keypress', async (e) => {
+    if (e.key === 'Enter') {
+      const studentVal = e.target.value.trim();
+      if (studentVal) {
+        const s = normalizeStudentValue(studentVal);
+        if (s) {
+          studentIdEl.value = s;
+          refreshIssueButton();
+          const manualIssueBtn = document.getElementById('btnIssueManual');
+          if (manualIssueBtn && !manualIssueBtn.disabled) {
+            issueNow();
+          }
+        }
+      }
+    }
+  });
+
+  refreshIssueButton();
+
+  let html5QrCode = null;
+  startScanner();
+</script>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+</body>
+</html>
+

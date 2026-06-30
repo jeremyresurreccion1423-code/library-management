@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Scan Book')}"></head>
+<body class="dashboard-body">
+<style>
+  #reader video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 12px;
+  }
+</style>
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/student-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Scan Book</h1>
+      <p class="dashboard-subtitle">Scan or type a barcode to find a book</p>
+    </div>
+
+    <div id="flash" class="alert d-none"></div>
+
+    <div id="bookCard" class="card-lib p-3 mb-3 d-none">
+      <div class="d-flex align-items-center gap-3">
+        <div class="bg-success bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center" style="width:64px;height:64px;">
+          <i class="bi bi-book fs-2 text-success"></i>
+        </div>
+        <div class="flex-grow-1">
+          <h5 class="mb-1 fw-bold" id="cardTitle">Book Title</h5>
+          <p class="mb-1 text-muted" id="cardAuthor">Author</p>
+          <span class="badge" id="cardStatus">Available</span>
+        </div>
+        <a th:href="@{/books/0}" id="cardLink" class="btn btn-accent">
+          <i class="bi bi-eye me-1"></i>View Book
+        </a>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-6">
+        <div class="card-lib p-3">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h2 class="h6 mb-0"><i class="bi bi-camera me-1"></i>Camera</h2>
+            <button type="button" class="btn btn-sm btn-outline-secondary" id="btnRestart">Restart</button>
+          </div>
+          <div id="reader" style="width:100%; aspect-ratio:1/1; background:#f8fafc; border-radius:12px; border:1px dashed #cbd5e1; overflow:hidden;"></div>
+          <p class="small text-muted mt-2 mb-0" id="status">Allow camera access to scan...</p>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="manual-entry-card">
+          <h3><i class="bi bi-pencil-square me-2" style="color:#22c55e;"></i>Manual Lookup</h3>
+          <p class="text-muted">Type a barcode number to look up a book manually.</p>
+
+          <div class="manual-input-group">
+            <label>Barcode / QR Code</label>
+            <input class="form-control" id="manualBarcode" placeholder="Enter barcode or BOOK:ID"/>
+          </div>
+
+          <button type="button" class="btn btn-accent w-100" id="btnBarcode" style="border-radius:10px;">
+            <i class="bi bi-upc-scan me-1"></i>Lookup
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script>
+  const statusEl = document.getElementById('status');
+  const flashEl = document.getElementById('flash');
+  let html5QrCode = null;
+  let lastScannedCode = '';
+  let lastScanTime = 0;
+  const SCAN_COOLDOWN_MS = 2500;
+
+  function showFlash(kind, msg) {
+    flashEl.classList.remove('d-none', 'alert-success', 'alert-danger', 'alert-info');
+    flashEl.classList.add(kind === 'success' ? 'alert-success' : (kind === 'error' ? 'alert-danger' : 'alert-info'));
+    flashEl.textContent = msg;
+  }
+
+  function goBook(id) {
+    window.location.href = '/books/' + id;
+  }
+
+  function showBookCard(book) {
+    document.getElementById('cardTitle').textContent = book.title;
+    document.getElementById('cardAuthor').textContent = book.author || 'Unknown Author';
+    const statusBadge = document.getElementById('cardStatus');
+    if (book.isAvailable) {
+      statusBadge.className = 'badge bg-success';
+      statusBadge.textContent = book.availableCopies + ' copy(s) available';
+    } else {
+      statusBadge.className = 'badge bg-danger';
+      statusBadge.textContent = 'Not available';
+    }
+    document.getElementById('cardLink').href = '/books/' + book.bookId;
+    document.getElementById('bookCard').classList.remove('d-none');
+  }
+
+  function parseBookQr(text) {
+    const t = String(text).trim();
+    if (t.toUpperCase().startsWith('BOOK:')) {
+      return t.substring('BOOK:'.length).trim();
+    }
+    return null;
+  }
+
+  async function lookupBook(code) {
+    statusEl.textContent = 'Looking up...';
+
+    const r = await fetch('/api/lookup/any?code=' + encodeURIComponent(code));
+    if (!r.ok) { showFlash('error', 'Book not found.'); statusEl.textContent = 'Not found.'; return; }
+    const j = await r.json();
+    showFlash('success', 'Found: ' + j.title);
+    statusEl.textContent = 'Found: ' + j.title;
+    showBookCard(j);
+    setTimeout(() => goBook(j.bookId), 1200);
+  }
+
+  document.getElementById('btnBarcode').onclick = () => {
+    const v = document.getElementById('manualBarcode').value.trim();
+    if (v) lookupBook(v);
+  };
+
+  document.getElementById('manualBarcode').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      const v = document.getElementById('manualBarcode').value.trim();
+      if (v) lookupBook(v);
+    }
+  });
+
+  async function startScanner() {
+    statusEl.textContent = 'Initializing camera...';
+
+    if (html5QrCode) {
+      try { await html5QrCode.stop(); } catch(e) {}
+      try { html5QrCode.clear(); } catch(e) {}
+      html5QrCode = null;
+    }
+
+    const reader = document.getElementById('reader');
+    reader.innerHTML = '';
+
+    html5QrCode = new Html5Qrcode('reader');
+    lastScannedCode = '';
+    lastScanTime = 0;
+
+    try {
+      const cameras = await Html5Qrcode.getCameras();
+      if (!cameras.length) {
+        statusEl.textContent = 'No camera found.';
+        return;
+      }
+
+      let cameraId = cameras[0].id;
+      const backCamera = cameras.find(c =>
+        c.label.toLowerCase().includes('back') ||
+        c.label.toLowerCase().includes('environment') ||
+        c.label.toLowerCase().includes('rear')
+      );
+      if (backCamera) cameraId = backCamera.id;
+
+      await html5QrCode.start(
+        cameraId,
+        { fps: 15, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          const now = Date.now();
+          if (decodedText === lastScannedCode && (now - lastScanTime) < SCAN_COOLDOWN_MS) {
+            return;
+          }
+          lastScannedCode = decodedText;
+          lastScanTime = now;
+          statusEl.textContent = 'Scanned: ' + decodedText;
+          lookupBook(decodedText);
+          html5QrCode.stop().catch(() => {});
+        },
+        (error) => {}
+      );
+      statusEl.textContent = 'Camera ready. Point at QR/barcode...';
+    } catch (e) {
+      console.error('Scanner error:', e);
+      statusEl.textContent = 'Camera error: ' + e;
+    }
+  }
+
+  document.getElementById('btnRestart').onclick = () => startScanner();
+
+  startScanner();
+</script>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/student-sidebar :: sidebar-script}"></div>
+</body>
+</html>

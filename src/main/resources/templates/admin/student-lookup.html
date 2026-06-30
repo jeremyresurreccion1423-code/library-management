@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Student lookup')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Search Student</h1>
+      <p class="dashboard-subtitle">Search and view student information</p>
+    </div>
+  
+  
+  <form class="row g-2 mb-4" method="get" th:action="@{/admin/students}">
+    <div class="col-auto flex-grow-1">
+      <input class="form-control" name="query" placeholder="Search by ID, name, email, or phone..." th:value="${query}"/>
+    </div>
+    <div class="col-auto"><button class="btn btn-accent" type="submit">Search</button></div>
+    <div class="col-auto" th:if="${isSearch}">
+      <a href="/admin/students" class="btn btn-secondary">Clear</a>
+    </div>
+  </form>
+
+  
+  <div th:if="${notFound}" class="alert alert-warning">Not Found.</div>
+
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+
+
+  
+  <div class="row g-2 mb-3" th:if="${students != null && !students.isEmpty()}">
+    <div class="col-md-4">
+      <input class="form-control" id="studentFilter" placeholder="Filter by name or student ID..." oninput="filterStudents()"/>
+    </div>
+  </div>
+
+  
+  <div class="table-responsive card-lib p-0" th:if="${students != null && !students.isEmpty()}">
+    <table class="table table-dark-lib mb-0">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Full Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Course</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="student : ${students}" onclick="loadStudentDetails(this)" style="cursor: pointer;" class="student-row">
+          <td th:text="${student.studentId}"></td>
+          <td th:text="${student.fullName}"></td>
+          <td th:text="${student.user.email}"></td>
+          <td th:text="${student.phone}"></td>
+          <td th:text="${student.course}"></td>
+          <td>
+            <button type="button" class="btn btn-sm btn-info" data-action="view">View</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="modal fade" id="studentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content" style="border:none;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.2);">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold" style="color:#166534;">Student Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex align-items-center gap-3 mb-4">
+            <div class="profile-avatar" style="width:56px;height:56px;font-size:1.4rem;">
+              <i class="bi bi-person-fill"></i>
+            </div>
+            <div>
+              <h5 class="mb-0 fw-bold" id="modalStudentName">-</h5>
+              <p class="mb-0 text-muted small" id="modalStudentId">-</p>
+            </div>
+          </div>
+          <div class="row g-2 mb-4">
+            <div class="col-md-6"><p class="mb-1 small text-muted">Course</p><p class="fw-medium" id="modalStudentCourse">-</p></div>
+            <div class="col-md-6"><p class="mb-1 small text-muted">Email</p><p class="fw-medium" id="modalStudentEmail">-</p></div>
+            <div class="col-md-6"><p class="mb-1 small text-muted">Phone</p><p class="fw-medium" id="modalStudentPhone">-</p></div>
+          </div>
+          <h6 class="fw-bold mb-2" style="color:#166534;">Reading History</h6>
+          <div class="table-responsive card-lib p-0">
+            <table class="table table-dark-lib mb-0">
+              <thead><tr><th>Book</th><th>Issued</th><th>Due</th><th>Returned</th><th>Fine</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody id="modalHistoryBody">
+                <tr><td colspan="7" class="text-center text-muted-lib py-3">Loading history...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:10px;">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </main>
+</div>
+
+<script>
+  function filterStudents() {
+    const q = document.getElementById('studentFilter').value.toLowerCase().trim();
+    document.querySelectorAll('.student-row').forEach(row => {
+      const id = row.cells[0].textContent.toLowerCase();
+      const name = row.cells[1].textContent.toLowerCase();
+      if (!q || id.includes(q) || name.includes(q)) {
+        row.style.display = '';
+      } else {
+        row.style.display = 'none';
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('button[data-action="view"]').forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.preventDefault();
+        const row = this.closest('tr');
+        loadStudentDetails(row);
+      });
+    });
+
+    document.querySelectorAll('.student-row').forEach(row => {
+      row.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON') {
+          loadStudentDetails(this);
+        }
+      });
+    });
+  });
+
+  let studentModalInstance = null;
+
+  function loadStudentDetails(row) {
+    const studentId = row.cells[0].textContent;
+    const fullName = row.cells[1].textContent;
+    const email = row.cells[2].textContent;
+    const phone = row.cells[3].textContent;
+    const course = row.cells[4].textContent;
+
+    document.getElementById('modalStudentName').textContent = fullName;
+    document.getElementById('modalStudentId').textContent = 'ID: ' + studentId;
+    document.getElementById('modalStudentEmail').textContent = email;
+    document.getElementById('modalStudentPhone').textContent = phone || '—';
+    document.getElementById('modalStudentCourse').textContent = course || '—';
+
+    // Reset history
+    document.getElementById('modalHistoryBody').innerHTML = '<tr><td colspan="7" class="text-center text-muted-lib py-3">Loading history...</td></tr>';
+
+    // Show modal
+    if (!studentModalInstance) {
+      studentModalInstance = new bootstrap.Modal(document.getElementById('studentModal'));
+    }
+    studentModalInstance.show();
+
+    loadStudentHistory(studentId);
+  }
+
+  function loadStudentHistory(studentId) {
+    const tbody = document.getElementById('modalHistoryBody');
+
+    fetch(`/admin/students/${encodeURIComponent(studentId)}/history`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Could not load student history');
+        }
+        return response.json();
+      })
+      .then(data => {
+        const rows = Array.isArray(data.history) ? data.history : [];
+        if (!rows.length) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted-lib py-3">No borrowed history for this student</td></tr>';
+          return;
+        }
+        tbody.innerHTML = '';
+        rows.forEach(item => {
+          const tr = document.createElement('tr');
+          const canRemind = item.status === 'BORROWED' || item.status === 'OVERDUE';
+          tr.innerHTML = `
+            <td>${escapeHtml(item.bookTitle || '-')}</td>
+            <td>${escapeHtml(item.issuedAt || '-')}</td>
+            <td>${escapeHtml(item.dueAt || '-')}</td>
+            <td>${escapeHtml(item.returnedAt || '-')}</td>
+            <td>${escapeHtml(item.fineAmount || '0.00')}</td>
+            <td>${escapeHtml(item.status || '-')}</td>
+            <td>${canRemind ? `<button type="button" class="btn btn-sm btn-warning remind-btn" data-issue-id="${item.issueId}">Remind return</button>` : '<span class="text-muted-lib small">—</span>'}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+        wireRemindButtons();
+      })
+      .catch(error => {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-3">${escapeHtml(error.message)}</td></tr>`;
+      });
+  }
+
+  function wireRemindButtons() {
+    document.querySelectorAll('.remind-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const issueId = this.getAttribute('data-issue-id');
+        const submitRemind = function() {
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = `/admin/students/issues/${issueId}/remind`;
+
+          const csrfMeta = document.querySelector('meta[name="_csrf"]');
+          if (csrfMeta) {
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_csrf';
+            csrf.value = csrfMeta.getAttribute('content');
+            form.appendChild(csrf);
+          }
+
+          document.body.appendChild(form);
+          form.submit();
+        };
+
+        if (typeof confirmAction === 'function') {
+          confirmAction('Send reminder email to return this borrowed book?', submitRemind);
+        } else if (confirm('Send reminder email to return this borrowed book?')) {
+          submitRemind();
+        }
+      });
+    });
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;');
+  }
+</script>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+</body>
+</html>

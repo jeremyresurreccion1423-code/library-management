@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="sidebar">
+
+<div class="dashboard-header-bar">
+  <div class="header-bar-left">
+    <button type="button" class="header-bar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+      <i class="bi bi-list"></i>
+    </button>
+    <a th:href="@{/admin}" class="header-bar-brand">
+      <i class="bi bi-book-half"></i>
+      <span>EDULIBRARY</span>
+    </a>
+  </div>
+  <div class="header-bar-right">
+    <div class="dropdown header-bar-dropdown">
+      <button class="header-bar-user-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="bi bi-person-circle"></i>
+        <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" th:href="@{/admin/profile}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+        <li><a class="dropdown-item" th:href="@{/admin/account/password}"><i class="bi bi-shield-lock me-2"></i>Change Password</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><button class="dropdown-item text-danger" type="button" onclick="showAdminLogoutModal()"><i class="bi bi-box-arrow-right me-2"></i>Logout</button></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<aside class="admin-sidebar" id="adminSidebar" aria-label="Admin sidebar navigation">
+  <div class="sidebar-header">
+    <a th:href="@{/admin}" class="sidebar-brand">
+      <i class="bi bi-book-half"></i>
+      <span>EDULIBRARY</span>
+    </a>
+  </div>
+  <nav class="sidebar-nav">
+    <a class="sidebar-link" data-nav-prefix="/admin" data-nav-exact="true" th:href="@{/admin}">
+      <i class="bi bi-speedometer2"></i>
+      <span>Dashboard</span>
+    </a>
+    <a class="sidebar-link" data-nav-prefix="/admin/categories" th:href="@{/admin/categories}">
+      <i class="bi bi-folder"></i>
+      <span>Categories</span>
+    </a>
+    <a class="sidebar-link" data-nav-prefix="/admin/authors" th:href="@{/admin/authors}">
+      <i class="bi bi-person-badge"></i>
+      <span>Authors</span>
+    </a>
+    <a class="sidebar-link" data-nav-prefix="/admin/books" th:href="@{/admin/books}">
+      <i class="bi bi-book"></i>
+      <span>Books</span>
+    </a>
+    <a class="sidebar-link" data-nav-prefix="/admin/scan-issue" th:href="@{/admin/scan-issue}">
+      <i class="bi bi-qr-code-scan"></i>
+      <span>Scan & Issue</span>
+    </a>
+    <a class="sidebar-link" data-nav-prefix="/admin/issues" data-nav-exclude="/admin/issues/reservations" th:href="@{/admin/issues}">
+      <i class="bi bi-journal-arrow-up"></i>
+      <span>Issue / Return</span>
+    </a>
+    <a class="sidebar-link" data-nav-prefix="/admin/issues/reservations" th:href="@{/admin/issues/reservations}">
+      <i class="bi bi-calendar-check"></i>
+      <span>Reservations</span>
+    </a>
+    <a class="sidebar-link" data-nav-prefix="/admin/students" th:href="@{/admin/students}">
+      <i class="bi bi-people"></i>
+      <span>Students</span>
+    </a>
+    <a class="sidebar-link" data-nav-prefix="/admin/analytics" th:href="@{/admin/analytics}">
+      <i class="bi bi-graph-up"></i>
+      <span>Analytics</span>
+    </a>
+    <a class="sidebar-link" data-nav-prefix="/admin/admins" th:href="@{/admin/admins}">
+      <i class="bi bi-person-plus"></i>
+      <span>Admins</span>
+    </a>
+  </nav>
+</aside>
+
+
+<div class="modal fade" id="adminLogoutModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content" style="background:#fff;border:none;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div class="modal-body text-center p-4">
+        <div class="mb-3">
+          <i class="bi bi-exclamation-triangle" style="font-size:2.5rem;color:#f59e0b;"></i>
+        </div>
+        <h5 class="mb-2" style="color:#1f2937;font-weight:600;">Confirm Logout</h5>
+        <p class="mb-4" style="color:#6b7280;">Are you sure you want to logout?</p>
+        <div class="d-flex justify-content-center gap-2">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="border-radius:10px;padding:8px 20px;">Cancel</button>
+          <form th:action="@{/admin/logout}" method="post" class="d-inline">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit" class="btn btn-danger" style="border-radius:10px;padding:8px 20px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;">Logout</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</th:block>
+
+<script th:fragment="sidebar-script">
+  // Active nav highlighting
+  document.addEventListener('DOMContentLoaded', function () {
+    const currentPath = window.location.pathname;
+    document.querySelectorAll('.sidebar-link').forEach(function (link) {
+      const prefix = link.dataset.navPrefix || '';
+      const exact = link.dataset.navExact === 'true';
+      const exclude = link.dataset.navExclude || '';
+      if (exclude && currentPath.startsWith(exclude)) {
+        return;
+      }
+      const isActive = exact ? currentPath === prefix : currentPath.startsWith(prefix);
+      if (isActive) {
+        link.classList.add('active');
+      }
+    });
+  });
+
+  // Logout modal
+  function showAdminLogoutModal() {
+    const modal = new bootstrap.Modal(document.getElementById('adminLogoutModal'));
+    modal.show();
+  }
+
+  // Toggle sidebar
+  function toggleSidebar() {
+    const sidebar = document.getElementById('adminSidebar');
+    const main = document.querySelector('.dashboard-main');
+    sidebar.classList.toggle('collapsed');
+    if (main) main.classList.toggle('expanded');
+  }
+
+  // Close sidebar when clicking outside on mobile
+  document.addEventListener('click', function(e) {
+    const sidebar = document.getElementById('adminSidebar');
+    const toggle = document.querySelector('.header-bar-toggle');
+    if (sidebar && !sidebar.classList.contains('collapsed') && window.innerWidth < 992) {
+      if (!sidebar.contains(e.target) && e.target !== toggle && !toggle.contains(e.target)) {
+        sidebar.classList.add('collapsed');
+        const main = document.querySelector('.dashboard-main');
+        if (main) main.classList.add('expanded');
+      }
+    }
+  });
+</script>
+</body>
+</html>

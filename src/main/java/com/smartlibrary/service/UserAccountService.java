@@ -1,0 +1,367 @@
+package com.smartlibrary.service;
+
+import com.smartlibrary.config.LibraryProperties;
+import com.smartlibrary.entity.OtpCode;
+import com.smartlibrary.entity.PasswordResetToken;
+import com.smartlibrary.entity.StudentProfile;
+import com.smartlibrary.entity.User;
+import com.smartlibrary.model.UserRole;
+import com.smartlibrary.repository.OtpRepository;
+import com.smartlibrary.repository.PasswordResetTokenRepository;
+import com.smartlibrary.repository.StudentProfileRepository;
+import com.smartlibrary.repository.UserRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+
+@Service
+public class UserAccountService {
+    private static final SecureRandom OTP_RANDOM = new SecureRandom();
+
+    private final UserRepository userRepository;
+    private final StudentProfileRepository studentProfileRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final StudentIdService studentIdService;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final MailNotificationService mailNotificationService;
+    private final OtpRepository otpRepository;
+    private final LibraryProperties libraryProperties;
+
+    public UserAccountService(
+            UserRepository userRepository,
+            StudentProfileRepository studentProfileRepository,
+            PasswordEncoder passwordEncoder,
+            StudentIdService studentIdService,
+            PasswordResetTokenRepository passwordResetTokenRepository,
+            MailNotificationService mailNotificationService,
+            OtpRepository otpRepository,
+            LibraryProperties libraryProperties) {
+        this.userRepository = userRepository;
+        this.studentProfileRepository = studentProfileRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.studentIdService = studentIdService;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.mailNotificationService = mailNotificationService;
+        this.otpRepository = otpRepository;
+        this.libraryProperties = libraryProperties;
+    }
+
+    @Transactional
+    public StudentProfile registerStudent(
+            String username, String rawPassword, String email, String fullName, String phone, String course) {
+        username = (username == null ? "" : username.trim());
+        email = normalizeEmail(email);
+        fullName = (fullName == null ? "" : fullName.trim());
+
+        if (username.isBlank()) {
+            throw new IllegalArgumentException("Username is required");
+        }
+        if (!username.matches("[A-Za-z0-9._-]{5,20}")) {
+            throw new IllegalArgumentException(
+                    "Username must be 5-20 characters and may include letters, numbers, dots, underscores, or hyphens");
+        }
+        validateStrongPassword(rawPassword);
+        if (email.isBlank() || !email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new IllegalArgumentException("Please enter a valid email address");
+        }
+        if (fullName.isBlank() || fullName.length() < 3 || fullName.split("\\s+").length < 2) {
+            throw new IllegalArgumentException("Full name is required and should include first and last name");
+        }
+        if (!fullName.matches("^[A-Za-z\\s]+$")) {
+            throw new IllegalArgumentException("Name must contain letters and spaces only");
+        }
+        phone = (phone == null ? "" : phone.trim());
+        if (!phone.isBlank() && !phone.matches("^09[0-9]{9}$")) {
+            throw new IllegalArgumentException("Phone number must start with 09 and be exactly 11 digits");
+        }
+        course = (course == null ? "" : course.trim());
+        if (!course.isBlank() && course.length() < 2) {
+            throw new IllegalArgumentException("Course name must be at least 2 characters if provided");
+        }
+        
+        userRepository.findByUsername(username).ifPresent(user -> {
+            if (!user.isEnabled()) {
+                userRepository.delete(user);
+            }
+        });
+        
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Username already taken");
+        }
+        
+        deleteUnverifiedAccount(email);
+        
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
+            throw new IllegalArgumentException("An account with that email already exists");
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setEmail(email);
+        user.setRole(UserRole.STUDENT);
+        user.setEnabled(false);
+        userRepository.save(user);
+
+        StudentProfile profile = new StudentProfile();
+        profile.setStudentId(studentIdService.generateNextStudentId());
+        profile.setFullName(fullName);
+        profile.setPhone(phone);
+        profile.setCourse(course);
+        profile.setUser(user);
+        user.setStudentProfile(profile);
+        
+        studentProfileRepository.save(profile);
+        userRepository.save(user);
+        return profile;
+    }
+
+    @Transactional
+    public void changePassword(String username, String oldRaw, String newRaw) {
+        User u = userRepository.findByUsername(username).orElseThrow();
+        if (!passwordEncoder.matches(oldRaw, u.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+        validateStrongPassword(newRaw);
+        u.setPassword(passwordEncoder.encode(newRaw));
+        userRepository.save(u);
+    }
+
+    @Transactional
+    public void validateCurrentPassword(String username, String currentPassword) {
+        User u = userRepository.findByUsername(username).orElseThrow();
+        if (!passwordEncoder.matches(currentPassword, u.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+    }
+
+    @Transactional
+    public void changePasswordWithoutOld(String username, String newRaw) {
+        User u = userRepository.findByUsername(username).orElseThrow();
+        validateStrongPassword(newRaw);
+        u.setPassword(passwordEncoder.encode(newRaw));
+        userRepository.save(u);
+    }
+
+    @Transactional
+    public void updateProfile(String username, String email) {
+        User u = userRepository.findByUsername(username).orElseThrow();
+        u.setEmail(normalizeEmail(email));
+        userRepository.save(u);
+    }
+
+    @Transactional
+    public void requestPasswordResetOtp(String emailOrUsername) {
+        User u = userRepository.findByUsername(emailOrUsername).orElse(null);
+        if (u == null) {
+            u = userRepository.findByEmailIgnoreCase(emailOrUsername).orElse(null);
+        }
+        if (u == null) {
+            throw new IllegalArgumentException("No account found with that username or email");
+        }
+        generateAndSendOtp(u.getEmail());
+    }
+
+    @Transactional
+    public void resetPasswordWithOtp(String emailOrUsername, String otpCode, String newRaw) {
+        User u = userRepository.findByUsername(emailOrUsername).orElse(null);
+        if (u == null) {
+            u = userRepository.findByEmailIgnoreCase(emailOrUsername).orElse(null);
+        }
+        if (u == null) {
+            throw new IllegalArgumentException("No account found");
+        }
+        boolean verified = verifyOtp(u.getEmail(), otpCode);
+        if (!verified) {
+            throw new IllegalArgumentException("Invalid or expired OTP");
+        }
+        validateStrongPassword(newRaw);
+        u.setPassword(passwordEncoder.encode(newRaw));
+        userRepository.save(u);
+    }
+
+    @Transactional
+    public void resetPasswordWithToken(String token, String newRaw) {
+        PasswordResetToken pr = passwordResetTokenRepository.findByTokenAndUsedFalse(token)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
+        if (pr.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Token expired");
+        }
+        validateStrongPassword(newRaw);
+        User u = pr.getUser();
+        u.setPassword(passwordEncoder.encode(newRaw));
+        userRepository.save(u);
+        pr.setUsed(true);
+        passwordResetTokenRepository.save(pr);
+    }
+
+    @Transactional
+    public void updateStudentProfile(String username, String fullName, String phone, String course) {
+        User u = userRepository.findByUsername(username).orElseThrow();
+        if (u.getStudentProfile() == null) {
+            throw new IllegalStateException("Not a student account");
+        }
+        if (fullName != null && !fullName.matches("^[A-Za-z\\s]+$")) {
+            throw new IllegalArgumentException("Name must contain letters and spaces only");
+        }
+        u.getStudentProfile().setFullName(fullName);
+        u.getStudentProfile().setPhone(phone);
+        u.getStudentProfile().setCourse(course);
+        userRepository.save(u);
+    }
+
+    @Transactional
+    public User registerAdmin(String username, String rawPassword) {
+        username = (username == null ? "" : username.trim());
+        if (username.isBlank()) {
+            throw new IllegalArgumentException("Username is required");
+        }
+        if (!username.matches("[A-Za-z0-9._-]{5,20}")) {
+            throw new IllegalArgumentException(
+                    "Username must be 5-20 characters and may include letters, numbers, dots, underscores, or hyphens");
+        }
+        validateStrongPassword(rawPassword);
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Username already taken");
+        }
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(username.toLowerCase() + "@admin.local");
+        user.setPassword(passwordEncoder.encode(rawPassword));
+        user.setRole(UserRole.ADMIN);
+        user.setEnabled(true);
+        userRepository.save(user);
+        return user;
+    }
+
+    @Transactional
+    public void generateAndSendOtp(String email) {
+        email = normalizeEmail(email);
+
+        final String finalEmail;
+        if (!email.isBlank() && !email.contains("@")) {
+            finalEmail = "edulibrary67+" + email + "@gmail.com";
+        } else if (email.endsWith("@library.local")) {
+            String name = email.substring(0, email.indexOf("@"));
+            finalEmail = "edulibrary67+" + name + "@gmail.com";
+        } else {
+            finalEmail = email;
+        }
+
+        if (!finalEmail.equals(email)) {
+            userRepository.findByEmailIgnoreCase(email).ifPresent(user -> {
+                user.setEmail(finalEmail);
+                userRepository.save(user);
+            });
+        }
+
+        otpRepository.findByEmailAndVerifiedFalse(finalEmail).ifPresent(otpRepository::delete);
+
+        String otpCode = String.format("%06d", OTP_RANDOM.nextInt(1_000_000));
+
+        OtpCode otp = new OtpCode(finalEmail, otpCode, LocalDateTime.now().plusMinutes(libraryProperties.getOtpExpiryMinutes()));
+        otpRepository.save(otp);
+
+        boolean sent = mailNotificationService.sendOtpCode(finalEmail, otpCode);
+        if (!sent) {
+            throw new IllegalStateException(
+                    "Could not send OTP email. Check mail username/app password settings and try again.");
+        }
+    }
+
+    @Transactional
+    public boolean verifyOtp(String email, String otpCode) {
+        OtpCode otp = otpRepository.findByEmailAndCodeAndVerifiedFalse(email, otpCode)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid OTP code"));
+
+        if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("OTP has expired");
+        }
+
+        otp.setVerified(true);
+        otpRepository.save(otp);
+        return true;
+    }
+
+    @Transactional
+    public StudentProfile registerAndSendOtp(
+            String username, String rawPassword, String email, String fullName, String phone, String course) {
+        StudentProfile profile = registerStudent(username, rawPassword, email, fullName, phone, course);
+        generateAndSendOtp(email);
+        return profile;
+    }
+
+    @Transactional
+    public boolean verifyRegistrationOtp(String email, String otpCode) {
+        email = normalizeEmail(email);
+        boolean verified = verifyOtp(email, otpCode);
+
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setEnabled(true);
+        userRepository.save(user);
+        
+        return verified;
+    }
+
+    @Transactional
+    public void deleteUnverifiedAccount(String email) {
+        email = normalizeEmail(email);
+        User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
+        if (user != null && !user.isEnabled()) {
+            userRepository.delete(user);
+        }
+    }
+
+    public boolean emailExists(String email) {
+        email = normalizeEmail(email);
+        return userRepository.findByEmailIgnoreCase(email).isPresent();
+    }
+
+    public String findStudentIdByEmail(String email) {
+        email = normalizeEmail(email);
+        if (email == null || email.isBlank()) {
+            return null;
+        }
+        return userRepository.findByEmailIgnoreCase(email)
+                .map(User::getStudentProfile)
+                .map(StudentProfile::getStudentId)
+                .orElse(null);
+    }
+
+    @Transactional
+    public void updateStudentDemographicsByEmail(String email, String firstName, String lastName) {
+        email = normalizeEmail(email);
+        if (email == null || email.isBlank()) {
+            return;
+        }
+        User user = userRepository.findByEmailIgnoreCase(email).orElseThrow();
+        StudentProfile profile = user.getStudentProfile();
+        if (profile == null) {
+            return;
+        }
+        profile.setFirstName(firstName == null ? null : firstName.trim());
+        profile.setLastName(lastName == null ? null : lastName.trim());
+        studentProfileRepository.save(profile);
+    }
+
+    private static String normalizeEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase();
+    }
+
+    private static void validateStrongPassword(String rawPassword) {
+        if (rawPassword == null || rawPassword.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters");
+        }
+        if (!rawPassword.matches(".*[A-Z].*")
+                || !rawPassword.matches(".*[a-z].*")
+                || !rawPassword.matches(".*\\d.*")
+                || !rawPassword.matches(".*[!@#$%^&*()\\-_=+\\[\\]{};:'\",.<>/?].*")) {
+            throw new IllegalArgumentException(
+                    "Password must include uppercase and lowercase letters, a number, and a special character");
+        }
+    }
+}

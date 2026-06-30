@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Categories')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Categories</h1>
+      <p class="dashboard-subtitle">Manage book categories</p>
+    </div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+  <form class="row g-2 mb-4" th:action="@{/admin/categories}" method="post">
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <div class="col-auto"><input class="form-control" name="name" placeholder="New category" required/></div>
+    <div class="col-auto"><button class="btn btn-accent" type="submit">Add</button></div>
+  </form>
+  <div class="table-responsive card-lib p-0">
+    <table class="table table-dark-lib mb-0">
+      <thead><tr><th>Name</th><th></th></tr></thead>
+      <tbody>
+      <tr th:each="c : ${categories}">
+        <td>
+          <form th:action="@{/admin/categories/{id}/edit(id=${c.id})}" method="post" class="d-flex gap-2">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <input class="form-control form-control-sm" name="name" th:value="${c.name}"/>
+            <button class="btn btn-sm btn-outline-light" type="submit">Save</button>
+          </form>
+        </td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-danger delete-category-btn" type="button"
+                  th:attr="data-category-id=${c.id},data-category-name=${c.name}">
+            Delete
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+  </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.delete-category-btn');
+    buttons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        const categoryId = button.getAttribute('data-category-id');
+        const categoryName = button.getAttribute('data-category-name');
+        const message = 'Are you sure you want to delete "' + categoryName + '"?';
+
+        const submitDelete = function() {
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = '/admin/categories/' + categoryId + '/delete';
+
+          const csrfToken = document.querySelector('meta[name="_csrf"]');
+          if (csrfToken) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = '_csrf';
+            input.value = csrfToken.getAttribute('content');
+            form.appendChild(input);
+          }
+
+          document.body.appendChild(form);
+          form.submit();
+        };
+
+        if (typeof confirmAction === 'function') {
+          confirmAction(message, submitDelete);
+        } else if (confirm(message)) {
+          submitDelete();
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

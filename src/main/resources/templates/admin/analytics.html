@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Analytics')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Library Analytics</h1>
+      <p class="dashboard-subtitle">Borrowing trends, loan health, and student reading activity</p>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <!-- KPI cards -->
+    <div class="dashboard-cards">
+      <div class="dashboard-card">
+        <div class="card-icon bg-purple">
+          <i class="bi bi-journal-text"></i>
+        </div>
+        <div class="card-info">
+          <h6 class="card-label">Total Issues</h6>
+          <p class="card-value" th:text="${totalIssues}">0</p>
+        </div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon bg-teal">
+          <i class="bi bi-bookmark-check"></i>
+        </div>
+        <div class="card-info">
+          <h6 class="card-label">Currently Borrowed</h6>
+          <p class="card-value text-success" th:text="${statusCounts['borrowed']}">0</p>
+        </div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon bg-green">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div class="card-info">
+          <h6 class="card-label">Returned</h6>
+          <p class="card-value" th:text="${statusCounts['returned']}">0</p>
+        </div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon bg-red">
+          <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="card-info">
+          <h6 class="card-label">Overdue Rate</h6>
+          <p class="card-value text-danger" th:text="${overdueRate + '%'}">0%</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Borrowing activity by day -->
+    <div class="analytics-section-title">
+      <i class="bi bi-calendar-week"></i>
+      When Do Students Borrow Most?
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-lg-6">
+        <div class="analytics-chart-card">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+            <h6 class="mb-0"><i class="bi bi-calendar3 me-1"></i> Borrowing by Day of Week</h6>
+            <span class="badge rounded-pill text-bg-success" th:if="${busiestDayOfWeek != null}">
+              Busiest: <span th:text="${busiestDayOfWeek}"></span>
+            </span>
+          </div>
+          <p class="small text-muted-lib mb-3">Shows which weekdays have the most book borrowings overall.</p>
+          <div class="analytics-chart-wrap" th:if="${totalIssues > 0}">
+            <canvas id="weekdayChart"></canvas>
+          </div>
+          <div class="analytics-chart-empty" th:if="${totalIssues == 0}">
+            <div>
+              <i class="bi bi-calendar-x d-block mb-2" style="font-size:2rem;"></i>
+              No borrowing activity recorded yet
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="analytics-chart-card">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+            <h6 class="mb-0"><i class="bi bi-graph-up me-1"></i> Daily Borrowing (Last 14 Days)</h6>
+            <span class="badge rounded-pill text-bg-primary" th:if="${busiestRecentDay != null}">
+              Peak: <span th:text="${busiestRecentDay['label']}"></span>
+              (<span th:text="${busiestRecentDay['count']}"></span>)
+            </span>
+          </div>
+          <p class="small text-muted-lib mb-3">Tracks how many books were borrowed on each calendar day.</p>
+          <div class="analytics-chart-wrap" th:if="${totalIssues > 0}">
+            <canvas id="dailyTrendChart"></canvas>
+          </div>
+          <div class="analytics-chart-empty" th:if="${totalIssues == 0}">
+            <div>
+              <i class="bi bi-bar-chart d-block mb-2" style="font-size:2rem;"></i>
+              No daily trend data yet
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="row g-4 mb-4">
+      <div class="col-lg-5">
+        <div class="analytics-chart-card">
+          <h6><i class="bi bi-pie-chart me-1"></i> Issues by Status</h6>
+          <div class="analytics-chart-wrap" th:if="${totalIssues > 0}">
+            <canvas id="statusChart"></canvas>
+          </div>
+          <div class="analytics-chart-empty" th:if="${totalIssues == 0}">
+            <div>
+              <i class="bi bi-inbox d-block mb-2" style="font-size:2rem;"></i>
+              No borrowing data yet
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7">
+        <div class="analytics-chart-card">
+          <h6><i class="bi bi-bar-chart me-1"></i> Most Borrowed Books</h6>
+          <div th:if="${!#lists.isEmpty(topBooks)}" th:with="maxBorrow=${topBooks[0]['borrowCount'] > 0 ? topBooks[0]['borrowCount'] : 1}">
+            <div th:each="row, iter : ${topBooks}" class="analytics-top-row">
+              <span class="analytics-rank"
+                    th:classappend="${iter.count == 1 ? ' top-1' : (iter.count == 2 ? ' top-2' : (iter.count == 3 ? ' top-3' : ''))}"
+                    th:text="${iter.count}">1</span>
+              <div class="flex-grow-1">
+                <div class="analytics-top-title" th:text="${row.title}">Book title</div>
+                <div class="analytics-bar-track mt-1">
+                  <div class="analytics-bar-fill"
+                       th:style="|width: ${row['borrowCount'] * 100 / maxBorrow}%|"></div>
+                </div>
+              </div>
+              <span class="analytics-top-count" th:text="${row['borrowCount']}">0</span>
+            </div>
+          </div>
+          <div class="analytics-chart-empty" th:if="${#lists.isEmpty(topBooks)}">
+            <div>
+              <i class="bi bi-book d-block mb-2" style="font-size:2rem;"></i>
+              No books have been borrowed yet
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student reading history -->
+    <div class="analytics-section-title">
+      <i class="bi bi-person-lines-fill"></i>
+      Student Reading History
+    </div>
+
+    <div class="card-lib p-3 mb-3">
+      <form th:action="@{/admin/analytics}" method="get" class="row g-3 align-items-end">
+        <div class="col-md-8">
+          <label class="form-label fw-medium">Select Student</label>
+          <select class="form-select" name="studentId" required>
+            <option value="" disabled th:selected="${selectedStudentId == null or selectedStudentId == ''}">
+              Choose a student…
+            </option>
+            <option th:each="s : ${students}"
+                    th:value="${s.studentId}"
+                    th:text="${s.studentId + ' — ' + s.fullName + (s.course != null and !s.course.isBlank() ? ' (' + s.course + ')' : '')}"
+                    th:selected="${s.studentId == selectedStudentId}">
+            </option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <button class="btn btn-accent w-100" type="submit">
+            <i class="bi bi-search me-1"></i> View History
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="analytics-student-panel" th:if="${selectedStudent != null}">
+      <p class="student-name" th:text="${selectedStudent.fullName}">Student Name</p>
+      <p class="student-meta">
+        <span th:text="'ID: ' + ${selectedStudent.studentId}"></span>
+        <span th:if="${selectedStudent.course != null and !selectedStudent.course.isBlank()}"
+              th:text="' · ' + ${selectedStudent.course}"></span>
+        <span th:text="' · ' + ${selectedStudent.user.email}"></span>
+      </p>
+    </div>
+
+    <div class="table-responsive card-lib p-0">
+      <table class="table table-dark-lib mb-0">
+        <thead>
+        <tr>
+          <th>Book</th>
+          <th>Issued</th>
+          <th>Due</th>
+          <th>Returned</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${readingHistory}">
+          <td class="fw-medium" th:text="${row.book.title}"></td>
+          <td th:text="${#temporals.format(row.issuedAt, 'MMM d, yyyy')}"></td>
+          <td th:text="${#temporals.format(row.dueAt, 'MMM d, yyyy')}"></td>
+          <td th:text="${row.returnedAt != null ? #temporals.format(row.returnedAt, 'MMM d, yyyy') : '—'}"></td>
+          <td>
+            <span class="badge-status"
+                  th:classappend="${row.status.name() == 'RETURNED' ? ' returned' : (row.status.name() == 'OVERDUE' ? ' overdue' : ' borrowed')}"
+                  th:text="${row.status}"></span>
+          </td>
+          <td>
+            <button type="button"
+                    class="btn btn-sm btn-warning analytics-remind-btn"
+                    th:if="${row.status.name() == 'BORROWED' or row.status.name() == 'OVERDUE'}"
+                    th:attr="data-issue-id=${row.id},data-student-id=${selectedStudentId}">
+              <i class="bi bi-envelope me-1"></i> Remind
+            </button>
+            <span th:if="${row.status.name() != 'BORROWED' and row.status.name() != 'OVERDUE'}"
+                  class="text-muted-lib small">—</span>
+          </td>
+        </tr>
+        <tr th:if="${selectedStudent != null and #lists.isEmpty(readingHistory)}">
+          <td colspan="6" class="text-center text-muted-lib py-4">
+            <i class="bi bi-journal-x d-block mb-2" style="font-size:1.5rem;"></i>
+            No reading history for this student
+          </td>
+        </tr>
+        <tr th:if="${selectedStudent == null}">
+          <td colspan="6" class="text-center text-muted-lib py-4">
+            <i class="bi bi-person-badge d-block mb-2" style="font-size:1.5rem;"></i>
+            Select a student above to view their borrowing history
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', function() {
+    const borrowed = /*[[${statusCounts['borrowed']}]]*/ 0;
+    const returned = /*[[${statusCounts['returned']}]]*/ 0;
+    const overdue = /*[[${statusCounts['overdue']}]]*/ 0;
+    const total = borrowed + returned + overdue;
+
+    const weekdayLabels = /*[[${borrowsByDayOfWeek.![day]}]]*/ [];
+    const weekdayCounts = /*[[${borrowsByDayOfWeek.![count]}]]*/ [];
+    const dailyLabels = /*[[${borrowsByRecentDays.![label]}]]*/ [];
+    const dailyCounts = /*[[${borrowsByRecentDays.![count]}]]*/ [];
+    const busiestWeekday = /*[[${busiestDayOfWeek}]]*/ null;
+
+    if (total > 0) {
+      const canvas = document.getElementById('statusChart');
+      if (canvas && typeof Chart !== 'undefined') {
+        new Chart(canvas, {
+          type: 'doughnut',
+          data: {
+            labels: ['Borrowed', 'Returned', 'Overdue'],
+            datasets: [{
+              data: [borrowed, returned, overdue],
+              backgroundColor: ['#3b82f6', '#22c55e', '#ef4444'],
+              borderWidth: 0,
+              hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  padding: 16,
+                  usePointStyle: true,
+                  pointStyle: 'circle',
+                  font: { size: 13, family: 'Inter, sans-serif' }
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    const val = ctx.raw || 0;
+                    const pct = total > 0 ? Math.round(val * 100 / total) : 0;
+                    return ' ' + ctx.label + ': ' + val + ' (' + pct + '%)';
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      const weekdayCanvas = document.getElementById('weekdayChart');
+      if (weekdayCanvas && typeof Chart !== 'undefined' && weekdayLabels.length) {
+        const weekdayColors = weekdayLabels.map(function(day) {
+          return day === busiestWeekday ? '#16a34a' : '#86efac';
+        });
+        new Chart(weekdayCanvas, {
+          type: 'bar',
+          data: {
+            labels: weekdayLabels,
+            datasets: [{
+              label: 'Books borrowed',
+              data: weekdayCounts,
+              backgroundColor: weekdayColors,
+              borderRadius: 8,
+              borderSkipped: false
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    return ' ' + ctx.raw + ' book' + (ctx.raw === 1 ? '' : 's') + ' borrowed';
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, precision: 0 },
+                grid: { color: 'rgba(0,0,0,0.05)' }
+              },
+              x: { grid: { display: false } }
+            }
+          }
+        });
+      }
+
+      const dailyCanvas = document.getElementById('dailyTrendChart');
+      if (dailyCanvas && typeof Chart !== 'undefined' && dailyLabels.length) {
+        new Chart(dailyCanvas, {
+          type: 'line',
+          data: {
+            labels: dailyLabels,
+            datasets: [{
+              label: 'Books borrowed',
+              data: dailyCounts,
+              borderColor: '#2563eb',
+              backgroundColor: 'rgba(37, 99, 235, 0.12)',
+              fill: true,
+              tension: 0.35,
+              pointRadius: 4,
+              pointBackgroundColor: '#2563eb',
+              pointBorderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    return ' ' + ctx.raw + ' book' + (ctx.raw === 1 ? '' : 's') + ' borrowed';
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, precision: 0 },
+                grid: { color: 'rgba(0,0,0,0.05)' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { maxRotation: 45, minRotation: 0, font: { size: 11 } }
+              }
+            }
+          }
+        });
+      }
+    }
+
+    document.querySelectorAll('.analytics-remind-btn').forEach(function(button) {
+      button.addEventListener('click', function() {
+        const issueId = this.getAttribute('data-issue-id');
+        const studentId = this.getAttribute('data-student-id');
+        const submitRemind = function() {
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = '/admin/analytics/issues/' + issueId + '/remind';
+
+          const csrfMeta = document.querySelector('meta[name="_csrf"]');
+          if (csrfMeta) {
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_csrf';
+            csrf.value = csrfMeta.getAttribute('content');
+            form.appendChild(csrf);
+          }
+
+          const sid = document.createElement('input');
+          sid.type = 'hidden';
+          sid.name = 'studentId';
+          sid.value = studentId || '';
+          form.appendChild(sid);
+
+          document.body.appendChild(form);
+          form.submit();
+        };
+
+        if (typeof confirmAction === 'function') {
+          confirmAction('Send reminder email to return this borrowed book?', submitRemind);
+        } else if (confirm('Send reminder email to return this borrowed book?')) {
+          submitRemind();
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

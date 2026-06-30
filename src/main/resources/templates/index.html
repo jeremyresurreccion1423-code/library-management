@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Smart Library — Home')}"></head>
+<body>
+<div class="floating-books"></div>
+<div class="floating-books-2"></div>
+<div class="floating-books-3"></div>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<main class="container pb-5">
+  <div class="row justify-content-center align-items-center min-vh-75">
+    <div class="col-lg-8">
+      <div class="card-lib p-5 text-center">
+        <h1 class="display-5 fw-bold mb-3">Smart Library</h1>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+          <a class="btn btn-accent btn-lg" th:href="@{/login}">Login</a>
+          <a class="btn btn-outline-light btn-lg" th:href="@{/register}">Register</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>

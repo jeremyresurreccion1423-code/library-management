@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Reservations')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Reservations</h1>
+      <p class="dashboard-subtitle">All student reservation requests</p>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="card-lib p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Book</th>
+              <th>Student</th>
+              <th>Queue #</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="r : ${reservations}">
+              <td th:text="${r.id}"></td>
+              <td>
+                <strong th:text="${r.book.title}"></strong>
+                <div class="small text-muted" th:if="${r.book.isbn != null}" th:text="${'ISBN: ' + r.book.isbn}"></div>
+              </td>
+              <td>
+                <span th:text="${r.student.fullName}"></span>
+                <div class="small text-muted" th:text="${r.student.studentId}"></div>
+              </td>
+              <td th:text="${r.queueOrder}"></td>
+              <td>
+                <span class="badge" th:classappend="
+                  ${r.status.name() == 'WAITING'} ? 'bg-warning text-dark' :
+                  (${r.status.name() == 'FULFILLED'} ? 'bg-success' : 'bg-secondary')"
+                  th:text="${r.status}"></span>
+              </td>
+              <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+              <td>
+                <form th:if="${r.status.name() == 'WAITING'}" th:action="@{/admin/issues/reservations/{id}/issue(id=${r.id})}" method="post" class="d-inline">
+                  <button type="submit" class="btn btn-sm btn-accent">Issue Now</button>
+                </form>
+                <span th:if="${r.status.name() != 'WAITING'}" class="text-muted small">—</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(reservations)}">
+              <td colspan="7" class="text-center text-muted-lib py-4">No reservations found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Books & Categories')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div sec:authorize="hasRole('STUDENT')" th:replace="~{fragments/student-sidebar :: sidebar}"></div>
+  <div sec:authorize="hasRole('ADMIN')" th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Books & Categories</h1>
+      <p class="dashboard-subtitle">Browse books by category</p>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    
+    <div class="card-lib p-3 mb-4">
+      <h6 class="mb-3 text-muted-lib"><i class="bi bi-folder me-2"></i>Select a Category</h6>
+      <div class="d-flex flex-wrap gap-2" id="categoryChips">
+        <button type="button" class="btn btn-accent category-chip active" data-category-id="">
+          <i class="bi bi-grid-3x3-gap me-1"></i>All Books
+        </button>
+        <button type="button" class="btn btn-outline-secondary category-chip" th:each="c : ${categories}"
+                th:attr="data-category-id=${c.id}" th:text="${c.name}"></button>
+      </div>
+    </div>
+
+    
+    <div id="booksGrid">
+      <div class="books-grid" th:if="${!#lists.isEmpty(books)}">
+        <div class="book-card book-item" th:each="b : ${books}" th:attr="data-category-id=${b.category != null ? b.category.id : ''}">
+          <div class="book-card-header">
+            <div class="book-icon"><i class="bi bi-book"></i></div>
+            <div class="book-status" th:classappend="${b.availableCopies > 0 ? 'available' : 'unavailable'}"
+                 th:text="${b.availableCopies + '/' + b.totalCopies}"></div>
+          </div>
+          <div class="book-card-body">
+            <h5 class="book-title" th:text="${b.title}">Book Title</h5>
+            <div class="book-details">
+              <p class="book-isbn" th:if="${b.isbn != null && !b.isbn.isEmpty()}">
+                <i class="bi bi-upc"></i><span th:text="${b.isbn}"></span>
+              </p>
+              <p class="book-category" th:if="${b.category != null}">
+                <i class="bi bi-folder"></i><span th:text="${b.category.name}"></span>
+              </p>
+              <p class="book-author" th:if="${b.author != null}">
+                <i class="bi bi-person"></i><span th:text="${b.author.name}"></span>
+              </p>
+            </div>
+          </div>
+          <div class="book-card-footer">
+            <a class="btn btn-sm btn-outline-primary w-100" th:href="@{/books/{id}(id=${b.id})}">
+              <i class="bi bi-eye"></i> Details
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" th:if="${#lists.isEmpty(books)}">
+        <i class="bi bi-inbox"></i>
+        <p>No books available.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div sec:authorize="hasRole('STUDENT')" th:replace="~{fragments/student-sidebar :: sidebar-script}"></div>
+<div sec:authorize="hasRole('ADMIN')" th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const chips = document.querySelectorAll('.category-chip');
+    const items = document.querySelectorAll('.book-item');
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', function() {
+        const catId = this.dataset.categoryId;
+
+        // Update active chip
+        chips.forEach(c => {
+          c.classList.remove('btn-accent', 'active');
+          c.classList.add('btn-outline-secondary');
+        });
+        this.classList.remove('btn-outline-secondary');
+        this.classList.add('btn-accent', 'active');
+
+        // Filter books
+        items.forEach(item => {
+          if (!catId || item.dataset.categoryId == catId) {
+            item.style.display = '';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    });
+  });
+</script>
+</body>
+</html>

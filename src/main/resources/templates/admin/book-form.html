@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${book != null ? 'Edit book' : 'New book'})}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <main class="dashboard-main" style="max-width:720px;">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title" th:text="${book != null ? 'Edit book' : 'New book'}"></h1>
+      <p class="dashboard-subtitle">Manage book details</p>
+    </div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+  <div class="card-lib p-4 mb-4">
+    <form th:action="@{/admin/books/save}" method="post" enctype="multipart/form-data">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <input type="hidden" name="id" th:if="${book != null}" th:value="${book.id}"/>
+      <div class="mb-2">
+        <label class="form-label">Title</label>
+        <input class="form-control" name="title" required th:value="${book != null ? book.title : ''}"/>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">ISBN</label>
+        <input class="form-control" name="isbn" th:value="${book != null ? book.isbn : ''}"/>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Barcode (para sa scanner)</label>
+        <input class="form-control" name="barcode" th:value="${book != null ? book.barcode : ''}" placeholder="Optional unique code"/>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Total copies</label>
+        <input class="form-control" type="number" name="totalCopies" min="0" required th:value="${book != null ? book.totalCopies : 1}"/>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Overdue fine per day (PHP)</label>
+        <input class="form-control" type="number" name="finePerDay" min="0" step="0.01"
+               th:value="${book != null && book.finePerDay != null ? book.finePerDay : ''}"
+               th:placeholder="${'Leave blank for default (₱' + defaultFinePerDay + '/day)'}"/>
+        <div class="form-text text-muted-lib">
+          Set a higher fine for expensive or high-value books. Blank uses the library default of
+          ₱<span th:text="${defaultFinePerDay}"></span>/day.
+        </div>
+      </div>
+      <div class="mb-2">
+        <label class="form-label">Category</label>
+        <select class="form-select" name="categoryId">
+          <option value="">—</option>
+          <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
+                  th:selected="${book != null && book.category != null && book.category.id == c.id}"></option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Author</label>
+        <select class="form-select" name="authorId">
+          <option value="">—</option>
+          <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.name}"
+                  th:selected="${book != null && book.author != null && book.author.id == a.id}"></option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">E-book (PDF)</label>
+        <input class="form-control" type="file" name="ebookFile" accept=".pdf"/>
+      </div>
+      <button type="submit" class="btn btn-accent">Save</button>
+      <a class="btn btn-outline-light ms-2" th:href="@{/admin/books}">Cancel</a>
+    </form>
+  </div>
+  <div class="card-lib p-4" th:if="${book != null}">
+    <h6 class="mb-3">QR code</h6>
+    <img th:src="@{/api/books/{id}/qr.png(id=${book.id})}" alt="QR" style="max-width:200px"/>
+  </div>
+  </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+</body>
+</html>
