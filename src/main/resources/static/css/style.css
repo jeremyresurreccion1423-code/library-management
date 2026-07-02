@@ -433,45 +433,6 @@ body.modal-open {
 }
 
 
-.admin-subnav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.6rem;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid var(--sl-border);
-  border-radius: 14px;
-}
-
-.admin-subnav-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.42rem 0.8rem;
-  border: 1px solid var(--sl-border);
-  border-radius: 12px;
-  background: #fff;
-  color: rgba(15, 23, 42, 0.78);
-  text-decoration: none;
-  font-size: 0.84rem;
-  line-height: 1.1;
-  transition: all 0.2s ease;
-}
-
-.admin-subnav-link:hover {
-  background: var(--sl-primary-50);
-  border-color: var(--sl-border);
-  color: var(--sl-text);
-}
-
-.admin-subnav-link.active {
-  background: var(--sl-primary);
-  border-color: var(--sl-primary);
-  color: #fff;
-  box-shadow: 0 10px 25px rgba(122, 92, 67, 0.25);
-}
-
-
 .sl-auth {
   min-height: 100vh;
   width: 100%;
@@ -714,17 +675,6 @@ body.modal-open {
   text-align: right;
   font-size: 0.9rem;
 }
-
-@media (max-width: 768px) {
-  .admin-subnav {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 0.7rem;
-    scrollbar-width: thin;
-  }
-}
-
-
 
 .dashboard-body {
   background: linear-gradient(135deg, #f8fdf9 0%, #e8f5eb 50%, #f0f9f3 100%);

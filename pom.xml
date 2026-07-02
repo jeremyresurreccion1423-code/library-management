@@ -15,7 +15,7 @@
     <artifactId>smart-library</artifactId>
     <version>1.0.0</version>
     <name>smart-library</name>
-    <description>Library management with MySQL, OOP Java, barcode/QR, e-books</description>
+    <description>Library management with Supabase PostgreSQL, OOP Java, barcode/QR, e-books</description>
 
     <properties>
         <java.version>17</java.version>
@@ -56,8 +56,8 @@
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.mysql</groupId>
-            <artifactId>mysql-connector-j</artifactId>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
         <dependency>

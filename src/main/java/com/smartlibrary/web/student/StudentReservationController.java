@@ -1,9 +1,9 @@
 package com.smartlibrary.web.student;
 
-import com.smartlibrary.repository.StudentProfileRepository;
 import com.smartlibrary.security.LibraryUserDetails;
 import com.smartlibrary.service.BookIssueService;
 import com.smartlibrary.service.ReservationService;
+import com.smartlibrary.service.SharedLibraryStudentProfileBridgeService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,15 +16,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/student")
 public class StudentReservationController {
 
-    private final StudentProfileRepository studentProfileRepository;
+    private final SharedLibraryStudentProfileBridgeService sharedLibraryStudentProfileBridgeService;
     private final ReservationService reservationService;
     private final BookIssueService bookIssueService;
 
     public StudentReservationController(
-            StudentProfileRepository studentProfileRepository,
+            SharedLibraryStudentProfileBridgeService sharedLibraryStudentProfileBridgeService,
             ReservationService reservationService,
             BookIssueService bookIssueService) {
-        this.studentProfileRepository = studentProfileRepository;
+        this.sharedLibraryStudentProfileBridgeService = sharedLibraryStudentProfileBridgeService;
         this.reservationService = reservationService;
         this.bookIssueService = bookIssueService;
     }
@@ -35,7 +35,7 @@ public class StudentReservationController {
             @RequestParam Long bookId,
             RedirectAttributes ra) {
         try {
-            var profile = studentProfileRepository.findByUserUsername(user.getUsername())
+            var profile = sharedLibraryStudentProfileBridgeService.ensureLibraryStudentProfile(user.getUser())
                     .orElseThrow(() -> new IllegalStateException("Student profile not found for this account. Please login as a student user."));
             var issue = bookIssueService.issueToStudent(bookId, profile.getStudentId());
             ra.addFlashAttribute("success", "Book borrowed successfully! Due: " + issue.getDueAt());
@@ -54,7 +54,7 @@ public class StudentReservationController {
             @RequestParam Long bookId,
             RedirectAttributes ra) {
         try {
-            var profile = studentProfileRepository.findByUserUsername(user.getUsername()).orElseThrow();
+            var profile = sharedLibraryStudentProfileBridgeService.ensureLibraryStudentProfile(user.getUser()).orElseThrow();
             reservationService.enqueue(bookId, profile.getId());
             ra.addFlashAttribute("success", "Added to reservation queue");
         } catch (Exception e) {

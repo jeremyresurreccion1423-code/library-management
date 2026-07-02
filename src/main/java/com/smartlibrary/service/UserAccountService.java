@@ -2,12 +2,10 @@ package com.smartlibrary.service;
 
 import com.smartlibrary.config.LibraryProperties;
 import com.smartlibrary.entity.OtpCode;
-import com.smartlibrary.entity.PasswordResetToken;
 import com.smartlibrary.entity.StudentProfile;
 import com.smartlibrary.entity.User;
 import com.smartlibrary.model.UserRole;
 import com.smartlibrary.repository.OtpRepository;
-import com.smartlibrary.repository.PasswordResetTokenRepository;
 import com.smartlibrary.repository.StudentProfileRepository;
 import com.smartlibrary.repository.UserRepository;
 import jakarta.transaction.Transactional;
@@ -25,28 +23,28 @@ public class UserAccountService {
     private final StudentProfileRepository studentProfileRepository;
     private final PasswordEncoder passwordEncoder;
     private final StudentIdService studentIdService;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final MailNotificationService mailNotificationService;
     private final OtpRepository otpRepository;
     private final LibraryProperties libraryProperties;
+    private final SharedAttendanceStudentProfileSyncService sharedAttendanceStudentProfileSyncService;
 
     public UserAccountService(
             UserRepository userRepository,
             StudentProfileRepository studentProfileRepository,
             PasswordEncoder passwordEncoder,
             StudentIdService studentIdService,
-            PasswordResetTokenRepository passwordResetTokenRepository,
             MailNotificationService mailNotificationService,
             OtpRepository otpRepository,
-            LibraryProperties libraryProperties) {
+            LibraryProperties libraryProperties,
+            SharedAttendanceStudentProfileSyncService sharedAttendanceStudentProfileSyncService) {
         this.userRepository = userRepository;
         this.studentProfileRepository = studentProfileRepository;
         this.passwordEncoder = passwordEncoder;
         this.studentIdService = studentIdService;
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.mailNotificationService = mailNotificationService;
         this.otpRepository = otpRepository;
         this.libraryProperties = libraryProperties;
+        this.sharedAttendanceStudentProfileSyncService = sharedAttendanceStudentProfileSyncService;
     }
 
     @Transactional
@@ -102,6 +100,7 @@ public class UserAccountService {
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(rawPassword));
         user.setEmail(email);
+        user.setFullName(fullName);
         user.setRole(UserRole.STUDENT);
         user.setEnabled(false);
         userRepository.save(user);
@@ -116,6 +115,7 @@ public class UserAccountService {
         
         studentProfileRepository.save(profile);
         userRepository.save(user);
+        sharedAttendanceStudentProfileSyncService.syncFromLibraryRegistration(user, profile);
         return profile;
     }
 
@@ -143,13 +143,6 @@ public class UserAccountService {
         User u = userRepository.findByUsername(username).orElseThrow();
         validateStrongPassword(newRaw);
         u.setPassword(passwordEncoder.encode(newRaw));
-        userRepository.save(u);
-    }
-
-    @Transactional
-    public void updateProfile(String username, String email) {
-        User u = userRepository.findByUsername(username).orElseThrow();
-        u.setEmail(normalizeEmail(email));
         userRepository.save(u);
     }
 
@@ -184,33 +177,17 @@ public class UserAccountService {
     }
 
     @Transactional
-    public void resetPasswordWithToken(String token, String newRaw) {
-        PasswordResetToken pr = passwordResetTokenRepository.findByTokenAndUsedFalse(token)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid token"));
-        if (pr.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new IllegalStateException("Token expired");
-        }
-        validateStrongPassword(newRaw);
-        User u = pr.getUser();
-        u.setPassword(passwordEncoder.encode(newRaw));
-        userRepository.save(u);
-        pr.setUsed(true);
-        passwordResetTokenRepository.save(pr);
-    }
-
-    @Transactional
     public void updateStudentProfile(String username, String fullName, String phone, String course) {
         User u = userRepository.findByUsername(username).orElseThrow();
-        if (u.getStudentProfile() == null) {
-            throw new IllegalStateException("Not a student account");
-        }
+        StudentProfile profile = studentProfileRepository.findByUserId(u.getId())
+                .orElseThrow(() -> new IllegalStateException("Not a student account"));
         if (fullName != null && !fullName.matches("^[A-Za-z\\s]+$")) {
             throw new IllegalArgumentException("Name must contain letters and spaces only");
         }
-        u.getStudentProfile().setFullName(fullName);
-        u.getStudentProfile().setPhone(phone);
-        u.getStudentProfile().setCourse(course);
-        userRepository.save(u);
+        profile.setFullName(fullName);
+        profile.setPhone(phone);
+        profile.setCourse(course);
+        studentProfileRepository.save(profile);
     }
 
     @Transactional
@@ -303,7 +280,10 @@ public class UserAccountService {
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         user.setEnabled(true);
         userRepository.save(user);
-        
+
+        studentProfileRepository.findByUserId(user.getId()).ifPresent(profile ->
+                sharedAttendanceStudentProfileSyncService.syncFromLibraryRegistration(user, profile));
+
         return verified;
     }
 
@@ -312,6 +292,7 @@ public class UserAccountService {
         email = normalizeEmail(email);
         User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
         if (user != null && !user.isEnabled()) {
+            studentProfileRepository.findByUserId(user.getId()).ifPresent(studentProfileRepository::delete);
             userRepository.delete(user);
         }
     }
@@ -319,6 +300,13 @@ public class UserAccountService {
     public boolean emailExists(String email) {
         email = normalizeEmail(email);
         return userRepository.findByEmailIgnoreCase(email).isPresent();
+    }
+
+    public String getLastGeneratedOtp(String email) {
+        email = normalizeEmail(email);
+        return otpRepository.findByEmailAndVerifiedFalse(email)
+                .map(OtpCode::getCode)
+                .orElse(null);
     }
 
     public String findStudentIdByEmail(String email) {

@@ -1,9 +1,9 @@
 package com.smartlibrary.web;
 
 import com.smartlibrary.model.UserRole;
-import com.smartlibrary.repository.StudentProfileRepository;
 import com.smartlibrary.security.LibraryUserDetails;
 import com.smartlibrary.service.BookService;
+import com.smartlibrary.service.SharedLibraryStudentProfileBridgeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResource;
@@ -27,11 +27,13 @@ public class EbookController {
     private static final Logger logger = LoggerFactory.getLogger(EbookController.class);
 
     private final BookService bookService;
-    private final StudentProfileRepository studentProfileRepository;
+    private final SharedLibraryStudentProfileBridgeService sharedLibraryStudentProfileBridgeService;
 
-    public EbookController(BookService bookService, StudentProfileRepository studentProfileRepository) {
+    public EbookController(
+            BookService bookService,
+            SharedLibraryStudentProfileBridgeService sharedLibraryStudentProfileBridgeService) {
         this.bookService = bookService;
-        this.studentProfileRepository = studentProfileRepository;
+        this.sharedLibraryStudentProfileBridgeService = sharedLibraryStudentProfileBridgeService;
     }
 
     @GetMapping("/ebook/read/{bookId}")
@@ -93,7 +95,7 @@ public class EbookController {
             return true;
         }
 
-        var profileOpt = studentProfileRepository.findByUserUsername(userDetails.getUsername());
+        var profileOpt = sharedLibraryStudentProfileBridgeService.ensureLibraryStudentProfile(userDetails.getUser());
         if (profileOpt.isEmpty()) {
             logger.debug("Access denied: student profile not found for user {}", userDetails.getUsername());
             return false;

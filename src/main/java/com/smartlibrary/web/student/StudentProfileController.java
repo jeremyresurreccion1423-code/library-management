@@ -1,7 +1,7 @@
 package com.smartlibrary.web.student;
 
-import com.smartlibrary.repository.StudentProfileRepository;
 import com.smartlibrary.security.LibraryUserDetails;
+import com.smartlibrary.service.SharedLibraryStudentProfileBridgeService;
 import com.smartlibrary.service.UserAccountService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -17,18 +17,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class StudentProfileController {
 
     private final UserAccountService userAccountService;
-    private final StudentProfileRepository studentProfileRepository;
+    private final SharedLibraryStudentProfileBridgeService sharedLibraryStudentProfileBridgeService;
 
     public StudentProfileController(
             UserAccountService userAccountService,
-            StudentProfileRepository studentProfileRepository) {
+            SharedLibraryStudentProfileBridgeService sharedLibraryStudentProfileBridgeService) {
         this.userAccountService = userAccountService;
-        this.studentProfileRepository = studentProfileRepository;
+        this.sharedLibraryStudentProfileBridgeService = sharedLibraryStudentProfileBridgeService;
     }
 
     @GetMapping
     public String form(@AuthenticationPrincipal LibraryUserDetails user, Model model) {
-        var profile = studentProfileRepository.findByUserUsername(user.getUsername()).orElseThrow();
+        var profile = sharedLibraryStudentProfileBridgeService.ensureLibraryStudentProfile(user.getUser()).orElseThrow();
         model.addAttribute("profile", profile);
         return "student/profile";
     }

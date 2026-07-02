@@ -41,8 +41,7 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/img/**",
                                 "/admin/login",
-                                "/forgot-password",
-                                "/reset-password")
+                                "/forgot-password")
                         .permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
@@ -94,9 +93,9 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/img/**",
                                 "/register",
+                                "/register/**",
                                 "/login",
                                 "/forgot-password",
-                                "/reset-password",
                                 "/search",
                                 "/scan",
                                 "/books/**",
@@ -120,6 +119,13 @@ public class SecurityConfig {
                                 if (details.getUser().getRole() == UserRole.ADMIN) {
                                     new SecurityContextLogoutHandler().logout(request, response, authentication);
                                     request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password");
+                                    response.sendRedirect("/login");
+                                    return;
+                                }
+                                if (details.getUser().getRole() == UserRole.TEACHER) {
+                                    new SecurityContextLogoutHandler().logout(request, response, authentication);
+                                    request.getSession().setAttribute("AUTH_ERROR",
+                                            "Teacher accounts use the Attendance System login (port 8081).");
                                     response.sendRedirect("/login");
                                     return;
                                 }

@@ -24,7 +24,7 @@ public class AnalyticsService {
 
     private static final String[] WEEKDAY_LABELS =
             {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"};
-    private static final int[] MYSQL_DOW_FOR_WEEKDAY = {2, 3, 4, 5, 6, 7, 1};
+    private static final int[] ISO_DOW_FOR_WEEKDAY = {1, 2, 3, 4, 5, 6, 7};
 
     private final BookIssueRepository bookIssueRepository;
     private final BookRepository bookRepository;
@@ -95,7 +95,7 @@ public class AnalyticsService {
 
         List<Map<String, Object>> result = new ArrayList<>();
         for (int i = 0; i < WEEKDAY_LABELS.length; i++) {
-            long count = counts.getOrDefault(MYSQL_DOW_FOR_WEEKDAY[i], 0L);
+            long count = counts.getOrDefault(ISO_DOW_FOR_WEEKDAY[i], 0L);
             result.add(Map.of("day", WEEKDAY_LABELS[i], "count", count));
         }
         return result;

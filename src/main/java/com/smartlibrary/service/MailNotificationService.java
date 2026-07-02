@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 @Service
-public class  MailNotificationService implements NotificationService {
+public class MailNotificationService {
 
     private static final Logger log = LoggerFactory.getLogger(MailNotificationService.class);
     private static final DateTimeFormatter DUE_DATE_FORMAT =
@@ -28,6 +28,9 @@ public class  MailNotificationService implements NotificationService {
     @Value("${spring.mail.host:}")
     private String mailHost;
 
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
+
     public MailNotificationService(
             JavaMailSender mailSender,
             LibraryProperties libraryProperties,
@@ -37,7 +40,6 @@ public class  MailNotificationService implements NotificationService {
         this.fineCalculator = fineCalculator;
     }
 
-    @Override
     public boolean sendDueReminder(BookIssue issue) {
         if (mailHost == null || mailHost.isBlank()) {
             log.info("[EMAIL REMINDER] To: {} | Book: '{}' | Due: {}",
@@ -166,29 +168,9 @@ public class  MailNotificationService implements NotificationService {
                 .replace("\"", "&quot;");
     }
 
-    @Override
-    public void sendPasswordReset(String email, String resetLink) {
-        if (mailHost == null || mailHost.isBlank()) {
-            log.info("Mail disabled. Password reset link for {}: {}", email, resetLink);
-            return;
-        }
-        
-        try {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setFrom(libraryProperties.getMailFrom());
-            msg.setTo(email);
-            msg.setSubject("Password reset");
-            msg.setText("Reset your password using this link (valid 1 hour):\n" + resetLink);
-            mailSender.send(msg);
-        } catch (Exception e) {
-            log.warn("Could not send reset email to {}: {}", email, e.getMessage());
-        }
-    }
-
-    @Override
     public boolean sendOtpCode(String email, String otpCode) {
-        if (mailHost == null || mailHost.isBlank()) {
-            log.info("Mail disabled. OTP for {}: {}", email, otpCode);
+        if (mailHost == null || mailHost.isBlank() || mailPassword == null || mailPassword.isBlank()) {
+            log.info("Mail not configured — OTP for {}: {}", email, otpCode);
             return true;
         }
         
@@ -206,7 +188,7 @@ public class  MailNotificationService implements NotificationService {
             mailSender.send(msg);
             return true;
         } catch (Exception e) {
-            log.warn("Could not send OTP email to {}: {}", email, e.getMessage());
+            log.error("Could not send OTP email to {}: {}", email, e.getMessage(), e);
             return false;
         }
     }

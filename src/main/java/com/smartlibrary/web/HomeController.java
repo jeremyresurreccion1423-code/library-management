@@ -23,10 +23,14 @@ public class HomeController {
     public String redirectHome(@AuthenticationPrincipal LibraryUserDetails user) {
         if (user == null) {
             logger.warn("Redirect-home accessed without authentication, redirecting to login");
-            return "redirect:/";
+            return "redirect:/login";
         }
         
-        String redirectPath = user.getUser().getRole() == UserRole.ADMIN ? "/admin" : "/student";
+        String redirectPath = switch (user.getUser().getRole()) {
+            case ADMIN -> "/admin";
+            case STUDENT -> "/student";
+            case TEACHER -> "/login";
+        };
         logger.info("Authenticated user {} redirected to {}", user.getUsername(), redirectPath);
         
         return "redirect:" + redirectPath;

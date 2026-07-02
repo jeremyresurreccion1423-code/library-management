@@ -203,8 +203,4 @@ public class BookIssueService {
         bookIssueRepository.delete(issue);
         logger.info("History record deleted for issue {}", issueId);
     }
-
-    public List<BookIssue> findDueBetween(LocalDateTime start, LocalDateTime end) {
-        return bookIssueRepository.findDueOnDate(IssueStatus.BORROWED, start, end);
-    }
 }

@@ -12,6 +12,7 @@ import lombok.ToString;
 @Entity
 @Table(
         name = "users",
+        schema = "public",
         indexes = {
                 @Index(name = "idx_users_email", columnList = "email"),
                 @Index(name = "idx_users_role_enabled", columnList = "role,enabled")
@@ -34,7 +35,7 @@ public class User extends BaseEntity {
  
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email cannot be blank")
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
 
     @NotNull(message = "Role cannot be null")

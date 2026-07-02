@@ -146,10 +146,11 @@
     <div class="split-right">
       <div class="login-card register-card">
         
-        <div th:if="!${otpRequired}">
+        <div th:unless="${otpRequired}">
           <h2 class="welcome-title">Create <span class="brand-highlight">Account</span></h2>
           <p class="welcome-subtitle">Fill in your details to get started</p>
 
+          <div th:if="${error != null}" class="alert alert-danger alert-compact" th:text="${error}"></div>
           <div th:if="${fieldErrors != null && fieldErrors['general'] != null}" class="alert alert-danger alert-compact" th:text="${fieldErrors['general']}"></div>
 
           <form th:action="@{/register}" method="post" id="registrationForm" class="register-form">
@@ -285,6 +286,10 @@
             6-digit code sent to <strong th:text="${email}"></strong>
           </p>
 
+          <div th:if="${message != null}" class="alert alert-info alert-compact" th:text="${message}"></div>
+          <div th:if="${devOtp != null}" class="alert alert-warning alert-compact">
+            Email not configured for local dev. Your OTP is: <strong th:text="${devOtp}"></strong>
+          </div>
           <div class="alert alert-success alert-compact">
             <strong>Account created!</strong>
             <p class="mb-0 small">Student ID: <strong th:text="${studentId}"></strong></p>

@@ -62,17 +62,17 @@ public interface BookIssueRepository extends JpaRepository<BookIssue, Long> {
     Optional<BookIssue> findByIdWithBookStudentUser(@Param("id") Long id);
 
     @Query(value = """
-            SELECT DAYOFWEEK(bi.issued_at) AS dow, COUNT(*) AS cnt
+            SELECT EXTRACT(ISODOW FROM bi.issued_at)::int AS dow, COUNT(*) AS cnt
             FROM book_issues bi
-            GROUP BY DAYOFWEEK(bi.issued_at)
+            GROUP BY EXTRACT(ISODOW FROM bi.issued_at)
             """, nativeQuery = true)
     List<Object[]> countIssuesByDayOfWeek();
 
     @Query(value = """
-            SELECT DATE(bi.issued_at) AS issue_date, COUNT(*) AS cnt
+            SELECT bi.issued_at::date AS issue_date, COUNT(*) AS cnt
             FROM book_issues bi
             WHERE bi.issued_at >= :since
-            GROUP BY DATE(bi.issued_at)
+            GROUP BY bi.issued_at::date
             ORDER BY issue_date ASC
             """, nativeQuery = true)
     List<Object[]> countIssuesByDateSince(@Param("since") LocalDateTime since);

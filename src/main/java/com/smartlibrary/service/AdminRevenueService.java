@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class AdminRevenueService {
@@ -49,24 +47,5 @@ public class AdminRevenueService {
 
     private BigDecimal calculateReturnRevenue(BookIssue bookIssue) {
         return RETURN_PROCESSING_FEE;
-    }
-
-    public BigDecimal getTotalRevenue() {
-        BigDecimal total = adminRevenueRepository.getTotalRevenue();
-        return total != null ? total : BigDecimal.ZERO;
-    }
-
-    public BigDecimal getRevenueBetween(LocalDateTime start, LocalDateTime end) {
-        BigDecimal total = adminRevenueRepository.getTotalRevenueBetween(start, end);
-        return total != null ? total : BigDecimal.ZERO;
-    }
-
-    public List<AdminRevenue> getRecentRevenue(int limit) {
-        List<AdminRevenue> revenues = adminRevenueRepository.findAllByCreatedAtDesc();
-        return revenues.size() > limit ? revenues.subList(0, limit) : revenues;
-    }
-
-    public List<AdminRevenue> getRevenueBetweenDates(LocalDateTime start, LocalDateTime end) {
-        return adminRevenueRepository.findByCreatedAtBetween(start, end);
     }
 }

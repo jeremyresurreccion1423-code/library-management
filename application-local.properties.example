@@ -1,0 +1,18 @@
+# Copy to: src/main/resources/application-local.properties
+# (that file is gitignored — never commit secrets)
+
+# --- Supabase Database (same project as Attendance Management System) ---
+# Dashboard: Project Settings -> Database -> Connection string (Session Pooler)
+spring.datasource.url=${SUPABASE_DB_URL:jdbc:postgresql://aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres?sslmode=require}
+spring.datasource.username=${SUPABASE_DB_USER:postgres.YOUR_PROJECT_REF}
+spring.datasource.password=${SUPABASE_DB_PASSWORD:your-database-password}
+
+# Library schema (isolates tables from Attendance public schema)
+spring.jpa.properties.hibernate.default_schema=library
+spring.jpa.properties.hibernate.create_namespaces=true
+spring.datasource.hikari.connection-init-sql=CREATE SCHEMA IF NOT EXISTS library
+
+# --- Gmail SMTP (required for OTP emails) ---
+spring.mail.host=smtp.gmail.com
+spring.mail.username=your@gmail.com
+spring.mail.password=your-gmail-app-password

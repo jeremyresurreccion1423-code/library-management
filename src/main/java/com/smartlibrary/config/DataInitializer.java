@@ -40,6 +40,7 @@ import java.util.Map;
 public class DataInitializer implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
+    private static final String LIBRARY_SCHEMA = "library";
 
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
@@ -639,40 +640,107 @@ public class DataInitializer implements CommandLineRunner {
 
     private void fixSchema() {
         try {
-            // Drop old uploaded_at column from ebooks (replaced by BaseEntity created_at)
-            jdbcTemplate.execute("ALTER TABLE ebooks DROP COLUMN IF EXISTS uploaded_at");
-            // Make timestamp columns nullable for tables that may have been created with NOT NULL in previous runs
-            jdbcTemplate.execute("ALTER TABLE admin_revenue MODIFY COLUMN created_at datetime(6)");
-            jdbcTemplate.execute("ALTER TABLE admin_revenue MODIFY COLUMN updated_at datetime(6)");
-            jdbcTemplate.execute("ALTER TABLE reservations MODIFY COLUMN created_at datetime(6)");
-            jdbcTemplate.execute("ALTER TABLE reservations MODIFY COLUMN updated_at datetime(6)");
-            jdbcTemplate.execute("ALTER TABLE ebooks MODIFY COLUMN created_at datetime(6)");
-            jdbcTemplate.execute("ALTER TABLE ebooks MODIFY COLUMN updated_at datetime(6)");
-            jdbcTemplate.execute("ALTER TABLE otp_codes MODIFY COLUMN created_at datetime(6)");
-            jdbcTemplate.execute("ALTER TABLE otp_codes MODIFY COLUMN updated_at datetime(6)");
-            jdbcTemplate.execute("ALTER TABLE password_reset_tokens MODIFY COLUMN created_at datetime(6)");
-            jdbcTemplate.execute("ALTER TABLE password_reset_tokens MODIFY COLUMN updated_at datetime(6)");
+            repairStudentProfileUserForeignKey();
+            jdbcTemplate.execute("ALTER TABLE library.ebooks DROP COLUMN IF EXISTS uploaded_at");
+            relaxTimestampColumn("admin_revenue", "created_at");
+            relaxTimestampColumn("admin_revenue", "updated_at");
+            relaxTimestampColumn("reservations", "created_at");
+            relaxTimestampColumn("reservations", "updated_at");
+            relaxTimestampColumn("ebooks", "created_at");
+            relaxTimestampColumn("ebooks", "updated_at");
+            relaxTimestampColumn("otp_codes", "created_at");
+            relaxTimestampColumn("otp_codes", "updated_at");
             log.debug("Schema fixes applied successfully.");
         } catch (Exception e) {
             log.warn("Schema fix skipped (possibly table does not exist yet): {}", e.getMessage());
         }
     }
 
+    private void relaxTimestampColumn(String table, String column) {
+        jdbcTemplate.execute(
+                "ALTER TABLE " + LIBRARY_SCHEMA + "." + table + " ALTER COLUMN " + column + " TYPE TIMESTAMP(6)");
+    }
+
+    private void repairStudentProfileUserForeignKey() {
+        try {
+            jdbcTemplate.update("""
+                    UPDATE library.student_profiles sp
+                    SET user_id = s.user_id
+                    FROM public.students s
+                    WHERE sp.user_id NOT IN (SELECT id FROM public.users)
+                      AND LOWER(s.student_number) = LOWER(sp.student_id)
+                      AND s.user_id IS NOT NULL
+                    """);
+
+            jdbcTemplate.update("""
+                    UPDATE library.student_profiles sp
+                    SET user_id = pu.id
+                    FROM public.users pu
+                    WHERE sp.user_id NOT IN (SELECT id FROM public.users)
+                      AND LOWER(TRIM(pu.email)) IN (
+                          SELECT LOWER(TRIM(s.email))
+                          FROM public.students s
+                          WHERE LOWER(s.student_number) = LOWER(sp.student_id)
+                            AND s.email IS NOT NULL
+                            AND TRIM(s.email) <> ''
+                      )
+                    """);
+
+            int removed = jdbcTemplate.update("""
+                    DELETE FROM library.student_profiles
+                    WHERE user_id NOT IN (SELECT id FROM public.users)
+                    """);
+            if (removed > 0) {
+                log.warn("Removed {} orphan library.student_profiles row(s) with invalid user_id", removed);
+            }
+
+            List<String> constraints = jdbcTemplate.queryForList("""
+                    SELECT c.conname
+                    FROM pg_constraint c
+                    JOIN pg_class t ON t.oid = c.conrelid
+                    JOIN pg_namespace n ON n.oid = t.relnamespace
+                    JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY (c.conkey)
+                    WHERE n.nspname = 'library'
+                      AND t.relname = 'student_profiles'
+                      AND c.contype = 'f'
+                      AND a.attname = 'user_id'
+                    """, String.class);
+
+            for (String constraintName : constraints) {
+                jdbcTemplate.execute("ALTER TABLE library.student_profiles DROP CONSTRAINT IF EXISTS \""
+                        + constraintName.replace("\"", "") + "\"");
+            }
+
+            jdbcTemplate.execute("""
+                    ALTER TABLE library.student_profiles
+                    ADD CONSTRAINT fk_student_profiles_user
+                    FOREIGN KEY (user_id) REFERENCES public.users (id)
+                    """);
+            log.info("Repaired library.student_profiles.user_id foreign key -> public.users");
+        } catch (Exception e) {
+            String message = e.getMessage() == null ? "" : e.getMessage();
+            if (message.contains("already exists")) {
+                log.debug("library.student_profiles FK already points to public.users");
+            } else {
+                log.warn("Could not repair library.student_profiles FK: {}", message);
+            }
+        }
+    }
+
     private void fixNullVersions() {
         try {
-            int booksFixed = jdbcTemplate.update("UPDATE books SET version = 0 WHERE version IS NULL");
-            int usersFixed = jdbcTemplate.update("UPDATE users SET version = 0 WHERE version IS NULL");
-            int categoriesFixed = jdbcTemplate.update("UPDATE categories SET version = 0 WHERE version IS NULL");
-            int authorsFixed = jdbcTemplate.update("UPDATE authors SET version = 0 WHERE version IS NULL");
-            int studentProfilesFixed = jdbcTemplate.update("UPDATE student_profiles SET version = 0 WHERE version IS NULL");
-            int bookIssuesFixed = jdbcTemplate.update("UPDATE book_issues SET version = 0 WHERE version IS NULL");
-            int reservationsFixed = jdbcTemplate.update("UPDATE reservations SET version = 0 WHERE version IS NULL");
-            int adminRevenueFixed = jdbcTemplate.update("UPDATE admin_revenue SET version = 0 WHERE version IS NULL");
-            int ebooksFixed = jdbcTemplate.update("UPDATE ebooks SET version = 0 WHERE version IS NULL");
-            int otpCodesFixed = jdbcTemplate.update("UPDATE otp_codes SET version = 0 WHERE version IS NULL");
-            int passwordResetTokensFixed = jdbcTemplate.update("UPDATE password_reset_tokens SET version = 0 WHERE version IS NULL");
+            int booksFixed = jdbcTemplate.update("UPDATE library.books SET version = 0 WHERE version IS NULL");
+            int usersFixed = jdbcTemplate.update("UPDATE public.users SET version = 0 WHERE version IS NULL");
+            int categoriesFixed = jdbcTemplate.update("UPDATE library.categories SET version = 0 WHERE version IS NULL");
+            int authorsFixed = jdbcTemplate.update("UPDATE library.authors SET version = 0 WHERE version IS NULL");
+            int studentProfilesFixed = jdbcTemplate.update("UPDATE library.student_profiles SET version = 0 WHERE version IS NULL");
+            int bookIssuesFixed = jdbcTemplate.update("UPDATE library.book_issues SET version = 0 WHERE version IS NULL");
+            int reservationsFixed = jdbcTemplate.update("UPDATE library.reservations SET version = 0 WHERE version IS NULL");
+            int adminRevenueFixed = jdbcTemplate.update("UPDATE library.admin_revenue SET version = 0 WHERE version IS NULL");
+            int ebooksFixed = jdbcTemplate.update("UPDATE library.ebooks SET version = 0 WHERE version IS NULL");
+            int otpCodesFixed = jdbcTemplate.update("UPDATE library.otp_codes SET version = 0 WHERE version IS NULL");
             int total = booksFixed + usersFixed + categoriesFixed + authorsFixed + studentProfilesFixed + bookIssuesFixed
-                    + reservationsFixed + adminRevenueFixed + ebooksFixed + otpCodesFixed + passwordResetTokensFixed;
+                    + reservationsFixed + adminRevenueFixed + ebooksFixed + otpCodesFixed;
             if (total > 0) {
                 log.info("Fixed {} row(s) with NULL version value(s).", total);
             }

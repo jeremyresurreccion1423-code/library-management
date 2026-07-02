@@ -3,6 +3,7 @@ package com.smartlibrary.web;
 import com.smartlibrary.security.LibraryUserDetails;
 import jakarta.servlet.http.HttpSession;
 import com.smartlibrary.service.UserAccountService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,12 @@ public class AuthController {
     private static final String EMAIL_REGEX = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
 
     private final UserAccountService userAccountService;
+
+    @Value("${spring.mail.host:}")
+    private String mailHost;
+
+    @Value("${spring.mail.password:}")
+    private String mailPassword;
 
     public AuthController(UserAccountService userAccountService) {
         this.userAccountService = userAccountService;
@@ -123,9 +130,17 @@ public class AuthController {
             ra.addFlashAttribute("otpRequired", true);
             ra.addFlashAttribute("studentId", profile.getStudentId());
             ra.addFlashAttribute("email", email);
+            ra.addFlashAttribute("username", username);
+            ra.addFlashAttribute("password", password);
+            ra.addFlashAttribute("phone", phone);
+            ra.addFlashAttribute("course", course);
             ra.addFlashAttribute("firstName", resolvedFirstName);
             ra.addFlashAttribute("lastName", resolvedLastName);
-            ra.addFlashAttribute("message", "Account created successfully! Check your email for OTP verification code.");
+            String devOtp = userAccountService.getLastGeneratedOtp(email);
+            if (devOtp != null && (mailHost == null || mailHost.isBlank() || mailPassword == null || mailPassword.isBlank())) {
+                ra.addFlashAttribute("devOtp", devOtp);
+            }
+            ra.addFlashAttribute("message", "Account created successfully! Enter the OTP code to verify your email.");
             logger.info("New registration initiated for email: {}", email);
             return "redirect:/register";
         } catch (IllegalArgumentException e) {
@@ -187,26 +202,6 @@ public class AuthController {
             ra.addFlashAttribute("error", e.getMessage());
             logger.warn("Password reset request failed: {}", e.getMessage());
             return "redirect:/forgot-password";
-        }
-    }
-
-    @GetMapping("/reset-password")
-    public String resetForm(@RequestParam String token, Model model) {
-        model.addAttribute("token", token);
-        return "reset-password";
-    }
-
-    @PostMapping("/reset-password")
-    public String resetSubmit(@RequestParam String token, @RequestParam String password, RedirectAttributes ra) {
-        try {
-            userAccountService.resetPasswordWithToken(token, password);
-            ra.addFlashAttribute("success", "Password updated. Please log in.");
-            logger.info("Password reset completed using token");
-            return "redirect:/login";
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", e.getMessage());
-            logger.warn("Token-based password reset failed: {}", e.getMessage());
-            return "redirect:/reset-password?token=" + token;
         }
     }
 }

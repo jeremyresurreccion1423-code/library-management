@@ -61,10 +61,6 @@ public class  BookService {
         return bookRepository.findAllByIsbnExact(isbn.trim());
     }
 
-    public List<Book> listDigitalBooks() {
-        return bookRepository.findAllWithEbook();
-    }
-
     public List<Book> listDigitalBooksForStudent(Long studentProfileId) {
         return bookRepository.findDigitalBooksBorrowedByStudent(Objects.requireNonNull(studentProfileId));
     }

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -44,16 +45,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public String handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest request, RedirectAttributes ra) {
+    public String handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest request, Model model) {
         logger.error("Database integrity violation at {}: {}", request.getRequestURI(), ex.getMessage());
-        ra.addFlashAttribute("error", "Operation failed due to a data conflict. Please check for duplicate entries.");
-        return "redirect:" + request.getRequestURI();
+        model.addAttribute("error", "Operation failed due to a data conflict. Please check for duplicate entries.");
+        model.addAttribute("path", request.getRequestURI());
+        return "error";
     }
 
     @ExceptionHandler(Exception.class)
-    public String handleGeneric(Exception ex, HttpServletRequest request, RedirectAttributes ra) {
+    public String handleGeneric(Exception ex, HttpServletRequest request, Model model) {
         logger.error("Unexpected error at {}: {}", request.getRequestURI(), ex.getMessage(), ex);
-        ra.addFlashAttribute("error", "An unexpected error occurred. Please try again or contact support.");
-        return "redirect:" + request.getRequestURI();
+        model.addAttribute("error", "An unexpected error occurred. Please try again or contact support.");
+        model.addAttribute("path", request.getRequestURI());
+        return "error";
     }
 }

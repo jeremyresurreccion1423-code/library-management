@@ -6,6 +6,7 @@ import com.smartlibrary.security.LibraryUserDetails;
 import com.smartlibrary.service.BookIssueService;
 import com.smartlibrary.service.BookService;
 import com.smartlibrary.service.ReservationService;
+import com.smartlibrary.service.SharedLibraryStudentProfileBridgeService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Optional;
+
 @Controller
 @RequestMapping("/student")
 public class StudentDashboardController {
@@ -25,24 +28,30 @@ public class StudentDashboardController {
     private final BookService bookService;
     private final ReservationService reservationService;
     private final LibraryProperties libraryProperties;
+    private final SharedLibraryStudentProfileBridgeService sharedLibraryStudentProfileBridgeService;
 
     public StudentDashboardController(
             StudentProfileRepository studentProfileRepository,
             BookIssueService bookIssueService,
             BookService bookService,
             ReservationService reservationService,
-            LibraryProperties libraryProperties) {
+            LibraryProperties libraryProperties,
+            SharedLibraryStudentProfileBridgeService sharedLibraryStudentProfileBridgeService) {
         this.studentProfileRepository = studentProfileRepository;
         this.bookIssueService = bookIssueService;
         this.bookService = bookService;
         this.reservationService = reservationService;
         this.libraryProperties = libraryProperties;
+        this.sharedLibraryStudentProfileBridgeService = sharedLibraryStudentProfileBridgeService;
     }
 
-    @Transactional(readOnly = true)
+    private Optional<com.smartlibrary.entity.StudentProfile> resolveProfile(LibraryUserDetails user) {
+        return sharedLibraryStudentProfileBridgeService.ensureLibraryStudentProfile(user.getUser());
+    }
+
     @GetMapping({"", "/"})
     public String dashboard(@AuthenticationPrincipal LibraryUserDetails user, Model model) {
-        var profileOpt = studentProfileRepository.findByUserUsername(user.getUsername());
+        var profileOpt = resolveProfile(user);
         if (profileOpt.isEmpty()) {
             model.addAttribute("error", "Student profile not found. Please contact administrator.");
             return "error";
@@ -70,7 +79,7 @@ public class StudentDashboardController {
             @PathVariable("id") Long issueId,
             RedirectAttributes ra) {
         try {
-            var profileOpt = studentProfileRepository.findByUserUsername(user.getUsername());
+            var profileOpt = resolveProfile(user);
             if (profileOpt.isEmpty()) {
                 ra.addFlashAttribute("error", "Student profile not found.");
                 return "redirect:/student";
@@ -97,7 +106,7 @@ public class StudentDashboardController {
             @PathVariable("id") Long issueId,
             RedirectAttributes ra) {
         try {
-            var profileOpt = studentProfileRepository.findByUserUsername(user.getUsername());
+            var profileOpt = resolveProfile(user);
             if (profileOpt.isEmpty()) {
                 ra.addFlashAttribute("error", "Student profile not found.");
                 return "redirect:/student";
