@@ -16,12 +16,25 @@
     <div class="profile-card">
       <div class="profile-card-header">
         <div class="profile-avatar">
-          <i class="bi bi-person-fill"></i>
+          <img th:if="${profilePhotoUrl != null}" th:src="${profilePhotoUrl}" alt="Profile photo" class="profile-avatar-img"/>
+          <span th:if="${profilePhotoUrl == null}" th:text="${profileInitial ?: 'U'}">U</span>
         </div>
         <div class="profile-info">
           <h4 th:text="${fullName} ?: ${username}">Admin</h4>
           <p>Administrator Account</p>
         </div>
+      </div>
+
+      <div class="profile-photo-upload mb-4">
+        <label class="form-label">Profile Photo</label>
+        <form th:action="@{/admin/profile/photo}" method="post" enctype="multipart/form-data" class="d-flex flex-wrap gap-2 align-items-center">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <input type="file" name="photo" accept="image/*" class="form-control" style="max-width:320px;" required>
+          <button type="submit" class="btn btn-accent btn-sm">
+            <i class="bi bi-upload me-1"></i>Upload Photo
+          </button>
+        </form>
+        <div class="form-text text-muted">JPG, PNG, GIF, or WebP. Max 5MB.</div>
       </div>
 
       <form th:action="@{/admin/profile}" method="post">

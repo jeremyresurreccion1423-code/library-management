@@ -3,6 +3,7 @@ package com.smartlibrary.web.admin;
 import com.smartlibrary.entity.User;
 import com.smartlibrary.repository.UserRepository;
 import com.smartlibrary.security.LibraryUserDetails;
+import com.smartlibrary.service.ProfilePhotoService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -17,9 +19,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminProfileController {
 
     private final UserRepository userRepository;
+    private final ProfilePhotoService profilePhotoService;
 
-    public AdminProfileController(UserRepository userRepository) {
+    public AdminProfileController(UserRepository userRepository, ProfilePhotoService profilePhotoService) {
         this.userRepository = userRepository;
+        this.profilePhotoService = profilePhotoService;
     }
 
     @GetMapping
@@ -57,6 +61,22 @@ public class AdminProfileController {
         userRepository.save(currentUser);
 
         ra.addFlashAttribute("success", "Username updated successfully.");
+        return "redirect:/admin/profile";
+    }
+
+    @PostMapping("/photo")
+    public String uploadPhoto(
+            @AuthenticationPrincipal LibraryUserDetails user,
+            @RequestParam("photo") MultipartFile photo,
+            RedirectAttributes ra) {
+        try {
+            profilePhotoService.saveProfilePhoto(user.getUsername(), photo);
+            ra.addFlashAttribute("success", "Profile photo updated successfully.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Unable to upload profile photo.");
+        }
         return "redirect:/admin/profile";
     }
 }

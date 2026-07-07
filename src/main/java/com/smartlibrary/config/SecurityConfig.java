@@ -47,6 +47,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/img/**",
+                                "/uploads/**",
                                 "/admin/login",
                                 "/forgot-password")
                         .permitAll()
@@ -99,6 +100,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/img/**",
+                                "/uploads/**",
                                 "/register",
                                 "/register/**",
                                 "/login",

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -85,6 +87,29 @@ public class StudentReservationController {
         try {
             reservationService.delete(id);
             ra.addFlashAttribute("success", "Reservation deleted");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/student";
+    }
+
+    @PostMapping("/reservations/bulk-delete")
+    public String bulkDelete(
+            @AuthenticationPrincipal LibraryUserDetails user,
+            @RequestParam(name = "ids", required = false) List<Long> ids,
+            RedirectAttributes ra) {
+        try {
+            var profile = sharedLibraryStudentProfileBridgeService.ensureLibraryStudentProfile(user.getUser()).orElseThrow();
+            if (ids == null || ids.isEmpty()) {
+                ra.addFlashAttribute("error", "Select at least one reservation record to delete.");
+                return "redirect:/student";
+            }
+            int count = reservationService.deleteHistoryForStudent(ids, profile.getId());
+            if (count == 0) {
+                ra.addFlashAttribute("error", "No reservation history records were deleted.");
+            } else {
+                ra.addFlashAttribute("success", count + " reservation record(s) deleted.");
+            }
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }

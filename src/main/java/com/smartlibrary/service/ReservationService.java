@@ -82,6 +82,26 @@ public class ReservationService {
     }
 
     @Transactional
+    public int deleteHistoryForStudent(List<Long> reservationIds, Long studentProfileId) {
+        if (reservationIds == null || reservationIds.isEmpty()) {
+            return 0;
+        }
+        int count = 0;
+        for (Long reservationId : reservationIds.stream().filter(Objects::nonNull).distinct().toList()) {
+            Reservation reservation = reservationRepository.findById(reservationId).orElse(null);
+            if (reservation == null || !reservation.getStudent().getId().equals(studentProfileId)) {
+                continue;
+            }
+            if (reservation.getStatus() == ReservationStatus.WAITING) {
+                continue;
+            }
+            reservationRepository.delete(reservation);
+            count++;
+        }
+        return count;
+    }
+
+    @Transactional
     public void notifyNextInQueue(Long bookId) {
         List<Reservation> waiting = queueForBook(bookId);
         if (waiting.isEmpty()) {

@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.Optional;
 
 @Controller
@@ -113,6 +115,62 @@ public class StudentDashboardController {
             }
             bookIssueService.deleteReturnedHistoryForStudent(issueId, profileOpt.get().getId());
             ra.addFlashAttribute("success", "Returned history record deleted.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/student";
+    }
+
+    @Transactional
+    @PostMapping("/issues/bulk-return")
+    public String bulkReturn(
+            @AuthenticationPrincipal LibraryUserDetails user,
+            @RequestParam(name = "ids", required = false) List<Long> ids,
+            RedirectAttributes ra) {
+        try {
+            var profileOpt = resolveProfile(user);
+            if (profileOpt.isEmpty()) {
+                ra.addFlashAttribute("error", "Student profile not found.");
+                return "redirect:/student";
+            }
+            if (ids == null || ids.isEmpty()) {
+                ra.addFlashAttribute("error", "Select at least one book to return.");
+                return "redirect:/student";
+            }
+            int count = bookIssueService.returnBooksForStudent(ids, profileOpt.get().getId());
+            if (count == 0) {
+                ra.addFlashAttribute("error", "No eligible books were returned.");
+            } else {
+                ra.addFlashAttribute("success", count + " book(s) returned successfully.");
+            }
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/student";
+    }
+
+    @Transactional
+    @PostMapping("/issues/bulk-delete-history")
+    public String bulkDeleteHistory(
+            @AuthenticationPrincipal LibraryUserDetails user,
+            @RequestParam(name = "ids", required = false) List<Long> ids,
+            RedirectAttributes ra) {
+        try {
+            var profileOpt = resolveProfile(user);
+            if (profileOpt.isEmpty()) {
+                ra.addFlashAttribute("error", "Student profile not found.");
+                return "redirect:/student";
+            }
+            if (ids == null || ids.isEmpty()) {
+                ra.addFlashAttribute("error", "Select at least one history record to delete.");
+                return "redirect:/student";
+            }
+            int count = bookIssueService.deleteReturnedHistoryForStudent(ids, profileOpt.get().getId());
+            if (count == 0) {
+                ra.addFlashAttribute("error", "No returned history records were deleted.");
+            } else {
+                ra.addFlashAttribute("success", count + " borrow history record(s) deleted.");
+            }
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }

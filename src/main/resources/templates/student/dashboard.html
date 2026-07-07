@@ -13,12 +13,30 @@
     
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
-  <h2 class="h5 mb-2">Issued books</h2>
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <h2 class="h5 mb-0">Issued books</h2>
+    <div class="bulk-toolbar d-flex flex-wrap gap-2">
+      <button type="button" id="bulkReturnBtn" class="btn btn-sm btn-outline-success">Return Selected</button>
+      <button type="button" id="bulkDeleteHistoryBtn" class="btn btn-sm btn-outline-danger">Delete Selected History</button>
+    </div>
+  </div>
   <div class="table-responsive card-lib p-0 mb-4">
     <table class="table table-dark-lib mb-0" id="issuedBooksTable">
-      <thead><tr><th>Book</th><th>Borrowed</th><th>Due</th><th>Fine/day</th><th>Returned</th><th>Status</th><th>Action</th></tr></thead>
+      <thead>
+        <tr>
+          <th style="width:42px;">
+            <input type="checkbox" id="issuesSelectAll" class="form-check-input" aria-label="Select all issued books">
+          </th>
+          <th>Book</th><th>Borrowed</th><th>Due</th><th>Fine/day</th><th>Returned</th><th>Status</th><th>Action</th>
+        </tr>
+      </thead>
       <tbody>
-      <tr th:each="i : ${issues}">
+      <tr th:each="i : ${issues}"
+          th:attr="data-returnable=${i.status.toString() != 'RETURNED'},data-deletable=${i.status.toString() == 'RETURNED'}">
+        <td>
+          <input type="checkbox" class="form-check-input bulk-row-check" th:value="${i.id}">
+        </td>
         <td th:text="${i.book.title}"></td>
         <td th:text="${i.issuedAt != null ? i.issuedAt.toString().substring(0, 16) : 'N/A'}"></td>
         <td th:text="${i.dueAt != null ? i.dueAt.toString().substring(0, 16) : 'N/A'}"></td>
@@ -39,15 +57,24 @@
           </form>
         </td>
       </tr>
-      <tr th:if="${#lists.isEmpty(issues)}"><td colspan="7" class="text-center text-muted-lib py-3">No borrowed books yet.</td></tr>
+      <tr th:if="${#lists.isEmpty(issues)}"><td colspan="8" class="text-center text-muted-lib py-3">No borrowed books yet.</td></tr>
       </tbody>
     </table>
   </div>
-  <h2 class="h5 mb-2">My Reservations</h2>
+
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+    <h2 class="h5 mb-0">My Reservations</h2>
+    <div class="bulk-toolbar d-flex flex-wrap gap-2">
+      <button type="button" id="bulkDeleteReservationsBtn" class="btn btn-sm btn-outline-danger">Delete Selected</button>
+    </div>
+  </div>
   <div class="table-responsive card-lib p-0 mb-4">
-    <table class="table table-hover align-middle mb-0">
+    <table class="table table-hover align-middle mb-0" id="reservationsTable">
       <thead class="table-light">
         <tr>
+          <th style="width:42px;">
+            <input type="checkbox" id="reservationsSelectAll" class="form-check-input" aria-label="Select all reservation history">
+          </th>
           <th>Book</th>
           <th>Queue #</th>
           <th>Status</th>
@@ -56,7 +83,10 @@
         </tr>
       </thead>
       <tbody>
-      <tr th:each="r : ${reservations}">
+      <tr th:each="r : ${reservations}" th:attr="data-deletable=${r.status != WAITING}">
+        <td>
+          <input th:if="${r.status != WAITING}" type="checkbox" class="form-check-input bulk-row-check" th:value="${r.id}">
+        </td>
         <td>
           <strong th:text="${r.book.title}"></strong>
           <div class="small text-muted" th:if="${r.book.isbn != null}" th:text="${'ISBN: ' + r.book.isbn}"></div>
@@ -80,10 +110,11 @@
           </form>
         </td>
       </tr>
-      <tr th:if="${#lists.isEmpty(reservations)}"><td colspan="5" class="text-center text-muted-lib py-3">No reservations yet</td></tr>
+      <tr th:if="${#lists.isEmpty(reservations)}"><td colspan="6" class="text-center text-muted-lib py-3">No reservations yet</td></tr>
       </tbody>
     </table>
   </div>
+
   <h2 class="h5 mb-3">Digital Library (PDF)</h2>
   <div class="book-cards-grid" th:if="${!#lists.isEmpty(digitalBooks)}">
     <div class="book-card-item" th:each="b : ${digitalBooks}">
@@ -108,16 +139,53 @@
   </main>
 </div>
 <div th:replace="~{fragments/layout :: scripts}"></div>
+<script th:inline="javascript">
+  window.libraryBulkTables = [
+    {
+      tableId: 'issuedBooksTable',
+      selectAllId: 'issuesSelectAll',
+      bulkActions: [
+        {
+          buttonId: 'bulkReturnBtn',
+          action: '/student/issues/bulk-return',
+          selector: 'tr[data-returnable="true"]',
+          message: 'Return all selected books?',
+          confirmOptions: { type: 'warning', title: 'Return Books', okText: 'Yes, Return' }
+        },
+        {
+          buttonId: 'bulkDeleteHistoryBtn',
+          action: '/student/issues/bulk-delete-history',
+          selector: 'tr[data-deletable="true"]',
+          message: 'Delete all selected borrow history records? This cannot be undone.',
+          confirmOptions: { type: 'danger', title: 'Delete History', okText: 'Delete' }
+        }
+      ]
+    },
+    {
+      tableId: 'reservationsTable',
+      selectAllId: 'reservationsSelectAll',
+      bulkActions: [
+        {
+          buttonId: 'bulkDeleteReservationsBtn',
+          action: '/student/reservations/bulk-delete',
+          selector: 'tr[data-deletable="true"]',
+          message: 'Delete all selected reservation records? This cannot be undone.',
+          confirmOptions: { type: 'danger', title: 'Delete Reservations', okText: 'Delete' }
+        }
+      ]
+    }
+  ];
+</script>
+<script th:src="@{/js/bulk-select.js}"></script>
 <div th:replace="~{fragments/student-sidebar :: sidebar-script}"></div>
 <script th:inline="javascript">
   document.addEventListener('DOMContentLoaded', function() {
-    // Return book confirmation
     const returnButtons = document.querySelectorAll('.return-btn');
     returnButtons.forEach(button => {
       button.addEventListener('click', function() {
         const issueId = this.getAttribute('data-issue-id');
-        const bookTitle = this.closest('tr').querySelectorAll('td')[0].textContent;
-        
+        const bookTitle = this.closest('tr').querySelectorAll('td')[1].textContent;
+
         if (typeof confirmAction === 'function') {
           confirmAction(
             `Are you sure you want to return "${bookTitle}"?`,
@@ -126,7 +194,7 @@
               const form = document.createElement('form');
               form.method = 'post';
               form.action = `/student/issues/${issueId}/return`;
-              
+
               const csrfToken = document.querySelector('meta[name="_csrf"]');
               if (csrfToken) {
                 const input = document.createElement('input');
@@ -135,41 +203,37 @@
                 input.value = csrfToken.getAttribute('content');
                 form.appendChild(input);
               }
-              
+
               document.body.appendChild(form);
               form.submit();
             }
           );
-        } else {
-          // Fallback if confirmAction is not available
-          if (confirm(`Are you sure you want to return "${bookTitle}"?`)) {
-            const form = document.createElement('form');
-            form.method = 'post';
-            form.action = `/student/issues/${issueId}/return`;
-            
-            const csrfToken = document.querySelector('meta[name="_csrf"]');
-            if (csrfToken) {
-              const input = document.createElement('input');
-              input.type = 'hidden';
-              input.name = '_csrf';
-              input.value = csrfToken.getAttribute('content');
-              form.appendChild(input);
-            }
-            
-            document.body.appendChild(form);
-            form.submit();
+        } else if (confirm(`Are you sure you want to return "${bookTitle}"?`)) {
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = `/student/issues/${issueId}/return`;
+
+          const csrfToken = document.querySelector('meta[name="_csrf"]');
+          if (csrfToken) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = '_csrf';
+            input.value = csrfToken.getAttribute('content');
+            form.appendChild(input);
           }
+
+          document.body.appendChild(form);
+          form.submit();
         }
       });
     });
 
-    // Cancel reservation confirmation
     const cancelButtons = document.querySelectorAll('.cancel-reservation-btn');
     cancelButtons.forEach(button => {
       button.addEventListener('click', function() {
         const reservationId = this.getAttribute('data-reservation-id');
-        const bookTitle = this.closest('tr').querySelectorAll('td')[0].textContent;
-        
+        const bookTitle = this.closest('tr').querySelectorAll('td')[1].textContent;
+
         if (typeof confirmAction === 'function') {
           confirmAction(
             `Are you sure you want to cancel your reservation for "${bookTitle}"?`,
@@ -178,7 +242,7 @@
               const form = document.createElement('form');
               form.method = 'post';
               form.action = `/student/reservations/${reservationId}/cancel`;
-              
+
               const csrfToken = document.querySelector('meta[name="_csrf"]');
               if (csrfToken) {
                 const input = document.createElement('input');
@@ -187,30 +251,27 @@
                 input.value = csrfToken.getAttribute('content');
                 form.appendChild(input);
               }
-              
+
               document.body.appendChild(form);
               form.submit();
             }
           );
-        } else {
-          // Fallback if confirmAction is not available
-          if (confirm(`Are you sure you want to cancel your reservation for "${bookTitle}"?`)) {
-            const form = document.createElement('form');
-            form.method = 'post';
-            form.action = `/student/reservations/${reservationId}/cancel`;
-            
-            const csrfToken = document.querySelector('meta[name="_csrf"]');
-            if (csrfToken) {
-              const input = document.createElement('input');
-              input.type = 'hidden';
-              input.name = '_csrf';
-              input.value = csrfToken.getAttribute('content');
-              form.appendChild(input);
-            }
-            
-            document.body.appendChild(form);
-            form.submit();
+        } else if (confirm(`Are you sure you want to cancel your reservation for "${bookTitle}"?`)) {
+          const form = document.createElement('form');
+          form.method = 'post';
+          form.action = `/student/reservations/${reservationId}/cancel`;
+
+          const csrfToken = document.querySelector('meta[name="_csrf"]');
+          if (csrfToken) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = '_csrf';
+            input.value = csrfToken.getAttribute('content');
+            form.appendChild(input);
           }
+
+          document.body.appendChild(form);
+          form.submit();
         }
       });
     });

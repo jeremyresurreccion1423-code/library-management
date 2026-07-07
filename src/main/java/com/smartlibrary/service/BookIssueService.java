@@ -214,4 +214,45 @@ public class BookIssueService {
         bookIssueRepository.delete(issue);
         logger.info("History record deleted for issue {}", issueId);
     }
+
+    @Transactional
+    public int returnBooksForStudent(List<Long> issueIds, Long studentProfileId) {
+        if (issueIds == null || issueIds.isEmpty()) {
+            return 0;
+        }
+        int count = 0;
+        for (Long issueId : issueIds) {
+            if (issueId == null) {
+                continue;
+            }
+            BookIssue issue = bookIssueRepository.findById(issueId).orElse(null);
+            if (issue == null || !issue.getStudent().getId().equals(studentProfileId)) {
+                continue;
+            }
+            if (issue.getStatus() == IssueStatus.RETURNED) {
+                continue;
+            }
+            returnBook(issueId);
+            count++;
+        }
+        return count;
+    }
+
+    @Transactional
+    public int deleteReturnedHistoryForStudent(List<Long> issueIds, Long studentProfileId) {
+        if (issueIds == null || issueIds.isEmpty()) {
+            return 0;
+        }
+        List<Long> uniqueIds = issueIds.stream().filter(Objects::nonNull).distinct().toList();
+        int count = 0;
+        for (Long issueId : uniqueIds) {
+            try {
+                deleteReturnedHistoryForStudent(issueId, studentProfileId);
+                count++;
+            } catch (RuntimeException ex) {
+                logger.warn("Skipped history delete for issue {}: {}", issueId, ex.getMessage());
+            }
+        }
+        return count;
+    }
 }
