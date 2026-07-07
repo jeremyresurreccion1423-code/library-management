@@ -14,6 +14,7 @@ public class LibraryProperties {
     private int reminderDaysBeforeDue = 2;
     private int otpExpiryMinutes = 5;
     private boolean seedEnabled = true;
+    private boolean startupMaintenanceEnabled = false;
 
     public int getLoanDays() {
         return loanDays;
@@ -69,5 +70,13 @@ public class LibraryProperties {
 
     public void setSeedEnabled(boolean seedEnabled) {
         this.seedEnabled = seedEnabled;
+    }
+
+    public boolean isStartupMaintenanceEnabled() {
+        return startupMaintenanceEnabled;
+    }
+
+    public void setStartupMaintenanceEnabled(boolean startupMaintenanceEnabled) {
+        this.startupMaintenanceEnabled = startupMaintenanceEnabled;
     }
 }

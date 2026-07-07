@@ -76,8 +76,10 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         fixSchema();
-        fixNullVersions();
-        fixInvalidEmails();
+        if (libraryProperties.isStartupMaintenanceEnabled()) {
+            fixNullVersions();
+            fixInvalidEmails();
+        }
 
         if (!libraryProperties.isSeedEnabled()) {
             log.info("Seed data initialization is disabled (library.seed-enabled=false).");
