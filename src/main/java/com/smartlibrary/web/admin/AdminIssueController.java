@@ -9,9 +9,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 @Controller
 @RequestMapping("/admin/issues")
 public class AdminIssueController {
+
+    private static final DateTimeFormatter DUE_DATE = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
 
     private final BookIssueService bookIssueService;
     private final BookService bookService;
@@ -39,7 +44,7 @@ public class AdminIssueController {
     public String issue(@RequestParam Long bookId, @RequestParam String studentId, RedirectAttributes ra) {
         try {
             var issue = bookIssueService.issueToStudent(bookId, studentId);
-            ra.addFlashAttribute("success", "Issued. Due: " + issue.getDueAt());
+            ra.addFlashAttribute("success", "Book issued. Return by " + issue.getDueAt().format(DUE_DATE) + ".");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }

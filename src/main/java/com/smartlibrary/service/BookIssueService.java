@@ -61,17 +61,28 @@ public class BookIssueService {
 
     @Transactional
     public BookIssue issueToStudent(Long bookId, String studentIdOrUsername) {
-        Book book = bookRepository.findById(Objects.requireNonNull(bookId))
-                .orElseThrow(() -> new IllegalArgumentException("Book not found"));
-        
-        if (book.getAvailableCopies() <= 0) {
-            throw new IllegalStateException("No copies available");
-        }
-        
         StudentProfile student = studentProfileRepository
                 .findByStudentId(studentIdOrUsername.trim())
                 .or(() -> studentProfileRepository.findByUserUsername(studentIdOrUsername.trim()))
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+        return issueToStudent(bookId, student);
+    }
+
+    @Transactional
+    public BookIssue issueToStudent(Long bookId, StudentProfile student) {
+        Objects.requireNonNull(student.getId(), "Student profile id is required");
+        StudentProfile managedStudent = studentProfileRepository.findById(student.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Student not found"));
+        return createIssue(bookId, managedStudent);
+    }
+
+    private BookIssue createIssue(Long bookId, StudentProfile student) {
+        Book book = bookRepository.findById(Objects.requireNonNull(bookId))
+                .orElseThrow(() -> new IllegalArgumentException("Book not found"));
+
+        if (book.getAvailableCopies() <= 0) {
+            throw new IllegalStateException("No copies available");
+        }
 
         List<BookIssue> activeIssues = bookIssueRepository.findActiveIssuesByStudentAndBook(
                 student.getId(), bookId, List.of(IssueStatus.BORROWED, IssueStatus.OVERDUE));

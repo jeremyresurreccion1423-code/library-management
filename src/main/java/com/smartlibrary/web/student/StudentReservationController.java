@@ -12,9 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 @Controller
 @RequestMapping("/student")
 public class StudentReservationController {
+
+    private static final DateTimeFormatter DUE_DATE = DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH);
 
     private final SharedLibraryStudentProfileBridgeService sharedLibraryStudentProfileBridgeService;
     private final ReservationService reservationService;
@@ -37,8 +42,9 @@ public class StudentReservationController {
         try {
             var profile = sharedLibraryStudentProfileBridgeService.ensureLibraryStudentProfile(user.getUser())
                     .orElseThrow(() -> new IllegalStateException("Student profile not found for this account. Please login as a student user."));
-            var issue = bookIssueService.issueToStudent(bookId, profile.getStudentId());
-            ra.addFlashAttribute("success", "Book borrowed successfully! Due: " + issue.getDueAt());
+            var issue = bookIssueService.issueToStudent(bookId, profile);
+            String dueDate = issue.getDueAt().format(DUE_DATE);
+            ra.addFlashAttribute("success", "Book borrowed successfully! Return by " + dueDate + ".");
         } catch (Exception e) {
             String message = (e.getMessage() == null || e.getMessage().isBlank())
                     ? "Borrow failed. Please try again or contact admin."

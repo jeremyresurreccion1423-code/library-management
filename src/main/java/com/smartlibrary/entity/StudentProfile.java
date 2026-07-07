@@ -10,6 +10,7 @@ import lombok.ToString;
 @Entity
 @Table(
         name = "student_profiles",
+        schema = "library",
         indexes = {
                 @Index(name = "idx_student_profiles_student_id", columnList = "student_id"),
                 @Index(name = "idx_student_profiles_last_name", columnList = "last_name")

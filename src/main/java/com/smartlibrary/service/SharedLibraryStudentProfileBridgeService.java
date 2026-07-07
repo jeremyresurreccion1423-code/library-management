@@ -7,6 +7,7 @@ import com.smartlibrary.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -130,6 +131,11 @@ public class SharedLibraryStudentProfileBridgeService {
             return loadProfileById(profileId.get());
         }
 
+        Optional<StudentProfile> byAttendanceStudentNumber = findProfileByAttendanceStudentNumber(user);
+        if (byAttendanceStudentNumber.isPresent()) {
+            return byAttendanceStudentNumber;
+        }
+
         if (!username.isBlank()) {
             profileId = findProfileId(
                     "library.student_profiles by joined username",
@@ -221,6 +227,44 @@ public class SharedLibraryStudentProfileBridgeService {
                 user.getId(), username, email);
         log.info("[TEMP] findProfileRecord: returning Optional.empty() — branch=no query matched");
         return Optional.empty();
+    }
+
+    private Optional<StudentProfile> findProfileByAttendanceStudentNumber(User user) {
+        try {
+            List<String> studentNumbers = jdbcTemplate.queryForList(
+                    "SELECT student_number FROM public.students WHERE user_id = ? LIMIT 1",
+                    String.class,
+                    user.getId());
+            if (studentNumbers.isEmpty()) {
+                return Optional.empty();
+            }
+            String studentNumber = stringValue(studentNumbers.get(0));
+            if (studentNumber.isBlank()) {
+                return Optional.empty();
+            }
+            return resolveExistingProfileByStudentId(studentNumber, user);
+        } catch (DataAccessException ex) {
+            log.error(
+                    "findProfileByAttendanceStudentNumber: lookup failed for userId={} username={}: {}",
+                    user.getId(), user.getUsername(), ex.getMessage(), ex);
+            return Optional.empty();
+        }
+    }
+
+    private Optional<StudentProfile> resolveExistingProfileByStudentId(String studentId, User user) {
+        Optional<StudentProfile> profile = loadProfileByStudentId(studentId);
+        if (profile.isEmpty()) {
+            profile = findProfileId(
+                    "library.student_profiles by student_id exact",
+                    "SELECT id FROM library.student_profiles WHERE student_id = ? LIMIT 1",
+                    stringValue(studentId))
+                    .flatMap(this::loadProfileById);
+        }
+        if (profile.isEmpty()) {
+            return Optional.empty();
+        }
+        repairUserLinkIfNeeded(profile.get(), user);
+        return loadProfileById(profile.get().getId());
     }
 
     private Optional<Long> findProfileId(String queryLabel, String sql, Object... args) {
@@ -415,13 +459,12 @@ public class SharedLibraryStudentProfileBridgeService {
                     studentId, user.getId(), user.getUsername());
         }
 
-        Optional<StudentProfile> existingByStudentId = loadProfileByStudentId(studentId);
+        Optional<StudentProfile> existingByStudentId = resolveExistingProfileByStudentId(studentId, user);
         if (existingByStudentId.isPresent()) {
             log.info(
                     "provisionFromAttendanceStudent: reusing existing library.student_profiles id={} studentId={} for username={}",
                     existingByStudentId.get().getId(), studentId, user.getUsername());
-            repairUserLinkIfNeeded(existingByStudentId.get(), user);
-            return loadProfileById(existingByStudentId.get().getId());
+            return existingByStudentId;
         }
 
         log.info(
@@ -515,6 +558,24 @@ public class SharedLibraryStudentProfileBridgeService {
                         loaded.get().getId());
             }
             return loaded;
+        } catch (DuplicateKeyException ex) {
+            log.warn(
+                    "saveNewProfile: duplicate student_id={} for username={} — loading existing profile instead of failing",
+                    studentId, user.getUsername());
+            Optional<StudentProfile> existing = resolveExistingProfileByStudentId(studentId, user);
+            if (existing.isPresent()) {
+                log.info(
+                        "saveNewProfile: recovered existing library.student_profiles id={} studentId={} for username={}",
+                        existing.get().getId(), studentId, user.getUsername());
+                log.info("[TEMP] saveNewProfile: returning Optional.of(profile) profileId={} — branch=duplicate student_id recovery",
+                        existing.get().getId());
+                return existing;
+            }
+            log.error(
+                    "saveNewProfile: duplicate student_id={} but could not load existing row for username={}",
+                    studentId, user.getUsername(), ex);
+            log.info("[TEMP] saveNewProfile: returning Optional.empty() — branch=duplicate student_id but reload failed");
+            return Optional.empty();
         } catch (DataAccessException ex) {
             log.error(
                     "saveNewProfile: INSERT into library.student_profiles failed for userId={} username={} email={} studentId={}: {}",
