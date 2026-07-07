@@ -98,8 +98,8 @@ public class  BookService {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("Title cannot be blank");
         }
-        if (totalCopies < 1) {
-            throw new IllegalArgumentException("Total copies must be at least 1");
+        if (totalCopies < 0) {
+            throw new IllegalArgumentException("Total copies cannot be negative");
         }
         if (finePerDay != null && finePerDay.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Fine per day cannot be negative");
@@ -117,6 +117,10 @@ public class  BookService {
             book.setAvailableCopies(totalCopies);
         } else {
             int borrowed = book.getTotalCopies() - book.getAvailableCopies();
+            if (totalCopies < borrowed) {
+                throw new IllegalStateException(
+                        "Total copies cannot be less than currently borrowed (" + borrowed + ")");
+            }
             book.setTotalCopies(totalCopies);
             book.setAvailableCopies(Math.max(0, totalCopies - borrowed));
         }

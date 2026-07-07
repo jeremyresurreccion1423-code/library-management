@@ -641,6 +641,7 @@ public class DataInitializer implements CommandLineRunner {
     private void fixSchema() {
         try {
             repairStudentProfileUserForeignKey();
+            relaxBooksTotalCopiesConstraint();
             jdbcTemplate.execute("ALTER TABLE library.ebooks DROP COLUMN IF EXISTS uploaded_at");
             relaxTimestampColumn("admin_revenue", "created_at");
             relaxTimestampColumn("admin_revenue", "updated_at");
@@ -659,6 +660,34 @@ public class DataInitializer implements CommandLineRunner {
     private void relaxTimestampColumn(String table, String column) {
         jdbcTemplate.execute(
                 "ALTER TABLE " + LIBRARY_SCHEMA + "." + table + " ALTER COLUMN " + column + " TYPE TIMESTAMP(6)");
+    }
+
+    /** Allow total_copies = 0 so books can be listed for reservation queue only. */
+    private void relaxBooksTotalCopiesConstraint() {
+        try {
+            List<String> constraintNames = jdbcTemplate.queryForList("""
+                    SELECT c.conname
+                    FROM pg_constraint c
+                    JOIN pg_class t ON c.conrelid = t.oid
+                    JOIN pg_namespace n ON t.relnamespace = n.oid
+                    WHERE n.nspname = 'library'
+                      AND t.relname = 'books'
+                      AND c.contype = 'c'
+                      AND pg_get_constraintdef(c.oid) ILIKE '%total_copies%'
+                    """, String.class);
+            for (String name : constraintNames) {
+                jdbcTemplate.execute("ALTER TABLE library.books DROP CONSTRAINT IF EXISTS \"" + name + "\"");
+            }
+            jdbcTemplate.execute(
+                    "ALTER TABLE library.books ADD CONSTRAINT books_total_copies_check CHECK (total_copies >= 0)");
+            log.info("Relaxed library.books total_copies check to allow 0 (reservation-only catalog entries).");
+        } catch (Exception e) {
+            if (e.getMessage() != null && e.getMessage().contains("already exists")) {
+                log.debug("library.books total_copies check already allows 0.");
+                return;
+            }
+            log.warn("Could not relax library.books total_copies constraint: {}", e.getMessage());
+        }
     }
 
     private void repairStudentProfileUserForeignKey() {

@@ -19,7 +19,7 @@ public class BookForm {
     private String barcode;
 
     @NotNull(message = "Total copies are required")
-    @Min(value = 1, message = "Total copies must be at least 1")
+    @Min(value = 0, message = "Total copies cannot be negative")
     private Integer totalCopies;
 
     private Long categoryId;

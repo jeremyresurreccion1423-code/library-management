@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS library.books (
     barcode          VARCHAR(256),
     qr_payload       VARCHAR(1024),
     available_copies INTEGER      NOT NULL CHECK (available_copies >= 0),
-    total_copies     INTEGER      NOT NULL CHECK (total_copies >= 1),
+    total_copies     INTEGER      NOT NULL CHECK (total_copies >= 0),
     fine_per_day     NUMERIC(10, 2),
     author_id        BIGINT,
     category_id      BIGINT,

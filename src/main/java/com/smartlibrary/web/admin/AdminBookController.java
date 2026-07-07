@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.stream.Collectors;
+
 @Controller
 @RequestMapping("/admin/books")
 public class AdminBookController {
@@ -54,6 +56,7 @@ public class AdminBookController {
 
     @GetMapping("/new")
     public String formNew(Model model) {
+        model.addAttribute("book", new BookForm());
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("authors", authorRepository.findAll());
         model.addAttribute("defaultFinePerDay", libraryProperties.getFinePerDay());
@@ -62,48 +65,76 @@ public class AdminBookController {
 
     @GetMapping("/{id}/edit")
     public String formEdit(@PathVariable("id") Long id, Model model) {
-        model.addAttribute("book", bookService.findById(id).orElseThrow());
-        model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("authors", authorRepository.findAll());
-        model.addAttribute("defaultFinePerDay", libraryProperties.getFinePerDay());
+        Book book = bookService.findById(id).orElseThrow();
+        populateBookFormModel(model, toBookForm(book));
         return "admin/book-form";
     }
 
     @PostMapping("/save")
     public String save(
-            @Valid @ModelAttribute BookForm bookForm,
+            @Valid @ModelAttribute("book") BookForm bookForm,
             BindingResult bindingResult,
             @RequestParam(required = false) MultipartFile ebookFile,
             Model model,
             RedirectAttributes ra) {
         if (bindingResult.hasErrors()) {
-            model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("authors", authorRepository.findAll());
-            model.addAttribute("book", bookForm);
-            model.addAttribute("defaultFinePerDay", libraryProperties.getFinePerDay());
+            populateBookFormModel(model, bookForm);
+            model.addAttribute("error", bindingResult.getFieldErrors().stream()
+                    .map(error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : error.getField() + " is invalid")
+                    .collect(Collectors.joining(" ")));
             return "admin/book-form";
         }
-        Book savedBook = bookService.saveBook(
-                bookForm.getId(),
-                bookForm.getIsbn(),
-                bookForm.getTitle(),
-                bookForm.getBarcode(),
-                bookForm.getTotalCopies(),
-                bookForm.getCategoryId(),
-                bookForm.getAuthorId(),
-                bookForm.getFinePerDay());
-        Long savedId = savedBook.getId();
-        if (ebookFile != null && !ebookFile.isEmpty()) {
-            try {
-                bookService.attachEbook(savedId, ebookFile);
-                ra.addFlashAttribute("success", "Book saved. E-book uploaded.");
-            } catch (Exception e) {
-                ra.addFlashAttribute("warning", "Book saved but e-book upload failed: " + e.getMessage());
+        try {
+            Book savedBook = bookService.saveBook(
+                    bookForm.getId(),
+                    bookForm.getIsbn(),
+                    bookForm.getTitle(),
+                    bookForm.getBarcode(),
+                    bookForm.getTotalCopies(),
+                    bookForm.getCategoryId(),
+                    bookForm.getAuthorId(),
+                    bookForm.getFinePerDay());
+            Long savedId = savedBook.getId();
+            if (ebookFile != null && !ebookFile.isEmpty()) {
+                try {
+                    bookService.attachEbook(savedId, ebookFile);
+                    ra.addFlashAttribute("success", "Book saved. E-book uploaded.");
+                } catch (Exception e) {
+                    ra.addFlashAttribute("warning", "Book saved but e-book upload failed: " + e.getMessage());
+                }
+            } else {
+                ra.addFlashAttribute("success", "Book saved");
             }
-        } else {
-            ra.addFlashAttribute("success", "Book saved");
+            return "redirect:/admin/books";
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            populateBookFormModel(model, bookForm);
+            model.addAttribute("error", e.getMessage());
+            return "admin/book-form";
         }
-        return "redirect:/admin/books";
+    }
+
+    private void populateBookFormModel(Model model, BookForm bookForm) {
+        model.addAttribute("book", bookForm);
+        model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("authors", authorRepository.findAll());
+        model.addAttribute("defaultFinePerDay", libraryProperties.getFinePerDay());
+    }
+
+    private BookForm toBookForm(Book book) {
+        BookForm form = new BookForm();
+        form.setId(book.getId());
+        form.setIsbn(book.getIsbn());
+        form.setTitle(book.getTitle());
+        form.setBarcode(book.getBarcode());
+        form.setTotalCopies(book.getTotalCopies());
+        form.setFinePerDay(book.getFinePerDay());
+        if (book.getCategory() != null) {
+            form.setCategoryId(book.getCategory().getId());
+        }
+        if (book.getAuthor() != null) {
+            form.setAuthorId(book.getAuthor().getId());
+        }
+        return form;
     }
 
     @PostMapping("/{id}/delete")

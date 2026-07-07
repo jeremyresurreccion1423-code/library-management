@@ -40,7 +40,7 @@ public class Book extends BaseEntity {
     @Column(nullable = false)
     private int availableCopies;
 
-    @Min(value = 1, message = "Total copies must be at least 1")
+    @Min(value = 0, message = "Total copies cannot be negative")
     @Column(nullable = false)
     private int totalCopies;
 

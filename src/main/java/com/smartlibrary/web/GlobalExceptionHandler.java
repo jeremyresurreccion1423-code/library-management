@@ -20,14 +20,14 @@ public class GlobalExceptionHandler {
     public String handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request, RedirectAttributes ra) {
         logger.warn("Validation error at {}: {}", request.getRequestURI(), ex.getMessage());
         ra.addFlashAttribute("error", ex.getMessage());
-        return "redirect:" + request.getRequestURI();
+        return safeRedirect(request);
     }
 
     @ExceptionHandler(IllegalStateException.class)
     public String handleIllegalState(IllegalStateException ex, HttpServletRequest request, RedirectAttributes ra) {
         logger.warn("Business rule violation at {}: {}", request.getRequestURI(), ex.getMessage());
         ra.addFlashAttribute("error", ex.getMessage());
-        return "redirect:" + request.getRequestURI();
+        return safeRedirect(request);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
@@ -58,5 +58,19 @@ public class GlobalExceptionHandler {
         model.addAttribute("error", "An unexpected error occurred. Please try again or contact support.");
         model.addAttribute("path", request.getRequestURI());
         return "error";
+    }
+
+    private String safeRedirect(HttpServletRequest request) {
+        if ("POST".equalsIgnoreCase(request.getMethod())) {
+            String uri = request.getRequestURI();
+            if (uri.startsWith("/admin/books/save")) {
+                return "redirect:/admin/books/new";
+            }
+            if (uri.startsWith("/admin/")) {
+                return "redirect:/admin/books";
+            }
+            return "redirect:/";
+        }
+        return "redirect:" + request.getRequestURI();
     }
 }
