@@ -105,57 +105,15 @@ public class DataInitializer implements CommandLineRunner {
             log.info("Additional admin created: username=admin2 password=admin1234 (change after first login)");
         }
 
-        if (studentProfileRepository.count() == 0) {
-            User student1 = new User();
-            student1.setUsername("student1");
-            student1.setPassword(passwordEncoder.encode("student123"));
-            student1.setEmail("edulibrary67+student1@gmail.com");
-            student1.setRole(UserRole.STUDENT);
-            student1.setEnabled(true);
-            userRepository.save(student1);
-
-            StudentProfile profile1 = new StudentProfile();
-            profile1.setUser(student1);
-            profile1.setStudentId("2024001");
-            profile1.setFullName("Juan Dela Cruz");
-            profile1.setPhone("09123456789");
-            profile1.setCourse("Computer Science");
-            studentProfileRepository.save(profile1);
-
-            User student2 = new User();
-            student2.setUsername("student2");
-            student2.setPassword(passwordEncoder.encode("student123"));
-            student2.setEmail("edulibrary67+student2@gmail.com");
-            student2.setRole(UserRole.STUDENT);
-            student2.setEnabled(true);
-            userRepository.save(student2);
-
-            StudentProfile profile2 = new StudentProfile();
-            profile2.setUser(student2);
-            profile2.setStudentId("2024002");
-            profile2.setFullName("Maria Santos");
-            profile2.setPhone("09198765432");
-            profile2.setCourse("Information Technology");
-            studentProfileRepository.save(profile2);
-
-            User student3 = new User();
-            student3.setUsername("student3");
-            student3.setPassword(passwordEncoder.encode("student123"));
-            student3.setEmail("edulibrary67+student3@gmail.com");
-            student3.setRole(UserRole.STUDENT);
-            student3.setEnabled(true);
-            userRepository.save(student3);
-
-            StudentProfile profile3 = new StudentProfile();
-            profile3.setUser(student3);
-            profile3.setStudentId("2024003");
-            profile3.setFullName("Pedro Reyes");
-            profile3.setPhone("09234567890");
-            profile3.setCourse("Engineering");
-            studentProfileRepository.save(profile3);
-
-            log.info("Sample students created: student1/student123, student2/student123, student3/student123");
-        }
+        ensureSampleStudent(
+                "student1", "student123", "edulibrary67+student1@gmail.com",
+                "2024001", "Juan Dela Cruz", "09123456789", "Computer Science");
+        ensureSampleStudent(
+                "student2", "student123", "edulibrary67+student2@gmail.com",
+                "2024002", "Maria Santos", "09198765432", "Information Technology");
+        ensureSampleStudent(
+                "student3", "student123", "edulibrary67+student3@gmail.com",
+                "2024003", "Pedro Reyes", "09234567890", "Engineering");
 
         ensureSampleCatalog();
 
@@ -164,6 +122,37 @@ public class DataInitializer implements CommandLineRunner {
         ensureQrPayloadsForExistingBooks();
 
         ensureSampleEbooks();
+    }
+
+    private void ensureSampleStudent(
+            String username,
+            String rawPassword,
+            String email,
+            String studentId,
+            String fullName,
+            String phone,
+            String course) {
+        if (userRepository.findByUsername(username).isPresent()) {
+            log.debug("Sample student '{}' already exists; skipping seed insert.", username);
+            return;
+        }
+        User student = new User();
+        student.setUsername(username);
+        student.setPassword(passwordEncoder.encode(rawPassword));
+        student.setEmail(email);
+        student.setRole(UserRole.STUDENT);
+        student.setEnabled(true);
+        userRepository.save(student);
+
+        StudentProfile profile = new StudentProfile();
+        profile.setUser(student);
+        profile.setStudentId(studentId);
+        profile.setFullName(fullName);
+        profile.setPhone(phone);
+        profile.setCourse(course);
+        studentProfileRepository.save(profile);
+
+        log.info("Sample student created: username={} password={}", username, rawPassword);
     }
 
     private void ensureSampleCatalog() {

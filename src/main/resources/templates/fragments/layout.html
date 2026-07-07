@@ -97,70 +97,7 @@
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Global function to clean up orphaned modal backdrops
-    function cleanupModalBackdrops() {
-      const backdrops = document.querySelectorAll('.modal-backdrop');
-      backdrops.forEach(backdrop => backdrop.remove());
-      document.body.classList.remove('modal-open');
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
-    }
-
-    // Confirmation Modal Function
-    function confirmAction(message, onConfirm) {
-      const modalElement = document.getElementById('confirmModal');
-      if (!modalElement || typeof bootstrap === 'undefined' || !bootstrap.Modal) {
-        if (confirm(message) && typeof onConfirm === 'function') {
-          onConfirm();
-        }
-        return;
-      }
-      const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-      const messageElement = document.getElementById('confirmModalMessage');
-      const confirmButton = document.getElementById('confirmModalButton');
-      
-      messageElement.textContent = message;
-
-      // Reset any previous click handler to avoid duplicate submits
-      confirmButton.onclick = null;
-      confirmButton.onclick = function() {
-        modal.hide();
-        // Slight delay gives Bootstrap time to remove backdrop cleanly
-        setTimeout(function() {
-          cleanupModalBackdrops();
-          if (typeof onConfirm === 'function') {
-            onConfirm();
-          }
-        }, 50);
-      };
-
-      cleanupModalBackdrops();
-      modal.show();
-    }
-
-    // Logout confirmation
-    document.addEventListener('DOMContentLoaded', function() {
-      const logoutBtn = document.getElementById('logoutBtn');
-      const logoutForm = document.getElementById('logoutForm');
-      
-      if (logoutBtn && logoutForm) {
-        logoutBtn.addEventListener('click', function() {
-          if (confirm('Are you sure you want to logout?')) {
-            logoutForm.submit();
-          }
-        });
-      }
-      
-      // Clean up any orphaned backdrops on page load
-      cleanupModalBackdrops();
-
-      // Also clean up on every modal lifecycle end to prevent blocked UI
-      document.querySelectorAll('.modal').forEach(function(modalElement) {
-        modalElement.addEventListener('hidden.bs.modal', cleanupModalBackdrops);
-      });
-    });
-  </script>
+  <script th:src="@{/js/forms.js}"></script>
 </th:block>
 </body>
 </html>

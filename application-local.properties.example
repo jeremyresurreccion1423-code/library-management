@@ -7,6 +7,10 @@ spring.datasource.url=${SUPABASE_DB_URL:jdbc:postgresql://aws-1-ap-southeast-1.p
 spring.datasource.username=${SUPABASE_DB_USER:postgres.YOUR_PROJECT_REF}
 spring.datasource.password=${SUPABASE_DB_PASSWORD:your-database-password}
 
+# PgBouncer / Session Pooler compatibility (also set in application.properties)
+spring.datasource.hikari.data-source-properties.prepareThreshold=0
+spring.jpa.properties.hibernate.jdbc.use_server_prep_stmts=false
+
 # Library schema (isolates tables from Attendance public schema)
 spring.jpa.properties.hibernate.default_schema=library
 spring.jpa.properties.hibernate.create_namespaces=true

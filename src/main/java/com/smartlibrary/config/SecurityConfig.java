@@ -50,7 +50,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/admin/login")
                         .failureHandler((request, response, exception) -> {
                             HttpSession session = request.getSession();
-                            session.setAttribute("AUTH_ERROR", "Invalid username or password");
+                            session.setAttribute("AUTH_ERROR", "Invalid username or password.");
                             response.sendRedirect("/admin/login");
                         })
                         .successHandler((request, response, authentication) -> {
@@ -58,7 +58,7 @@ public class SecurityConfig {
                             if (principal instanceof LibraryUserDetails details) {
                                 if (details.getUser().getRole() != UserRole.ADMIN) {
                                     new SecurityContextLogoutHandler().logout(request, response, authentication);
-                                    request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password");
+                                    request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password.");
                                     response.sendRedirect("/admin/login");
                                     return;
                                 }
@@ -73,7 +73,7 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
-                        .logoutSuccessUrl("/admin/login")
+                        .logoutSuccessUrl("/admin/login?logout=true")
                         .permitAll())
                 .headers(headers -> headers
                         .cacheControl(cache -> {})
@@ -110,7 +110,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .failureHandler((request, response, exception) -> {
                             HttpSession session = request.getSession();
-                            session.setAttribute("AUTH_ERROR", "Invalid username or password");
+                            session.setAttribute("AUTH_ERROR", "Invalid username or password.");
                             response.sendRedirect("/login");
                         })
                         .successHandler((request, response, authentication) -> {
@@ -118,7 +118,7 @@ public class SecurityConfig {
                             if (principal instanceof LibraryUserDetails details) {
                                 if (details.getUser().getRole() == UserRole.ADMIN) {
                                     new SecurityContextLogoutHandler().logout(request, response, authentication);
-                                    request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password");
+                                    request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password.");
                                     response.sendRedirect("/login");
                                     return;
                                 }
@@ -138,7 +138,7 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
-                        .logoutSuccessUrl("/login")
+                        .logoutSuccessUrl("/login?logout=true")
                         .permitAll())
                 .headers(headers -> headers
                         .cacheControl(cache -> {})

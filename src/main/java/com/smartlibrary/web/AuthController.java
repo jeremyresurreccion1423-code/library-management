@@ -38,14 +38,24 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String login(@AuthenticationPrincipal LibraryUserDetails user, HttpSession session, Model model) {
+    public String login(@AuthenticationPrincipal LibraryUserDetails user,
+                        HttpSession session,
+                        @RequestParam(required = false) String logout,
+                        @RequestParam(required = false) String error,
+                        Model model) {
         if (user != null) {
             return "redirect:/redirect-home";
+        }
+        if ("session".equals(error)) {
+            model.addAttribute("errorMessage", "Your session has expired. Please log in again.");
         }
         Object authError = session.getAttribute("AUTH_ERROR");
         if (authError instanceof String errorMessage && !errorMessage.isBlank()) {
             model.addAttribute("errorMessage", errorMessage);
             session.removeAttribute("AUTH_ERROR");
+        }
+        if (logout != null) {
+            model.addAttribute("success", "You have been logged out successfully.");
         }
         return "login";
     }

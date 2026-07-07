@@ -141,7 +141,7 @@
         };
 
         if (typeof confirmAction === 'function') {
-          confirmAction(message, submitDelete);
+          confirmAction(message, { type: 'danger', title: 'Confirm Delete', okText: 'Yes, Delete' }, submitDelete);
         } else if (confirm(message)) {
           submitDelete();
         }

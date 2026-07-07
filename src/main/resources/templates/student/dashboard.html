@@ -32,12 +32,14 @@
           <button th:if="${i.status.toString() != 'RETURNED'}" 
                   th:attr="data-issue-id=${i.id}"
                   class="btn btn-sm btn-outline-success return-btn">Return</button>
-          <form th:if="${i.status.toString() == 'RETURNED'}" th:action="@{/student/issues/{id}/delete-history(id=${i.id})}" method="post" style="display: inline;">
-            <button type="submit" class="btn btn-sm btn-outline-danger delete-history-btn" onclick="return confirm('Delete this history record?')">Delete</button>
+          <form th:if="${i.status.toString() == 'RETURNED'}" th:action="@{/student/issues/{id}/delete-history(id=${i.id})}" method="post"
+                class="confirm-delete d-inline"
+                data-confirm-message="Delete this borrow history record? This cannot be undone.">
+            <button type="submit" class="btn btn-sm btn-outline-danger delete-history-btn">Delete</button>
           </form>
         </td>
       </tr>
-      <tr th:if="${#lists.isEmpty(issues)}"><td colspan="7" class="text-center text-muted-lib py-3">Walang record</td></tr>
+      <tr th:if="${#lists.isEmpty(issues)}"><td colspan="7" class="text-center text-muted-lib py-3">No borrowed books yet.</td></tr>
       </tbody>
     </table>
   </div>
@@ -72,8 +74,8 @@
                   th:attr="data-reservation-id=${r.id}"
                   class="btn btn-sm btn-outline-danger cancel-reservation-btn">Cancel</button>
           <form th:if="${r.status != WAITING}"
-                th:action="@{/student/reservations/{id}/delete(id=${r.id})}" method="post" class="d-inline"
-                onsubmit="return confirm('Delete this reservation record?')">
+                th:action="@{/student/reservations/{id}/delete(id=${r.id})}" method="post" class="d-inline confirm-delete"
+                data-confirm-message="Delete this reservation record? This cannot be undone.">
             <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
           </form>
         </td>
@@ -101,7 +103,7 @@
   </div>
   <div class="book-cards-empty" th:if="${#lists.isEmpty(digitalBooks)}">
     <i class="bi bi-file-earmark-pdf"></i>
-    <p>Walang naka-upload na e-book.</p>
+    <p>No e-books uploaded yet.</p>
   </div>
   </main>
 </div>
@@ -119,6 +121,7 @@
         if (typeof confirmAction === 'function') {
           confirmAction(
             `Are you sure you want to return "${bookTitle}"?`,
+            { type: 'warning', title: 'Return Book', okText: 'Yes, Return' },
             function() {
               const form = document.createElement('form');
               form.method = 'post';
@@ -170,6 +173,7 @@
         if (typeof confirmAction === 'function') {
           confirmAction(
             `Are you sure you want to cancel your reservation for "${bookTitle}"?`,
+            { type: 'danger', title: 'Cancel Reservation', okText: 'Yes, Cancel' },
             function() {
               const form = document.createElement('form');
               form.method = 'post';

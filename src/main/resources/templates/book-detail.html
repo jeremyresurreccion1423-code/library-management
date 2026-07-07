@@ -90,7 +90,7 @@
         const bookId = this.getAttribute('data-book-id');
         const bookTitle = document.querySelector('.dashboard-title').textContent;
         if (typeof confirmAction === 'function') {
-          confirmAction('Are you sure you want to borrow "' + bookTitle + '"?', function() { submitBorrowForm(bookId); });
+          confirmAction('Are you sure you want to borrow "' + bookTitle + '"?', { type: 'warning', title: 'Borrow Book', okText: 'Yes, Borrow' }, function() { submitBorrowForm(bookId); });
         } else if (confirm('Are you sure you want to borrow "' + bookTitle + '"?')) {
           submitBorrowForm(bookId);
         }
@@ -103,7 +103,7 @@
         const bookId = this.getAttribute('data-book-id');
         const bookTitle = document.querySelector('.dashboard-title').textContent;
         if (typeof confirmAction === 'function') {
-          confirmAction('Join the reservation queue for "' + bookTitle + '"?', function() { submitReservationForm(bookId); });
+          confirmAction('Join the reservation queue for "' + bookTitle + '"?', { type: 'warning', title: 'Join Queue', okText: 'Join Queue' }, function() { submitReservationForm(bookId); });
         } else if (confirm('Join the reservation queue for "' + bookTitle + '"?')) {
           submitReservationForm(bookId);
         }

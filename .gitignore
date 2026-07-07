@@ -1,7 +1,42 @@
+# Build output
 target/
+
+# IDE
 .idea/
 .vscode/
 *.iml
+.classpath
+.project
+.settings/
 
+# Compiled artifacts
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets — never commit
 .env
 application-local.properties
+src/main/resources/application-local.properties
+
+# Local uploads (if added later)
+uploads/*
+!uploads/.gitkeep
+
+# Debug / scratch files
+cookies*.txt
+t_cookies*.txt
+tmp_*
+*_result.html
+*_check.html
+*_live*.html
+*_headers.txt
+phase4_integration_report.json
