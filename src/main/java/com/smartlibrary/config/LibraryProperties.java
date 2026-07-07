@@ -15,6 +15,7 @@ public class LibraryProperties {
     private int otpExpiryMinutes = 5;
     private boolean seedEnabled = true;
     private boolean startupMaintenanceEnabled = false;
+    private String attendanceAppUrl = "http://localhost:8081";
 
     public int getLoanDays() {
         return loanDays;
@@ -78,5 +79,28 @@ public class LibraryProperties {
 
     public void setStartupMaintenanceEnabled(boolean startupMaintenanceEnabled) {
         this.startupMaintenanceEnabled = startupMaintenanceEnabled;
+    }
+
+    public String getAttendanceAppUrl() {
+        return attendanceAppUrl;
+    }
+
+    public void setAttendanceAppUrl(String attendanceAppUrl) {
+        this.attendanceAppUrl = attendanceAppUrl;
+    }
+
+    /** Full URL to the Attendance login page (for teacher redirect messages). */
+    public String getAttendanceLoginUrl() {
+        if (attendanceAppUrl == null || attendanceAppUrl.isBlank()) {
+            return "/login";
+        }
+        String base = attendanceAppUrl.trim();
+        while (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        if (base.endsWith("/login")) {
+            return base;
+        }
+        return base + "/login";
     }
 }

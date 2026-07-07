@@ -1,5 +1,6 @@
 package com.smartlibrary.web;
 
+import com.smartlibrary.config.LibraryProperties;
 import com.smartlibrary.security.LibraryUserDetails;
 import jakarta.servlet.http.HttpSession;
 import com.smartlibrary.service.UserAccountService;
@@ -26,6 +27,7 @@ public class AuthController {
     private static final String EMAIL_REGEX = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
 
     private final UserAccountService userAccountService;
+    private final LibraryProperties libraryProperties;
 
     @Value("${spring.mail.host:}")
     private String mailHost;
@@ -33,8 +35,9 @@ public class AuthController {
     @Value("${spring.mail.password:}")
     private String mailPassword;
 
-    public AuthController(UserAccountService userAccountService) {
+    public AuthController(UserAccountService userAccountService, LibraryProperties libraryProperties) {
         this.userAccountService = userAccountService;
+        this.libraryProperties = libraryProperties;
     }
 
     @GetMapping("/login")
@@ -57,6 +60,7 @@ public class AuthController {
         if (logout != null) {
             model.addAttribute("success", "You have been logged out successfully.");
         }
+        model.addAttribute("attendanceLoginUrl", libraryProperties.getAttendanceLoginUrl());
         return "login";
     }
 

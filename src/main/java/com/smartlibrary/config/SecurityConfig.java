@@ -1,5 +1,6 @@
 package com.smartlibrary.config;
 
+import com.smartlibrary.config.LibraryProperties;
 import com.smartlibrary.model.UserRole;
 import com.smartlibrary.security.LibraryUserDetails;
 import jakarta.servlet.http.HttpSession;
@@ -21,6 +22,12 @@ import org.springframework.security.web.authentication.logout.SecurityContextLog
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    private final LibraryProperties libraryProperties;
+
+    public SecurityConfig(LibraryProperties libraryProperties) {
+        this.libraryProperties = libraryProperties;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -125,7 +132,8 @@ public class SecurityConfig {
                                 if (details.getUser().getRole() == UserRole.TEACHER) {
                                     new SecurityContextLogoutHandler().logout(request, response, authentication);
                                     request.getSession().setAttribute("AUTH_ERROR",
-                                            "Teacher accounts use the Attendance System login (port 8081).");
+                                            "Teacher accounts must sign in via the Attendance System: "
+                                                    + libraryProperties.getAttendanceLoginUrl());
                                     response.sendRedirect("/login");
                                     return;
                                 }
