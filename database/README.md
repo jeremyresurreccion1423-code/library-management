@@ -39,6 +39,8 @@ Use the **same Supabase connection string** as Attendance (Session Pooler URL + 
 
 Run `004_shared_auth_phase3.sql` in Supabase SQL Editor **or** start either app once (auto-migration runs on startup via `SharedAuthDataSourceMigrationProcessor`).
 
+If the app fails to start after enabling **RLS** in Supabase, run `005_fix_rls_and_archived_column.sql` in the SQL Editor.
+
 After migration:
 - All accounts live in `public.users`
 - `library.student_profiles.user_id` references `public.users(id)`
