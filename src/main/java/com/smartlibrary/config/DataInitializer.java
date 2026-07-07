@@ -132,17 +132,28 @@ public class DataInitializer implements CommandLineRunner {
             String fullName,
             String phone,
             String course) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            log.debug("Sample student '{}' already exists; skipping seed insert.", username);
+        if (studentProfileRepository.findByUserUsername(username).isPresent()
+                || studentProfileRepository.findByStudentId(studentId).isPresent()) {
+            log.debug("Sample student '{}' or id '{}' already has a library profile; skipping.", username, studentId);
             return;
         }
-        User student = new User();
-        student.setUsername(username);
-        student.setPassword(passwordEncoder.encode(rawPassword));
-        student.setEmail(email);
-        student.setRole(UserRole.STUDENT);
-        student.setEnabled(true);
-        userRepository.save(student);
+
+        User student = userRepository.findByUsername(username).orElseGet(() -> {
+            User newStudent = new User();
+            newStudent.setUsername(username);
+            newStudent.setPassword(passwordEncoder.encode(rawPassword));
+            newStudent.setEmail(email);
+            newStudent.setRole(UserRole.STUDENT);
+            newStudent.setEnabled(true);
+            User saved = userRepository.save(newStudent);
+            log.info("Sample student user created: username={} password={}", username, rawPassword);
+            return saved;
+        });
+
+        if (studentProfileRepository.findByUserId(student.getId()).isPresent()) {
+            log.debug("Library profile already linked to user '{}'; skipping.", username);
+            return;
+        }
 
         StudentProfile profile = new StudentProfile();
         profile.setUser(student);
@@ -152,7 +163,7 @@ public class DataInitializer implements CommandLineRunner {
         profile.setCourse(course);
         studentProfileRepository.save(profile);
 
-        log.info("Sample student created: username={} password={}", username, rawPassword);
+        log.info("Library profile ensured for sample student '{}'.", username);
     }
 
     private void ensureSampleCatalog() {
