@@ -3,6 +3,7 @@
       th:with="WAITING=${T(com.smartlibrary.model.ReservationStatus).WAITING}">
 <head th:replace="~{fragments/layout :: head('My Library')}"></head>
 <body class="dashboard-body">
+<link rel="stylesheet" th:href="@{/css/dashboard-bulk.css}">
 <div class="dashboard-wrapper">
   <div th:replace="~{fragments/student-sidebar :: sidebar}"></div>
   <main class="dashboard-main">
@@ -14,106 +15,141 @@
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-    <h2 class="h5 mb-0">Issued books</h2>
-    <div class="bulk-toolbar d-flex flex-wrap gap-2">
-      <button type="button" id="bulkReturnBtn" class="btn btn-sm btn-outline-success">Return Selected</button>
-      <button type="button" id="bulkDeleteHistoryBtn" class="btn btn-sm btn-outline-danger">Delete Selected History</button>
+  <section class="card-lib bulk-section mb-4">
+    <div class="bulk-section-head">
+      <h2 class="h5">Issued books</h2>
+      <p class="bulk-hint">May checkbox sa unang column — piliin ang books, tapos gamitin ang bulk actions sa baba.</p>
     </div>
-  </div>
-  <div class="table-responsive card-lib p-0 mb-4">
-    <table class="table table-dark-lib mb-0" id="issuedBooksTable">
-      <thead>
-        <tr>
-          <th style="width:42px;">
-            <input type="checkbox" id="issuesSelectAll" class="form-check-input" aria-label="Select all issued books">
-          </th>
-          <th>Book</th><th>Borrowed</th><th>Due</th><th>Fine/day</th><th>Returned</th><th>Status</th><th>Action</th>
+    <div class="bulk-action-bar" th:if="${!#lists.isEmpty(issues)}">
+      <span class="bulk-action-label"><i class="bi bi-check2-square me-1"></i>Bulk actions</span>
+      <button type="button" id="bulkReturnBtn" class="btn btn-sm btn-success">
+        <i class="bi bi-arrow-return-left me-1"></i>Return Selected
+      </button>
+      <button type="button" id="bulkDeleteHistoryBtn" class="btn btn-sm btn-danger">
+        <i class="bi bi-trash me-1"></i>Delete Selected History
+      </button>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-dark-lib mb-0" id="issuedBooksTable">
+        <thead>
+          <tr>
+            <th class="bulk-select-col">
+              <label class="bulk-select-label" for="issuesSelectAll">
+                <input type="checkbox" id="issuesSelectAll" class="bulk-select-check bulk-row-check-all" aria-label="Select all issued books">
+                <span>All</span>
+              </label>
+            </th>
+            <th>Book</th><th>Borrowed</th><th>Due</th><th>Fine/day</th><th>Returned</th><th>Status</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr th:each="i : ${issues}"
+            th:attr="data-returnable=${i.status.toString() != 'RETURNED'},data-deletable=${i.status.toString() == 'RETURNED'}">
+          <td class="bulk-select-col">
+            <label class="bulk-select-label" th:attr="for=${'issue-check-' + i.id}">
+              <input type="checkbox"
+                     th:id="${'issue-check-' + i.id}"
+                     class="bulk-select-check bulk-row-check"
+                     th:value="${i.id}"
+                     th:attr="aria-label=${'Select ' + i.book.title}">
+              <span>Select</span>
+            </label>
+          </td>
+          <td th:text="${i.book.title}"></td>
+          <td th:text="${i.issuedAt != null ? i.issuedAt.toString().substring(0, 16) : 'N/A'}"></td>
+          <td th:text="${i.dueAt != null ? i.dueAt.toString().substring(0, 16) : 'N/A'}"></td>
+          <td>
+            <span th:if="${i.book.finePerDay != null}" th:text="${'₱' + i.book.finePerDay}"></span>
+            <span th:if="${i.book.finePerDay == null}" class="text-muted-lib" th:text="${'₱' + defaultFinePerDay + ' (default)'}"></span>
+          </td>
+          <td th:text="${i.returnedAt != null ? i.returnedAt.toString().substring(0, 16) : '—'}"></td>
+          <td th:text="${i.status}"></td>
+          <td>
+            <button th:if="${i.status.toString() != 'RETURNED'}" 
+                    th:attr="data-issue-id=${i.id}"
+                    class="btn btn-sm btn-outline-success return-btn">Return</button>
+            <form th:if="${i.status.toString() == 'RETURNED'}" th:action="@{/student/issues/{id}/delete-history(id=${i.id})}" method="post"
+                  class="confirm-delete d-inline"
+                  data-confirm-message="Delete this borrow history record? This cannot be undone.">
+              <button type="submit" class="btn btn-sm btn-outline-danger delete-history-btn">Delete</button>
+            </form>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-      <tr th:each="i : ${issues}"
-          th:attr="data-returnable=${i.status.toString() != 'RETURNED'},data-deletable=${i.status.toString() == 'RETURNED'}">
-        <td>
-          <input type="checkbox" class="form-check-input bulk-row-check" th:value="${i.id}">
-        </td>
-        <td th:text="${i.book.title}"></td>
-        <td th:text="${i.issuedAt != null ? i.issuedAt.toString().substring(0, 16) : 'N/A'}"></td>
-        <td th:text="${i.dueAt != null ? i.dueAt.toString().substring(0, 16) : 'N/A'}"></td>
-        <td>
-          <span th:if="${i.book.finePerDay != null}" th:text="${'₱' + i.book.finePerDay}"></span>
-          <span th:if="${i.book.finePerDay == null}" class="text-muted-lib" th:text="${'₱' + defaultFinePerDay + ' (default)'}"></span>
-        </td>
-        <td th:text="${i.returnedAt != null ? i.returnedAt.toString().substring(0, 16) : '—'}"></td>
-        <td th:text="${i.status}"></td>
-        <td>
-          <button th:if="${i.status.toString() != 'RETURNED'}" 
-                  th:attr="data-issue-id=${i.id}"
-                  class="btn btn-sm btn-outline-success return-btn">Return</button>
-          <form th:if="${i.status.toString() == 'RETURNED'}" th:action="@{/student/issues/{id}/delete-history(id=${i.id})}" method="post"
-                class="confirm-delete d-inline"
-                data-confirm-message="Delete this borrow history record? This cannot be undone.">
-            <button type="submit" class="btn btn-sm btn-outline-danger delete-history-btn">Delete</button>
-          </form>
-        </td>
-      </tr>
-      <tr th:if="${#lists.isEmpty(issues)}"><td colspan="8" class="text-center text-muted-lib py-3">No borrowed books yet.</td></tr>
-      </tbody>
-    </table>
-  </div>
+        <tr th:if="${#lists.isEmpty(issues)}"><td colspan="8" class="text-center text-muted-lib py-3">No borrowed books yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
-  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
-    <h2 class="h5 mb-0">My Reservations</h2>
-    <div class="bulk-toolbar d-flex flex-wrap gap-2">
-      <button type="button" id="bulkDeleteReservationsBtn" class="btn btn-sm btn-outline-danger">Delete Selected</button>
+  <section class="card-lib bulk-section mb-4">
+    <div class="bulk-section-head">
+      <h2 class="h5">My Reservations</h2>
+      <p class="bulk-hint">Completed/cancelled reservations lang may checkbox. Waiting reservations — gamitin ang Cancel button.</p>
     </div>
-  </div>
-  <div class="table-responsive card-lib p-0 mb-4">
-    <table class="table table-hover align-middle mb-0" id="reservationsTable">
-      <thead class="table-light">
-        <tr>
-          <th style="width:42px;">
-            <input type="checkbox" id="reservationsSelectAll" class="form-check-input" aria-label="Select all reservation history">
-          </th>
-          <th>Book</th>
-          <th>Queue #</th>
-          <th>Status</th>
-          <th>Requested</th>
-          <th></th>
+    <div class="bulk-action-bar" th:if="${!#lists.isEmpty(reservations)}">
+      <span class="bulk-action-label"><i class="bi bi-check2-square me-1"></i>Bulk actions</span>
+      <button type="button" id="bulkDeleteReservationsBtn" class="btn btn-sm btn-danger">
+        <i class="bi bi-trash me-1"></i>Delete Selected
+      </button>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" id="reservationsTable">
+        <thead class="table-light">
+          <tr>
+            <th class="bulk-select-col">
+              <label class="bulk-select-label" for="reservationsSelectAll">
+                <input type="checkbox" id="reservationsSelectAll" class="bulk-select-check bulk-row-check-all" aria-label="Select all reservation history">
+                <span>All</span>
+              </label>
+            </th>
+            <th>Book</th>
+            <th>Queue #</th>
+            <th>Status</th>
+            <th>Requested</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${reservations}" th:attr="data-deletable=${r.status != WAITING}">
+          <td class="bulk-select-col">
+            <label th:if="${r.status != WAITING}" class="bulk-select-label" th:attr="for=${'res-check-' + r.id}">
+              <input type="checkbox"
+                     th:id="${'res-check-' + r.id}"
+                     class="bulk-select-check bulk-row-check"
+                     th:value="${r.id}"
+                     th:attr="aria-label=${'Select reservation for ' + r.book.title}">
+              <span>Select</span>
+            </label>
+            <span th:if="${r.status == WAITING}" class="bulk-empty-select">—</span>
+          </td>
+          <td>
+            <strong th:text="${r.book.title}"></strong>
+            <div class="small text-muted" th:if="${r.book.isbn != null}" th:text="${'ISBN: ' + r.book.isbn}"></div>
+          </td>
+          <td th:text="${r.queueOrder}"></td>
+          <td>
+            <span class="badge" th:classappend="
+              ${r.status.name() == 'WAITING'} ? 'bg-warning text-dark' :
+              (${r.status.name() == 'FULFILLED'} ? 'bg-success' : 'bg-secondary')"
+              th:text="${r.status}"></span>
+          </td>
+          <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd')}"></td>
+          <td>
+            <button th:if="${r.status == WAITING}"
+                    th:attr="data-reservation-id=${r.id}"
+                    class="btn btn-sm btn-outline-danger cancel-reservation-btn">Cancel</button>
+            <form th:if="${r.status != WAITING}"
+                  th:action="@{/student/reservations/{id}/delete(id=${r.id})}" method="post" class="d-inline confirm-delete"
+                  data-confirm-message="Delete this reservation record? This cannot be undone.">
+              <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+            </form>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-      <tr th:each="r : ${reservations}" th:attr="data-deletable=${r.status != WAITING}">
-        <td>
-          <input th:if="${r.status != WAITING}" type="checkbox" class="form-check-input bulk-row-check" th:value="${r.id}">
-        </td>
-        <td>
-          <strong th:text="${r.book.title}"></strong>
-          <div class="small text-muted" th:if="${r.book.isbn != null}" th:text="${'ISBN: ' + r.book.isbn}"></div>
-        </td>
-        <td th:text="${r.queueOrder}"></td>
-        <td>
-          <span class="badge" th:classappend="
-            ${r.status.name() == 'WAITING'} ? 'bg-warning text-dark' :
-            (${r.status.name() == 'FULFILLED'} ? 'bg-success' : 'bg-secondary')"
-            th:text="${r.status}"></span>
-        </td>
-        <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd')}"></td>
-        <td>
-          <button th:if="${r.status == WAITING}"
-                  th:attr="data-reservation-id=${r.id}"
-                  class="btn btn-sm btn-outline-danger cancel-reservation-btn">Cancel</button>
-          <form th:if="${r.status != WAITING}"
-                th:action="@{/student/reservations/{id}/delete(id=${r.id})}" method="post" class="d-inline confirm-delete"
-                data-confirm-message="Delete this reservation record? This cannot be undone.">
-            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-          </form>
-        </td>
-      </tr>
-      <tr th:if="${#lists.isEmpty(reservations)}"><td colspan="6" class="text-center text-muted-lib py-3">No reservations yet</td></tr>
-      </tbody>
-    </table>
-  </div>
+        <tr th:if="${#lists.isEmpty(reservations)}"><td colspan="6" class="text-center text-muted-lib py-3">No reservations yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
 
   <h2 class="h5 mb-3">Digital Library (PDF)</h2>
   <div class="book-cards-grid" th:if="${!#lists.isEmpty(digitalBooks)}">
@@ -184,7 +220,7 @@
     returnButtons.forEach(button => {
       button.addEventListener('click', function() {
         const issueId = this.getAttribute('data-issue-id');
-        const bookTitle = this.closest('tr').querySelectorAll('td')[1].textContent;
+        const bookTitle = this.closest('tr').querySelectorAll('td')[1].textContent.trim();
 
         if (typeof confirmAction === 'function') {
           confirmAction(
@@ -232,7 +268,7 @@
     cancelButtons.forEach(button => {
       button.addEventListener('click', function() {
         const reservationId = this.getAttribute('data-reservation-id');
-        const bookTitle = this.closest('tr').querySelectorAll('td')[1].textContent;
+        const bookTitle = this.closest('tr').querySelectorAll('td')[1].textContent.trim();
 
         if (typeof confirmAction === 'function') {
           confirmAction(

@@ -16,7 +16,12 @@
     <div class="profile-card">
       <div class="profile-card-header">
         <div class="profile-avatar">
-          <img th:if="${profilePhotoUrl != null}" th:src="${profilePhotoUrl}" alt="Profile photo" class="profile-avatar-img"/>
+          <img th:if="${profilePhotoUrl != null}"
+               th:src="${profilePhotoUrl}"
+               alt="Profile photo"
+               class="profile-avatar-img"
+               width="72"
+               height="72"/>
           <span th:if="${profilePhotoUrl == null}" th:text="${profileInitial ?: 'U'}">U</span>
         </div>
         <div class="profile-info">

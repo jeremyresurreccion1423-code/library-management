@@ -1,0 +1,77 @@
+/* Profile photo sizing — separate file so Railway cache does not serve stale rules */
+
+.profile-avatar {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  min-height: 72px;
+  max-width: 72px;
+  max-height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.profile-avatar > img,
+.profile-avatar img.profile-avatar-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 72px !important;
+  height: 72px !important;
+  max-width: 72px !important;
+  max-height: 72px !important;
+  min-width: 0;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border-radius: 50%;
+}
+
+.header-bar-user-avatar {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  max-width: 28px;
+  max-height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.header-bar-user-avatar > img,
+.header-bar-user-avatar img.header-bar-user-avatar-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  min-width: 0;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border-radius: 50%;
+}
+
+.profile-card-header {
+  align-items: center;
+}
+
+.profile-photo-upload {
+  padding-top: 0.25rem;
+}
+
+.profile-photo-upload .form-control[type="file"] {
+  max-width: 320px;
+}
+
+.profile-photo-preview-note {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+}

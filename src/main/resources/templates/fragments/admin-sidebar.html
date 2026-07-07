@@ -17,7 +17,12 @@
     <div class="dropdown header-bar-dropdown">
       <button class="header-bar-user-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
         <span class="header-bar-user-avatar">
-          <img th:if="${profilePhotoUrl != null}" th:src="${profilePhotoUrl}" alt="Profile photo" class="header-bar-user-avatar-img"/>
+          <img th:if="${profilePhotoUrl != null}"
+               th:src="${profilePhotoUrl}"
+               alt="Profile photo"
+               class="header-bar-user-avatar-img"
+               width="28"
+               height="28"/>
           <i th:if="${profilePhotoUrl == null}" class="bi bi-person-circle"></i>
         </span>
         <i class="bi bi-chevron-down" style="font-size:0.7rem;"></i>

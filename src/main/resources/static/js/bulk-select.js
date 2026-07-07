@@ -59,7 +59,7 @@
     });
 
     function rowCheckboxes() {
-      return Array.from(table.querySelectorAll('tbody input[type="checkbox"].bulk-row-check'));
+      return Array.from(table.querySelectorAll('tbody input[type="checkbox"].bulk-row-check, tbody input[type="checkbox"].bulk-select-check.bulk-row-check'));
     }
 
     function selectedCheckboxes(filterSelector) {
