@@ -1,6 +1,6 @@
 package com.smartlibrary.web.admin;
 
-import com.smartlibrary.repository.StudentProfileRepository;
+import com.smartlibrary.service.AdminStudentManagementService;
 import com.smartlibrary.service.AnalyticsService;
 import com.smartlibrary.service.BookIssueService;
 import com.smartlibrary.service.MailNotificationService;
@@ -21,23 +21,26 @@ import java.util.Map;
 public class AdminAnalyticsController {
 
     private final AnalyticsService analyticsService;
-    private final StudentProfileRepository studentProfileRepository;
+    private final AdminStudentManagementService adminStudentManagementService;
     private final BookIssueService bookIssueService;
     private final MailNotificationService mailNotificationService;
 
     public AdminAnalyticsController(
             AnalyticsService analyticsService,
-            StudentProfileRepository studentProfileRepository,
+            AdminStudentManagementService adminStudentManagementService,
             BookIssueService bookIssueService,
             MailNotificationService mailNotificationService) {
         this.analyticsService = analyticsService;
-        this.studentProfileRepository = studentProfileRepository;
+        this.adminStudentManagementService = adminStudentManagementService;
         this.bookIssueService = bookIssueService;
         this.mailNotificationService = mailNotificationService;
     }
 
     @GetMapping
-    public String analytics(@RequestParam(value = "studentId", required = false) String studentId, Model model) {
+    public String analytics(
+            @RequestParam(value = "query", required = false) String query,
+            @RequestParam(value = "studentId", required = false) String studentId,
+            Model model) {
         Map<String, Long> statusCounts = analyticsService.issueStatusCounts();
         model.addAttribute("topBooks", analyticsService.mostBorrowedBooks(10));
         model.addAttribute("overdueRate", analyticsService.overdueRatePercent());
@@ -47,13 +50,36 @@ public class AdminAnalyticsController {
         model.addAttribute("borrowsByRecentDays", analyticsService.borrowsByRecentDays(14));
         analyticsService.busiestDayOfWeek().ifPresent(day -> model.addAttribute("busiestDayOfWeek", day));
         analyticsService.busiestRecentDay(14).ifPresent(day -> model.addAttribute("busiestRecentDay", day));
-        model.addAttribute("students", studentProfileRepository.findAllWithUsers());
+
+        model.addAttribute("query", query != null ? query : "");
         model.addAttribute("selectedStudentId", studentId);
         model.addAttribute("selectedStudent", null);
         model.addAttribute("readingHistory", List.of());
-        if (studentId != null && !studentId.isBlank()) {
-            studentProfileRepository.findByStudentId(studentId.trim()).ifPresent(profile -> {
+        model.addAttribute("searchResults", List.of());
+
+        String resolvedStudentId = studentId;
+        if ((resolvedStudentId == null || resolvedStudentId.isBlank()) && query != null && !query.isBlank()) {
+            var results = adminStudentManagementService.listStudents(query.trim(), false);
+            if (results.isEmpty()) {
+                results = adminStudentManagementService.listStudents(query.trim(), true);
+            }
+            model.addAttribute("searchResults", results);
+            if (results.size() == 1) {
+                resolvedStudentId = results.get(0).getStudentId();
+            } else {
+                var exact = results.stream()
+                        .filter(s -> s.getStudentId().equalsIgnoreCase(query.trim()))
+                        .findFirst();
+                if (exact.isPresent()) {
+                    resolvedStudentId = exact.get().getStudentId();
+                }
+            }
+        }
+
+        if (resolvedStudentId != null && !resolvedStudentId.isBlank()) {
+            adminStudentManagementService.findByStudentId(resolvedStudentId).ifPresent(profile -> {
                 model.addAttribute("selectedStudent", profile);
+                model.addAttribute("selectedStudentId", profile.getStudentId());
                 model.addAttribute("readingHistory", analyticsService.studentReadingHistory(profile.getId()));
             });
         }

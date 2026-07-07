@@ -156,17 +156,9 @@
     <div class="card-lib p-3 mb-3">
       <form th:action="@{/admin/analytics}" method="get" class="row g-3 align-items-end">
         <div class="col-md-8">
-          <label class="form-label fw-medium">Select Student</label>
-          <select class="form-select" name="studentId" required>
-            <option value="" disabled th:selected="${selectedStudentId == null or selectedStudentId == ''}">
-              Choose a student…
-            </option>
-            <option th:each="s : ${students}"
-                    th:value="${s.studentId}"
-                    th:text="${s.studentId + ' — ' + s.fullName + (s.course != null and !s.course.isBlank() ? ' (' + s.course + ')' : '')}"
-                    th:selected="${s.studentId == selectedStudentId}">
-            </option>
-          </select>
+          <label class="form-label fw-medium">Search Student</label>
+          <input class="form-control" name="query" placeholder="Search by ID, name, email, or phone..."
+                 th:value="${query}"/>
         </div>
         <div class="col-md-4">
           <button class="btn btn-accent w-100" type="submit">
@@ -174,6 +166,36 @@
           </button>
         </div>
       </form>
+    </div>
+
+    <div class="table-responsive card-lib p-0 mb-3" th:if="${!#lists.isEmpty(searchResults) and selectedStudent == null}">
+      <table class="table table-dark-lib mb-0">
+        <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Course</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${searchResults}">
+          <td th:text="${s.studentId}"></td>
+          <td th:text="${s.fullName}"></td>
+          <td th:text="${s.user.email}"></td>
+          <td th:text="${s.course}"></td>
+          <td>
+            <a class="btn btn-sm btn-accent"
+               th:href="@{/admin/analytics(studentId=${s.studentId},query=${query})}">View History</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="alert alert-warning" th:if="${query != null and !query.isBlank() and selectedStudent == null and #lists.isEmpty(searchResults)}">
+      No students matched "<span th:text="${query}"></span>".
     </div>
 
     <div class="analytics-student-panel" th:if="${selectedStudent != null}">
@@ -226,10 +248,10 @@
             No reading history for this student
           </td>
         </tr>
-        <tr th:if="${selectedStudent == null}">
+        <tr th:if="${selectedStudent == null and (query == null or query.isBlank())}">
           <td colspan="6" class="text-center text-muted-lib py-4">
-            <i class="bi bi-person-badge d-block mb-2" style="font-size:1.5rem;"></i>
-            Select a student above to view their borrowing history
+            <i class="bi bi-search d-block mb-2" style="font-size:1.5rem;"></i>
+            Search for a student above to view their borrowing history
           </td>
         </tr>
         </tbody>

@@ -47,4 +47,7 @@ public class StudentProfile extends BaseEntity {
 
     @Column(length = 120)
     private String course;
+
+    @Column(nullable = false)
+    private boolean archived = false;
 }

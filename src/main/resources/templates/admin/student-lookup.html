@@ -11,31 +11,31 @@
     </div>
   
   
-  <form class="row g-2 mb-4" method="get" th:action="@{/admin/students}">
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+  <form class="row g-2 mb-3 align-items-center" method="get" th:action="@{/admin/students}">
     <div class="col-auto flex-grow-1">
       <input class="form-control" name="query" placeholder="Search by ID, name, email, or phone..." th:value="${query}"/>
     </div>
     <div class="col-auto"><button class="btn btn-accent" type="submit">Search</button></div>
     <div class="col-auto" th:if="${isSearch}">
-      <a href="/admin/students" class="btn btn-secondary">Clear</a>
+      <a th:href="@{/admin/students(showArchived=${showArchived})}" class="btn btn-secondary">Clear</a>
     </div>
+    <div class="col-auto" th:if="${!showArchived}">
+      <a th:href="@{/admin/students(showArchived=true,query=${query})}" class="btn btn-outline-secondary">View Archived</a>
+    </div>
+    <div class="col-auto" th:if="${showArchived}">
+      <a th:href="@{/admin/students(query=${query})}" class="btn btn-primary">Active Students</a>
+    </div>
+    <input type="hidden" name="showArchived" th:if="${showArchived}" value="true"/>
   </form>
 
   
-  <div th:if="${notFound}" class="alert alert-warning">Not Found.</div>
+  <div th:if="${notFound}" class="alert alert-warning">No students matched your search.</div>
 
-  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+  <div th:if="${noStudents}" class="alert alert-info">No students in the library system yet.</div>
 
-
-
-  
-  <div class="row g-2 mb-3" th:if="${students != null && !students.isEmpty()}">
-    <div class="col-md-4">
-      <input class="form-control" id="studentFilter" placeholder="Filter by name or student ID..." oninput="filterStudents()"/>
-    </div>
-  </div>
-
-  
   <div class="table-responsive card-lib p-0" th:if="${students != null && !students.isEmpty()}">
     <table class="table table-dark-lib mb-0">
       <thead>
@@ -45,18 +45,46 @@
           <th>Email</th>
           <th>Phone</th>
           <th>Course</th>
+          <th>Status</th>
           <th>Action</th>
         </tr>
       </thead>
       <tbody>
-        <tr th:each="student : ${students}" onclick="loadStudentDetails(this)" style="cursor: pointer;" class="student-row">
+        <tr th:each="student : ${students}" class="student-row" th:attr="data-profile-id=${student.id}">
           <td th:text="${student.studentId}"></td>
           <td th:text="${student.fullName}"></td>
           <td th:text="${student.user.email}"></td>
           <td th:text="${student.phone}"></td>
           <td th:text="${student.course}"></td>
           <td>
-            <button type="button" class="btn btn-sm btn-info" data-action="view">View</button>
+            <span class="badge rounded-pill" th:classappend="${student.archived} ? ' bg-secondary' : ' bg-success'"
+                  th:text="${student.archived} ? 'ARCHIVED' : 'ACTIVE'"></span>
+          </td>
+          <td class="text-nowrap">
+            <button type="button" class="btn btn-sm btn-info view-student-btn">View</button>
+            <form th:if="${!student.archived}"
+                  th:action="@{/admin/students/{id}/archive(id=${student.id})}" method="post" class="d-inline confirm-action"
+                  data-confirm-message="Archive this student? Records are kept and login will be disabled.">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <input type="hidden" name="query" th:value="${query}"/>
+              <input type="hidden" name="showArchived" th:if="${showArchived}" value="true"/>
+              <button type="submit" class="btn btn-sm btn-warning">Archive</button>
+            </form>
+            <form th:if="${student.archived}"
+                  th:action="@{/admin/students/{id}/restore(id=${student.id})}" method="post" class="d-inline confirm-action"
+                  data-confirm-message="Restore this student to ACTIVE?">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <input type="hidden" name="query" th:value="${query}"/>
+              <input type="hidden" name="showArchived" value="true"/>
+              <button type="submit" class="btn btn-sm btn-success">Restore</button>
+            </form>
+            <form th:action="@{/admin/students/{id}/delete(id=${student.id})}" method="post" class="d-inline confirm-delete"
+                  data-confirm-message="Delete this student from the library? Only allowed if they have no borrowing history.">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <input type="hidden" name="query" th:value="${query}"/>
+              <input type="hidden" name="showArchived" th:if="${showArchived}" value="true"/>
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
           </td>
         </tr>
       </tbody>
@@ -106,33 +134,12 @@
 </div>
 
 <script>
-  function filterStudents() {
-    const q = document.getElementById('studentFilter').value.toLowerCase().trim();
-    document.querySelectorAll('.student-row').forEach(row => {
-      const id = row.cells[0].textContent.toLowerCase();
-      const name = row.cells[1].textContent.toLowerCase();
-      if (!q || id.includes(q) || name.includes(q)) {
-        row.style.display = '';
-      } else {
-        row.style.display = 'none';
-      }
-    });
-  }
-
   document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('button[data-action="view"]').forEach(button => {
+    document.querySelectorAll('.view-student-btn').forEach(button => {
       button.addEventListener('click', function(e) {
         e.preventDefault();
-        const row = this.closest('tr');
-        loadStudentDetails(row);
-      });
-    });
-
-    document.querySelectorAll('.student-row').forEach(row => {
-      row.addEventListener('click', function(e) {
-        if (e.target.tagName !== 'BUTTON') {
-          loadStudentDetails(this);
-        }
+        e.stopPropagation();
+        loadStudentDetails(this.closest('tr'));
       });
     });
   });

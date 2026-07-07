@@ -76,4 +76,8 @@ public interface BookIssueRepository extends JpaRepository<BookIssue, Long> {
             ORDER BY issue_date ASC
             """, nativeQuery = true)
     List<Object[]> countIssuesByDateSince(@Param("since") LocalDateTime since);
+
+    long countByStudent_Id(Long studentId);
+
+    boolean existsByStudent_IdAndStatusIn(Long studentId, List<IssueStatus> statuses);
 }

@@ -23,11 +23,12 @@ public interface StudentProfileRepository extends JpaRepository<StudentProfile, 
     
     @Query("SELECT s FROM StudentProfile s JOIN FETCH s.user ORDER BY s.fullName ASC")
     List<StudentProfile> findAllWithUsers();
-    
+
     @Query("SELECT s FROM StudentProfile s JOIN FETCH s.user WHERE " +
-           "LOWER(s.studentId) LIKE LOWER(CONCAT('%', ?1, '%')) OR " +
-           "LOWER(s.fullName) LIKE LOWER(CONCAT('%', ?1, '%')) OR " +
-           "LOWER(s.phone) LIKE LOWER(CONCAT('%', ?1, '%')) " +
+           "LOWER(s.studentId) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(s.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(s.phone) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(s.user.email) LIKE LOWER(CONCAT('%', :query, '%')) " +
            "ORDER BY s.fullName ASC")
-    List<StudentProfile> searchStudents(String query);
+    List<StudentProfile> searchStudents(@Param("query") String query);
 }

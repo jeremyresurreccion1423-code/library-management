@@ -653,6 +653,8 @@ public class DataInitializer implements CommandLineRunner {
             relaxTimestampColumn("ebooks", "updated_at");
             relaxTimestampColumn("otp_codes", "created_at");
             relaxTimestampColumn("otp_codes", "updated_at");
+            jdbcTemplate.execute(
+                    "ALTER TABLE library.student_profiles ADD COLUMN IF NOT EXISTS archived BOOLEAN NOT NULL DEFAULT false");
             log.debug("Schema fixes applied successfully.");
         } catch (Exception e) {
             log.warn("Schema fix skipped (possibly table does not exist yet): {}", e.getMessage());

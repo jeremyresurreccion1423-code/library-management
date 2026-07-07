@@ -4,7 +4,9 @@ import com.smartlibrary.entity.User;
 import com.smartlibrary.repository.UserRepository;
 import com.smartlibrary.security.LibraryUserDetails;
 import com.smartlibrary.service.ProfilePhotoService;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +30,10 @@ public class AdminProfileController {
 
     @GetMapping
     public String form(@AuthenticationPrincipal LibraryUserDetails user, Model model) {
-        model.addAttribute("username", user.getUsername());
-        model.addAttribute("fullName", user.getUser().getFullName());
-        model.addAttribute("email", user.getUser().getEmail());
+        User fresh = userRepository.findById(user.getUser().getId()).orElseThrow();
+        model.addAttribute("username", fresh.getUsername());
+        model.addAttribute("fullName", fresh.getFullName());
+        model.addAttribute("email", fresh.getEmail());
         model.addAttribute("role", user.getAuthorities().toString());
         return "admin/profile";
     }
@@ -48,19 +51,25 @@ public class AdminProfileController {
             ra.addFlashAttribute("error", "Username can only contain letters, numbers, underscore, and hyphen. No spaces or special characters allowed.");
             return "redirect:/admin/profile";
         }
-        String currentUsername = user.getUsername();
-        if (!trimmedUsername.equals(currentUsername)) {
-            if (userRepository.existsByUsername(trimmedUsername)) {
-                ra.addFlashAttribute("error", "Username '" + trimmedUsername + "' is already taken.");
-                return "redirect:/admin/profile";
-            }
+
+        User currentUser = userRepository.findById(user.getUser().getId()).orElseThrow();
+        if (!trimmedUsername.equals(currentUser.getUsername())
+                && userRepository.existsByUsername(trimmedUsername)) {
+            ra.addFlashAttribute("error", "Username '" + trimmedUsername + "' is already taken.");
+            return "redirect:/admin/profile";
         }
 
-        User currentUser = userRepository.findByUsername(currentUsername).orElseThrow();
         currentUser.setUsername(trimmedUsername);
-        userRepository.save(currentUser);
+        User saved = userRepository.save(currentUser);
 
-        ra.addFlashAttribute("success", "Username updated successfully.");
+        LibraryUserDetails updatedDetails = new LibraryUserDetails(saved);
+        var authentication = new UsernamePasswordAuthenticationToken(
+                updatedDetails,
+                updatedDetails.getPassword(),
+                updatedDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        ra.addFlashAttribute("success", "Username updated to \"" + trimmedUsername + "\".");
         return "redirect:/admin/profile";
     }
 
@@ -70,7 +79,8 @@ public class AdminProfileController {
             @RequestParam("photo") MultipartFile photo,
             RedirectAttributes ra) {
         try {
-            profilePhotoService.saveProfilePhoto(user.getUsername(), photo);
+            User fresh = userRepository.findById(user.getUser().getId()).orElseThrow();
+            profilePhotoService.saveProfilePhoto(fresh.getUsername(), photo);
             ra.addFlashAttribute("success", "Profile photo updated successfully.");
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());

@@ -1,6 +1,6 @@
 package com.smartlibrary.web.admin;
 
-import com.smartlibrary.repository.StudentProfileRepository;
+import com.smartlibrary.service.AdminStudentManagementService;
 import com.smartlibrary.service.BookIssueService;
 import com.smartlibrary.service.MailNotificationService;
 import org.springframework.http.ResponseEntity;
@@ -24,53 +24,95 @@ import java.util.Map;
 @RequestMapping("/admin/students")
 public class AdminStudentController {
 
-    private final StudentProfileRepository studentProfileRepository;
+    private final AdminStudentManagementService adminStudentManagementService;
     private final BookIssueService bookIssueService;
     private final MailNotificationService mailNotificationService;
 
     public AdminStudentController(
-            StudentProfileRepository studentProfileRepository,
+            AdminStudentManagementService adminStudentManagementService,
             BookIssueService bookIssueService,
             MailNotificationService mailNotificationService) {
-        this.studentProfileRepository = studentProfileRepository;
+        this.adminStudentManagementService = adminStudentManagementService;
         this.bookIssueService = bookIssueService;
         this.mailNotificationService = mailNotificationService;
     }
 
     @Transactional(readOnly = true)
     @GetMapping
-    public String search(@RequestParam(required = false) String query, Model model) {
+    public String search(
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) Boolean showArchived,
+            Model model) {
+        boolean archivedView = Boolean.TRUE.equals(showArchived);
         try {
-            if (query != null && !query.isBlank()) {
-                var results = studentProfileRepository.searchStudents(query.trim());
-                model.addAttribute("students", results);
-                model.addAttribute("query", query);
-                model.addAttribute("isSearch", true);
-                if (results.isEmpty()) {
-                    model.addAttribute("notFound", true);
-                }
-            } else {
-                var allStudents = studentProfileRepository.findAllWithUsers();
-                model.addAttribute("students", allStudents);
-                model.addAttribute("isSearch", false);
-                if (allStudents.isEmpty()) {
-                    model.addAttribute("noStudents", true);
-                }
+            var students = adminStudentManagementService.listStudents(query, archivedView);
+            model.addAttribute("students", students);
+            model.addAttribute("query", query != null ? query : "");
+            model.addAttribute("isSearch", query != null && !query.isBlank());
+            model.addAttribute("showArchived", archivedView);
+            if (query != null && !query.isBlank() && students.isEmpty()) {
+                model.addAttribute("notFound", true);
+            }
+            if ((query == null || query.isBlank()) && students.isEmpty()) {
+                model.addAttribute("noStudents", true);
             }
         } catch (Exception e) {
             model.addAttribute("students", List.of());
+            model.addAttribute("query", query != null ? query : "");
             model.addAttribute("isSearch", false);
-            model.addAttribute("noStudents", true);
+            model.addAttribute("showArchived", archivedView);
             model.addAttribute("error", "Unable to load students: " + e.getMessage());
         }
         return "admin/student-lookup";
+    }
+
+    @PostMapping("/{id}/archive")
+    public String archive(@PathVariable Long id,
+                          @RequestParam(required = false) String query,
+                          @RequestParam(required = false) Boolean showArchived,
+                          RedirectAttributes ra) {
+        try {
+            adminStudentManagementService.archive(id);
+            ra.addFlashAttribute("success", "Student archived. Records are kept and login is disabled.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return redirectToList(query, showArchived);
+    }
+
+    @PostMapping("/{id}/restore")
+    public String restore(@PathVariable Long id,
+                          @RequestParam(required = false) String query,
+                          @RequestParam(required = false) Boolean showArchived,
+                          RedirectAttributes ra) {
+        try {
+            adminStudentManagementService.restore(id);
+            ra.addFlashAttribute("success", "Student restored to active.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return redirectToList(query, showArchived);
+    }
+
+    @PostMapping("/{id}/delete")
+    public String delete(@PathVariable Long id,
+                         @RequestParam(required = false) String query,
+                         @RequestParam(required = false) Boolean showArchived,
+                         RedirectAttributes ra) {
+        try {
+            adminStudentManagementService.delete(id);
+            ra.addFlashAttribute("success", "Student removed from the library system.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return redirectToList(query, showArchived);
     }
 
     @Transactional(readOnly = true)
     @GetMapping("/{studentId}/history")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> history(@PathVariable String studentId) {
-        var profileOpt = studentProfileRepository.findByStudentId(studentId);
+        var profileOpt = adminStudentManagementService.findByStudentId(studentId);
         if (profileOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -108,5 +150,18 @@ public class AdminStudentController {
             ra.addFlashAttribute("error", e.getMessage());
         }
         return "redirect:/admin/students";
+    }
+
+    private String redirectToList(String query, Boolean showArchived) {
+        StringBuilder url = new StringBuilder("redirect:/admin/students");
+        boolean hasParam = false;
+        if (query != null && !query.isBlank()) {
+            url.append(hasParam ? "&" : "?").append("query=").append(java.net.URLEncoder.encode(query.trim(), java.nio.charset.StandardCharsets.UTF_8));
+            hasParam = true;
+        }
+        if (Boolean.TRUE.equals(showArchived)) {
+            url.append(hasParam ? "&" : "?").append("showArchived=true");
+        }
+        return url.toString();
     }
 }
