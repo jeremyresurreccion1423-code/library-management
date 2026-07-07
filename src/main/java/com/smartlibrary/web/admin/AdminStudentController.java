@@ -39,17 +39,12 @@ public class AdminStudentController {
 
     @Transactional(readOnly = true)
     @GetMapping
-    public String search(
-            @RequestParam(required = false) String query,
-            @RequestParam(required = false) Boolean showArchived,
-            Model model) {
-        boolean archivedView = Boolean.TRUE.equals(showArchived);
+    public String search(@RequestParam(required = false) String query, Model model) {
         try {
-            var students = adminStudentManagementService.listStudents(query, archivedView);
+            var students = adminStudentManagementService.listStudents(query);
             model.addAttribute("students", students);
             model.addAttribute("query", query != null ? query : "");
             model.addAttribute("isSearch", query != null && !query.isBlank());
-            model.addAttribute("showArchived", archivedView);
             if (query != null && !query.isBlank() && students.isEmpty()) {
                 model.addAttribute("notFound", true);
             }
@@ -60,7 +55,6 @@ public class AdminStudentController {
             model.addAttribute("students", List.of());
             model.addAttribute("query", query != null ? query : "");
             model.addAttribute("isSearch", false);
-            model.addAttribute("showArchived", archivedView);
             model.addAttribute("error", "Unable to load students: " + e.getMessage());
         }
         return "admin/student-lookup";
@@ -69,7 +63,6 @@ public class AdminStudentController {
     @PostMapping("/{id}/archive")
     public String archive(@PathVariable Long id,
                           @RequestParam(required = false) String query,
-                          @RequestParam(required = false) Boolean showArchived,
                           RedirectAttributes ra) {
         try {
             adminStudentManagementService.archive(id);
@@ -77,13 +70,12 @@ public class AdminStudentController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return redirectToList(query, showArchived);
+        return redirectToList(query);
     }
 
     @PostMapping("/{id}/restore")
     public String restore(@PathVariable Long id,
                           @RequestParam(required = false) String query,
-                          @RequestParam(required = false) Boolean showArchived,
                           RedirectAttributes ra) {
         try {
             adminStudentManagementService.restore(id);
@@ -91,13 +83,12 @@ public class AdminStudentController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return redirectToList(query, showArchived);
+        return redirectToList(query);
     }
 
     @PostMapping("/{id}/delete")
     public String delete(@PathVariable Long id,
                          @RequestParam(required = false) String query,
-                         @RequestParam(required = false) Boolean showArchived,
                          RedirectAttributes ra) {
         try {
             adminStudentManagementService.delete(id);
@@ -105,7 +96,7 @@ public class AdminStudentController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return redirectToList(query, showArchived);
+        return redirectToList(query);
     }
 
     @Transactional(readOnly = true)
@@ -152,16 +143,11 @@ public class AdminStudentController {
         return "redirect:/admin/students";
     }
 
-    private String redirectToList(String query, Boolean showArchived) {
-        StringBuilder url = new StringBuilder("redirect:/admin/students");
-        boolean hasParam = false;
+    private String redirectToList(String query) {
         if (query != null && !query.isBlank()) {
-            url.append(hasParam ? "&" : "?").append("query=").append(java.net.URLEncoder.encode(query.trim(), java.nio.charset.StandardCharsets.UTF_8));
-            hasParam = true;
+            return "redirect:/admin/students?query="
+                    + java.net.URLEncoder.encode(query.trim(), java.nio.charset.StandardCharsets.UTF_8);
         }
-        if (Boolean.TRUE.equals(showArchived)) {
-            url.append(hasParam ? "&" : "?").append("showArchived=true");
-        }
-        return url.toString();
+        return "redirect:/admin/students";
     }
 }

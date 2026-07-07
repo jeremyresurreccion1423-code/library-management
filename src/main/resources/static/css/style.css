@@ -1710,6 +1710,15 @@ button.sidebar-link-logout i {
   background: #f0fdf4;
 }
 
+.dashboard-main .table-dark-lib tbody tr.student-row-archived {
+  background: #f8fafc;
+  opacity: 0.85;
+}
+
+.dashboard-main .table-dark-lib tbody tr.student-row-archived:hover {
+  background: #f1f5f9;
+}
+
 
 .dashboard-main .btn {
   border-radius: 10px;

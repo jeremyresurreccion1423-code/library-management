@@ -11,6 +11,7 @@ import com.smartlibrary.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -34,7 +35,7 @@ public class AdminStudentManagementService {
         this.reservationRepository = reservationRepository;
     }
 
-    public List<StudentProfile> listStudents(String query, boolean showArchived) {
+    public List<StudentProfile> listStudents(String query) {
         List<StudentProfile> students;
         if (query != null && !query.isBlank()) {
             students = studentProfileRepository.searchStudents(query.trim());
@@ -42,7 +43,9 @@ public class AdminStudentManagementService {
             students = studentProfileRepository.findAllWithUsers();
         }
         return students.stream()
-                .filter(student -> showArchived == student.isArchived())
+                .sorted(Comparator
+                        .comparing(StudentProfile::isArchived)
+                        .thenComparing(StudentProfile::getFullName, String.CASE_INSENSITIVE_ORDER))
                 .toList();
     }
 

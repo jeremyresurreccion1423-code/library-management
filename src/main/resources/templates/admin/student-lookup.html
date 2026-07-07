@@ -20,15 +20,8 @@
     </div>
     <div class="col-auto"><button class="btn btn-accent" type="submit">Search</button></div>
     <div class="col-auto" th:if="${isSearch}">
-      <a th:href="@{/admin/students(showArchived=${showArchived})}" class="btn btn-secondary">Clear</a>
+      <a th:href="@{/admin/students}" class="btn btn-secondary">Clear</a>
     </div>
-    <div class="col-auto" th:if="${!showArchived}">
-      <a th:href="@{/admin/students(showArchived=true,query=${query})}" class="btn btn-outline-secondary">View Archived</a>
-    </div>
-    <div class="col-auto" th:if="${showArchived}">
-      <a th:href="@{/admin/students(query=${query})}" class="btn btn-primary">Active Students</a>
-    </div>
-    <input type="hidden" name="showArchived" th:if="${showArchived}" value="true"/>
   </form>
 
   
@@ -50,7 +43,9 @@
         </tr>
       </thead>
       <tbody>
-        <tr th:each="student : ${students}" class="student-row" th:attr="data-profile-id=${student.id}">
+        <tr th:each="student : ${students}" class="student-row"
+            th:classappend="${student.archived} ? ' student-row-archived' : ''"
+            th:attr="data-profile-id=${student.id}">
           <td th:text="${student.studentId}"></td>
           <td th:text="${student.fullName}"></td>
           <td th:text="${student.user.email}"></td>
@@ -67,7 +62,6 @@
                   data-confirm-message="Archive this student? Records are kept and login will be disabled.">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
               <input type="hidden" name="query" th:value="${query}"/>
-              <input type="hidden" name="showArchived" th:if="${showArchived}" value="true"/>
               <button type="submit" class="btn btn-sm btn-warning">Archive</button>
             </form>
             <form th:if="${student.archived}"
@@ -75,14 +69,13 @@
                   data-confirm-message="Restore this student to ACTIVE?">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
               <input type="hidden" name="query" th:value="${query}"/>
-              <input type="hidden" name="showArchived" value="true"/>
               <button type="submit" class="btn btn-sm btn-success">Restore</button>
             </form>
-            <form th:action="@{/admin/students/{id}/delete(id=${student.id})}" method="post" class="d-inline confirm-delete"
+            <form th:if="${!student.archived}"
+                  th:action="@{/admin/students/{id}/delete(id=${student.id})}" method="post" class="d-inline confirm-delete"
                   data-confirm-message="Delete this student from the library? Only allowed if they have no borrowing history.">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
               <input type="hidden" name="query" th:value="${query}"/>
-              <input type="hidden" name="showArchived" th:if="${showArchived}" value="true"/>
               <button type="submit" class="btn btn-sm btn-danger">Delete</button>
             </form>
           </td>

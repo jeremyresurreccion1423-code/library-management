@@ -59,10 +59,7 @@ public class AdminAnalyticsController {
 
         String resolvedStudentId = studentId;
         if ((resolvedStudentId == null || resolvedStudentId.isBlank()) && query != null && !query.isBlank()) {
-            var results = adminStudentManagementService.listStudents(query.trim(), false);
-            if (results.isEmpty()) {
-                results = adminStudentManagementService.listStudents(query.trim(), true);
-            }
+            var results = adminStudentManagementService.listStudents(query.trim());
             model.addAttribute("searchResults", results);
             if (results.size() == 1) {
                 resolvedStudentId = results.get(0).getStudentId();
