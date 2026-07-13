@@ -51,10 +51,11 @@ public class SuperAdminSsoController {
     @GetMapping("/super-admin/bridge/attendance")
     public String bridgeToAttendance(@RequestParam(defaultValue = "/super-admin") String path, Authentication auth) {
         String token = ssoTokenService.generateToken(auth.getName());
-        String attendanceAppUrl = libraryProperties.getAttendanceAppUrl();
-        String base = attendanceAppUrl.endsWith("/")
-                ? attendanceAppUrl.substring(0, attendanceAppUrl.length() - 1)
-                : attendanceAppUrl;
+        String base = com.smartlibrary.service.SuperAdminDashboardService.normalizeBaseUrl(
+                libraryProperties.getAttendanceAppUrl());
+        if (base == null) {
+            return "redirect:/super-admin?error=attendance-url";
+        }
         String next = URLEncoder.encode(path, StandardCharsets.UTF_8);
         return "redirect:" + base + "/super-admin/sso?token=" + token + "&next=" + next;
     }

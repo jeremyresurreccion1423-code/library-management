@@ -12,7 +12,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
@@ -77,12 +76,9 @@ public class SuperAdminDashboardService {
         fallback.put("lowAttendanceCount", 0);
 
         try {
-            String base = libraryProperties.getAttendanceAppUrl();
-            if (base == null || base.isBlank()) {
+            String base = normalizeBaseUrl(libraryProperties.getAttendanceAppUrl());
+            if (base == null) {
                 return fallback;
-            }
-            while (base.endsWith("/")) {
-                base = base.substring(0, base.length() - 1);
             }
             HttpHeaders headers = new HttpHeaders();
             headers.set("X-Super-Admin-Secret", ssoSecret);
@@ -98,8 +94,23 @@ public class SuperAdminDashboardService {
             Map<String, Object> body = new HashMap<>(response.getBody());
             body.put("available", true);
             return body;
-        } catch (RestClientException ex) {
+        } catch (Exception ex) {
             return fallback;
         }
+    }
+
+    /** Accepts host-only Railway values and makes them absolute https URLs. */
+    public static String normalizeBaseUrl(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        String base = raw.trim();
+        while (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        if (!base.startsWith("http://") && !base.startsWith("https://")) {
+            base = "https://" + base;
+        }
+        return base;
     }
 }

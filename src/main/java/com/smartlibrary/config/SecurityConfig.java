@@ -40,6 +40,7 @@ public class SecurityConfig {
         http.securityMatcher("/super-admin/**");
 
         http
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/super-admin/login", "/super-admin/sso")
                         .permitAll()
@@ -52,7 +53,16 @@ public class SecurityConfig {
                             session.setAttribute("AUTH_ERROR", "Invalid Super Admin credentials.");
                             response.sendRedirect("/super-admin/login");
                         })
-                        .successHandler((request, response, authentication) -> response.sendRedirect("/super-admin"))
+                        .successHandler((request, response, authentication) -> {
+                            boolean isSuperAdmin = authentication.getAuthorities().stream()
+                                    .anyMatch(a -> "ROLE_SUPER_ADMIN".equals(a.getAuthority()));
+                            if (!isSuperAdmin) {
+                                new SecurityContextLogoutHandler().logout(request, response, authentication);
+                                response.sendRedirect("/super-admin/login");
+                                return;
+                            }
+                            response.sendRedirect("/super-admin");
+                        })
                         .permitAll())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/super-admin/login")))
