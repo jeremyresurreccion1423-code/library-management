@@ -43,11 +43,68 @@ public class SuperAdminDashboardService {
     }
 
     public Map<String, Object> getCombinedDashboard() {
+        Map<String, Object> attendance;
+        Map<String, Object> library;
+        try {
+            attendance = fetchAttendanceStats();
+        } catch (Exception ex) {
+            attendance = emptyAttendanceStats();
+        }
+        try {
+            library = getLibraryStats();
+        } catch (Exception ex) {
+            library = emptyLibraryStats();
+        }
+
         Map<String, Object> model = new HashMap<>();
-        model.put("attendance", fetchAttendanceStats());
-        model.put("library", getLibraryStats());
-        model.put("attendanceAvailable", model.get("attendance") instanceof Map<?, ?> m && Boolean.TRUE.equals(m.get("available")));
+        model.put("attendance", attendance);
+        model.put("library", library);
+        model.put("attendanceAvailable", Boolean.TRUE.equals(attendance.get("available")));
+
+        // Flat attributes avoid nested Map SpEL issues in Thymeleaf on Railway
+        model.put("attTotalStudents", toLong(attendance.get("totalStudents")));
+        model.put("attTotalSubjects", toLong(attendance.get("totalSubjects")));
+        model.put("attTodayAttendance", toLong(attendance.get("todayAttendance")));
+        model.put("attLowAttendanceCount", toLong(attendance.get("lowAttendanceCount")));
+        model.put("libBookCount", toLong(library.get("bookCount")));
+        model.put("libStudentCount", toLong(library.get("studentCount")));
+        model.put("libActiveLoans", toLong(library.get("activeLoans")));
+        model.put("libOverdueLoans", toLong(library.get("overdueLoans")));
         return model;
+    }
+
+    private Map<String, Object> emptyAttendanceStats() {
+        Map<String, Object> fallback = new HashMap<>();
+        fallback.put("available", false);
+        fallback.put("totalStudents", 0L);
+        fallback.put("totalSubjects", 0L);
+        fallback.put("todayAttendance", 0L);
+        fallback.put("lowAttendanceCount", 0L);
+        return fallback;
+    }
+
+    private Map<String, Object> emptyLibraryStats() {
+        Map<String, Object> fallback = new HashMap<>();
+        fallback.put("available", false);
+        fallback.put("bookCount", 0L);
+        fallback.put("studentCount", 0L);
+        fallback.put("activeLoans", 0L);
+        fallback.put("overdueLoans", 0L);
+        return fallback;
+    }
+
+    private long toLong(Object value) {
+        if (value == null) {
+            return 0L;
+        }
+        if (value instanceof Number number) {
+            return number.longValue();
+        }
+        try {
+            return Long.parseLong(String.valueOf(value));
+        } catch (NumberFormatException ex) {
+            return 0L;
+        }
     }
 
     public Map<String, Object> getLibraryStatsForApi() {
@@ -68,12 +125,7 @@ public class SuperAdminDashboardService {
     }
 
     private Map<String, Object> fetchAttendanceStats() {
-        Map<String, Object> fallback = new HashMap<>();
-        fallback.put("available", false);
-        fallback.put("totalStudents", 0);
-        fallback.put("totalSubjects", 0);
-        fallback.put("todayAttendance", 0);
-        fallback.put("lowAttendanceCount", 0);
+        Map<String, Object> fallback = emptyAttendanceStats();
 
         try {
             String base = normalizeBaseUrl(libraryProperties.getAttendanceAppUrl());
@@ -93,6 +145,10 @@ public class SuperAdminDashboardService {
             }
             Map<String, Object> body = new HashMap<>(response.getBody());
             body.put("available", true);
+            body.putIfAbsent("totalStudents", 0);
+            body.putIfAbsent("totalSubjects", 0);
+            body.putIfAbsent("todayAttendance", 0);
+            body.putIfAbsent("lowAttendanceCount", 0);
             return body;
         } catch (Exception ex) {
             return fallback;

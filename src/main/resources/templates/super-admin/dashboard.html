@@ -10,7 +10,7 @@
       <p class="dashboard-subtitle">Combined overview of Attendance and Library systems</p>
     </div>
 
-    <div th:if="${!attendanceAvailable}" class="alert alert-warning">
+    <div th:if="${attendanceAvailable == false}" class="alert alert-warning">
       Attendance stats are temporarily unavailable. Library data below is still current.
     </div>
 
@@ -25,7 +25,7 @@
           <div class="card-icon bg-green"><i class="bi bi-people"></i></div>
           <div class="card-info">
             <h6 class="card-label">Total Students</h6>
-            <p class="card-value" th:text="${attendance.totalStudents}">0</p>
+            <p class="card-value" th:text="${attTotalStudents}">0</p>
           </div>
         </div>
         <div class="dashboard-card super-dashboard-card">
@@ -33,7 +33,7 @@
           <div class="card-icon bg-blue"><i class="bi bi-journal-bookmark"></i></div>
           <div class="card-info">
             <h6 class="card-label">Total Subjects</h6>
-            <p class="card-value" th:text="${attendance.totalSubjects}">0</p>
+            <p class="card-value" th:text="${attTotalSubjects}">0</p>
           </div>
         </div>
         <div class="dashboard-card super-dashboard-card">
@@ -41,15 +41,15 @@
           <div class="card-icon bg-teal"><i class="bi bi-calendar-check"></i></div>
           <div class="card-info">
             <h6 class="card-label">Today's Attendance</h6>
-            <p class="card-value" th:text="${attendance.todayAttendance}">0</p>
+            <p class="card-value" th:text="${attTodayAttendance}">0</p>
           </div>
         </div>
-        <div class="dashboard-card super-dashboard-card" th:if="${attendance.lowAttendanceCount > 0}">
+        <div class="dashboard-card super-dashboard-card" th:if="${attLowAttendanceCount > 0}">
           <span class="super-stat-tag">Attendance</span>
           <div class="card-icon bg-red"><i class="bi bi-exclamation-triangle"></i></div>
           <div class="card-info">
             <h6 class="card-label">Low Attendance Alerts</h6>
-            <p class="card-value text-danger" th:text="${attendance.lowAttendanceCount}">0</p>
+            <p class="card-value text-danger" th:text="${attLowAttendanceCount}">0</p>
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@
           <div class="card-icon bg-blue"><i class="bi bi-book"></i></div>
           <div class="card-info">
             <h6 class="card-label">Books</h6>
-            <p class="card-value" th:text="${library.bookCount}">0</p>
+            <p class="card-value" th:text="${libBookCount}">0</p>
           </div>
         </div>
         <div class="dashboard-card super-dashboard-card">
@@ -74,7 +74,7 @@
           <div class="card-icon bg-green"><i class="bi bi-people"></i></div>
           <div class="card-info">
             <h6 class="card-label">Students</h6>
-            <p class="card-value" th:text="${library.studentCount}">0</p>
+            <p class="card-value" th:text="${libStudentCount}">0</p>
           </div>
         </div>
         <div class="dashboard-card super-dashboard-card">
@@ -82,7 +82,7 @@
           <div class="card-icon bg-teal"><i class="bi bi-journal-check"></i></div>
           <div class="card-info">
             <h6 class="card-label">Active Loans</h6>
-            <p class="card-value text-success" th:text="${library.activeLoans}">0</p>
+            <p class="card-value text-success" th:text="${libActiveLoans}">0</p>
           </div>
         </div>
         <div class="dashboard-card super-dashboard-card">
@@ -90,7 +90,7 @@
           <div class="card-icon bg-red"><i class="bi bi-exclamation-triangle"></i></div>
           <div class="card-info">
             <h6 class="card-label">Overdue</h6>
-            <p class="card-value text-danger" th:text="${library.overdueLoans}">0</p>
+            <p class="card-value text-danger" th:text="${libOverdueLoans}">0</p>
           </div>
         </div>
       </div>
