@@ -28,6 +28,26 @@
   color: #166534 !important;
 }
 
+.admin-sidebar .sidebar-group-label i {
+  font-size: 1.15rem !important;
+  width: 22px !important;
+  text-align: center !important;
+  color: #6b7280 !important;
+}
+
+.admin-sidebar .sidebar-group.open > .sidebar-group-btn .sidebar-group-label i,
+.admin-sidebar .sidebar-group-btn:hover .sidebar-group-label i {
+  color: #16a34a !important;
+}
+
+.admin-sidebar .sidebar-header .sidebar-brand {
+  font-size: 1.05rem !important;
+}
+
+.admin-sidebar .sidebar-link {
+  font-size: 0.95rem !important;
+}
+
 .admin-sidebar .sidebar-group-label {
   display: flex !important;
   align-items: center !important;

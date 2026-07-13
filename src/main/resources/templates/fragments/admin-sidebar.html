@@ -35,7 +35,7 @@
             <li><hr class="dropdown-divider"></li>
             <li>
               <form th:action="@{/super-admin/logout}" method="post" class="d-inline w-100">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button type="submit" class="dropdown-item text-danger w-100 text-start border-0 bg-transparent">
                   <i class="bi bi-box-arrow-right me-2"></i>Logout
                 </button>

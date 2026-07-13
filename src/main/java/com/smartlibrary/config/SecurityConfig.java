@@ -40,7 +40,6 @@ public class SecurityConfig {
         http.securityMatcher("/super-admin/**");
 
         http
-                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/super-admin/login", "/super-admin/sso")
                         .permitAll()
