@@ -2,6 +2,8 @@ package com.smartlibrary.web.admin;
 
 import com.smartlibrary.security.LibraryUserDetails;
 import com.smartlibrary.service.UserAccountService;
+import com.smartlibrary.web.SafeRedirects;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,13 +32,19 @@ public class AdminPasswordController {
             @AuthenticationPrincipal LibraryUserDetails user,
             @RequestParam String currentPassword,
             @RequestParam String newPassword,
-            RedirectAttributes ra) {
+            @RequestParam(required = false) String confirmPassword,
+            RedirectAttributes ra,
+            HttpServletRequest request) {
         try {
+            if (confirmPassword != null && !newPassword.equals(confirmPassword)) {
+                ra.addFlashAttribute("error", "New password and confirmation do not match.");
+                return SafeRedirects.toRefererOr(request, "/admin/account/password");
+            }
             userAccountService.changePassword(user.getUsername(), currentPassword, newPassword);
             ra.addFlashAttribute("success", "Password updated");
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
-        return "redirect:/admin/account/password";
+        return SafeRedirects.toRefererOr(request, "/admin/account/password");
     }
 }

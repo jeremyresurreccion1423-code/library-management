@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!--
+  params:
+    photoAction   - form action for photo upload
+    passwordAction - form action for password change
+    roleLabel     - display role text
+    panelId       - unique panel id
+    logoutMode    - super-admin | admin | student
+-->
+<div th:fragment="widget(photoAction, passwordAction, roleLabel, panelId, logoutMode)"
+     class="page-header-profile-widget">
+  <button type="button" class="profile-trigger" onclick="toggleProfileMenu(this)">
+    <img th:if="${profilePhotoUrl != null}"
+         class="profile-avatar profile-avatar-img"
+         th:src="${profilePhotoUrl}"
+         alt="Profile photo"/>
+    <span th:unless="${profilePhotoUrl != null}"
+          class="profile-avatar"
+          th:text="${profileInitial ?: 'U'}">U</span>
+    <span class="profile-meta">
+      <strong>My Profile</strong>
+      <small th:text="${#authentication.name != null ? #authentication.name : 'User'}">user</small>
+    </span>
+    <span class="profile-caret"><i class="bi bi-chevron-down"></i></span>
+  </button>
+
+  <div class="profile-menu">
+    <button type="button" class="profile-menu-action"
+            th:attr="onclick=|toggleProfilePanel('${panelId}')|">My Profile</button>
+    <th:block th:if="${logoutMode == 'super-admin'}">
+      <form th:action="@{/super-admin/logout}" method="post" class="profile-logout m-0">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <button type="submit">Logout</button>
+      </form>
+    </th:block>
+    <th:block th:if="${logoutMode == 'admin'}">
+      <button type="button" class="profile-menu-action profile-logout" onclick="showAdminLogoutModal()">Logout</button>
+    </th:block>
+    <th:block th:if="${logoutMode == 'student'}">
+      <button type="button" class="profile-menu-action profile-logout" onclick="showStudentLogoutModal()">Logout</button>
+    </th:block>
+  </div>
+
+  <div class="profile-panel" th:id="${panelId}">
+    <div class="profile-panel-title">My Profile</div>
+    <div class="profile-summary">
+      <div class="profile-summary-avatar">
+        <img th:if="${profilePhotoUrl != null}" th:src="${profilePhotoUrl}" alt="Profile photo"/>
+        <span th:unless="${profilePhotoUrl != null}" th:text="${profileInitial ?: 'U'}">U</span>
+      </div>
+      <div class="profile-summary-meta">
+        <strong th:text="${#authentication.name != null ? #authentication.name : 'User'}">user</strong>
+        <small th:text="${roleLabel}">Role</small>
+      </div>
+    </div>
+    <div class="profile-info">
+      <p><strong>Username:</strong> <span th:text="${#authentication.name}">user</span></p>
+      <p><strong>Role:</strong> <span th:text="${roleLabel}">Role</span></p>
+    </div>
+    <div class="profile-panel-section">
+      <div class="profile-panel-section-title">Upload Photo</div>
+      <form th:action="${photoAction}" method="post" enctype="multipart/form-data">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <div class="form-group">
+          <input type="file" name="photo" class="form-control" accept="image/*" required>
+        </div>
+        <div class="profile-panel-actions">
+          <button type="submit">Upload</button>
+        </div>
+      </form>
+    </div>
+    <div class="profile-panel-section">
+      <div class="profile-panel-section-title">Change Password</div>
+      <form th:action="${passwordAction}" method="post">
+        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" name="currentPassword" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>New Password</label>
+          <input type="password" name="newPassword" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" name="confirmPassword" class="form-control" required>
+        </div>
+        <div class="profile-panel-actions">
+          <button type="submit">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -10,6 +10,9 @@
       <p class="dashboard-subtitle">Combined overview of Attendance and Library systems</p>
     </div>
 
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
     <div th:if="${attendanceAvailable == false}" class="alert alert-warning">
       Attendance stats are temporarily unavailable. Library data below is still current.
     </div>

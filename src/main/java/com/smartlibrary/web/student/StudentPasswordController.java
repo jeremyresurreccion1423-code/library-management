@@ -2,6 +2,8 @@ package com.smartlibrary.web.student;
 
 import com.smartlibrary.security.LibraryUserDetails;
 import com.smartlibrary.service.UserAccountService;
+import com.smartlibrary.web.SafeRedirects;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -37,9 +39,22 @@ public class StudentPasswordController {
             @AuthenticationPrincipal LibraryUserDetails user,
             @RequestParam String currentPassword,
             @RequestParam String newPassword,
+            @RequestParam(required = false) String confirmPassword,
             @RequestParam(required = false) String otp,
-            RedirectAttributes ra) {
+            RedirectAttributes ra,
+            HttpServletRequest request) {
         try {
+            // Inline profile-widget flow (Attendance-style): direct change with confirm
+            if (confirmPassword != null) {
+                if (!newPassword.equals(confirmPassword)) {
+                    ra.addFlashAttribute("error", "New password and confirmation do not match.");
+                    return SafeRedirects.toRefererOr(request, "/student/account/password");
+                }
+                userAccountService.changePassword(user.getUsername(), currentPassword, newPassword);
+                ra.addFlashAttribute("success", "Password updated successfully");
+                return SafeRedirects.toRefererOr(request, "/student");
+            }
+
             if (otp != null && !otp.isBlank()) {
                 String userEmail = user.getUser().getEmail();
                 userAccountService.verifyOtp(userEmail, otp);
@@ -57,7 +72,7 @@ public class StudentPasswordController {
             return "redirect:/student/account/password";
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
-            return "redirect:/student/account/password";
+            return SafeRedirects.toRefererOr(request, "/student/account/password");
         }
     }
 

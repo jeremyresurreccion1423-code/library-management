@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.smartlibrary.web.SafeRedirects;
+import jakarta.servlet.http.HttpServletRequest;
+
 @Controller
 @RequestMapping("/admin/profile")
 public class AdminProfileController {
@@ -77,7 +80,8 @@ public class AdminProfileController {
     public String uploadPhoto(
             @AuthenticationPrincipal LibraryUserDetails user,
             @RequestParam("photo") MultipartFile photo,
-            RedirectAttributes ra) {
+            RedirectAttributes ra,
+            HttpServletRequest request) {
         try {
             User fresh = userRepository.findById(user.getUser().getId()).orElseThrow();
             profilePhotoService.saveProfilePhoto(fresh.getUsername(), photo);
@@ -87,6 +91,6 @@ public class AdminProfileController {
         } catch (Exception e) {
             ra.addFlashAttribute("error", "Unable to upload profile photo.");
         }
-        return "redirect:/admin/profile";
+        return SafeRedirects.toRefererOr(request, "/admin/profile");
     }
 }
