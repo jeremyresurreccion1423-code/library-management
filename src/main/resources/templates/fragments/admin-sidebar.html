@@ -67,17 +67,17 @@
             </span>
             <i class="bi bi-chevron-down sidebar-group-arrow"></i>
           </button>
-          <div class="sidebar-group-panel">
-            <a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/dashboard')}">Dashboard</a>
-            <a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/departments')}">Departments</a>
-            <a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/create')}">Create / Add</a>
-            <a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/students')}">Students</a>
-            <a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/teachers')}">Teachers</a>
-            <a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/subjects')}">Subjects</a>
-            <a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/sections')}">Sections</a>
-            <a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/reports')}">Reports</a>
-            <a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/trends')}">Trends</a>
-          </div>
+          <ul class="sidebar-group-panel">
+            <li><a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/dashboard')}">Dashboard</a></li>
+            <li><a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/departments')}">Departments</a></li>
+            <li><a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/create')}">Create / Add</a></li>
+            <li><a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/students')}">Students</a></li>
+            <li><a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/teachers')}">Teachers</a></li>
+            <li><a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/subjects')}">Subjects</a></li>
+            <li><a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/sections')}">Sections</a></li>
+            <li><a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/reports')}">Reports</a></li>
+            <li><a class="sidebar-sublink" th:href="@{/super-admin/bridge/attendance(path='/admin/trends')}">Trends</a></li>
+          </ul>
         </div>
 
         <div class="sidebar-group" th:classappend="${navLibOpen} ? 'open' : ''">
@@ -88,18 +88,18 @@
             </span>
             <i class="bi bi-chevron-down sidebar-group-arrow"></i>
           </button>
-          <div class="sidebar-group-panel">
-            <a class="sidebar-sublink" data-nav-prefix="/admin" data-nav-exact="true" th:href="@{/admin}">Dashboard</a>
-            <a class="sidebar-sublink" data-nav-prefix="/admin/categories" th:href="@{/admin/categories}">Categories</a>
-            <a class="sidebar-sublink" data-nav-prefix="/admin/authors" th:href="@{/admin/authors}">Authors</a>
-            <a class="sidebar-sublink" data-nav-prefix="/admin/books" th:href="@{/admin/books}">Books</a>
-            <a class="sidebar-sublink" data-nav-prefix="/admin/scan-issue" th:href="@{/admin/scan-issue}">Scan &amp; Issue</a>
-            <a class="sidebar-sublink" data-nav-prefix="/admin/issues" data-nav-exclude="/admin/issues/reservations" th:href="@{/admin/issues}">Issue / Return</a>
-            <a class="sidebar-sublink" data-nav-prefix="/admin/issues/reservations" th:href="@{/admin/issues/reservations}">Reservations</a>
-            <a class="sidebar-sublink" data-nav-prefix="/admin/students" th:href="@{/admin/students}">Students</a>
-            <a class="sidebar-sublink" data-nav-prefix="/admin/analytics" th:href="@{/admin/analytics}">Analytics</a>
-            <a class="sidebar-sublink" data-nav-prefix="/admin/admins" th:href="@{/admin/admins}">Admins</a>
-          </div>
+          <ul class="sidebar-group-panel">
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin" data-nav-exact="true" th:href="@{/admin}">Dashboard</a></li>
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin/categories" th:href="@{/admin/categories}">Categories</a></li>
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin/authors" th:href="@{/admin/authors}">Authors</a></li>
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin/books" th:href="@{/admin/books}">Books</a></li>
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin/scan-issue" th:href="@{/admin/scan-issue}">Scan &amp; Issue</a></li>
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin/issues" data-nav-exclude="/admin/issues/reservations" th:href="@{/admin/issues}">Issue / Return</a></li>
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin/issues/reservations" th:href="@{/admin/issues/reservations}">Reservations</a></li>
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin/students" th:href="@{/admin/students}">Students</a></li>
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin/analytics" th:href="@{/admin/analytics}">Analytics</a></li>
+            <li><a class="sidebar-sublink" data-nav-prefix="/admin/admins" th:href="@{/admin/admins}">Admins</a></li>
+          </ul>
         </div>
       </nav>
     </aside>
@@ -216,12 +216,12 @@
 </th:block>
 
 <script th:fragment="sidebar-script">
-  function toggleSidebarGroup(button) {
-    const group = button.closest('.sidebar-group');
+  window.toggleSidebarGroup = function (button) {
+    const group = button && button.closest ? button.closest('.sidebar-group') : null;
     if (!group) return;
     group.classList.toggle('open');
-    button.setAttribute('aria-expanded', group.classList.contains('open'));
-  }
+    button.setAttribute('aria-expanded', group.classList.contains('open') ? 'true' : 'false');
+  };
 
   document.addEventListener('DOMContentLoaded', function () {
     const currentPath = window.location.pathname;
@@ -250,23 +250,24 @@
     });
   });
 
-  function showAdminLogoutModal() {
+  window.showAdminLogoutModal = function () {
     const modal = new bootstrap.Modal(document.getElementById('adminLogoutModal'));
     modal.show();
-  }
+  };
 
-  function toggleSidebar() {
+  window.toggleSidebar = function () {
     const sidebar = document.getElementById('adminSidebar');
     const main = document.querySelector('.dashboard-main');
+    if (!sidebar) return;
     sidebar.classList.toggle('collapsed');
     if (main) main.classList.toggle('expanded');
-  }
+  };
 
   document.addEventListener('click', function(e) {
     const sidebar = document.getElementById('adminSidebar');
     const toggle = document.querySelector('.header-bar-toggle');
     if (sidebar && !sidebar.classList.contains('collapsed') && window.innerWidth < 992) {
-      if (!sidebar.contains(e.target) && e.target !== toggle && !toggle.contains(e.target)) {
+      if (!sidebar.contains(e.target) && toggle && e.target !== toggle && !toggle.contains(e.target)) {
         sidebar.classList.add('collapsed');
         const main = document.querySelector('.dashboard-main');
         if (main) main.classList.add('expanded');
