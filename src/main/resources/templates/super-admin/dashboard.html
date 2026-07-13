@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard - System Control Center')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="dashboard-header">
+      <h1 class="dashboard-title">Dashboard</h1>
+      <p class="dashboard-subtitle">Combined overview of Attendance and Library systems</p>
+    </div>
+
+    <div th:if="${!attendanceAvailable}" class="alert alert-warning">
+      Attendance stats are temporarily unavailable. Library data below is still current.
+    </div>
+
+    <div class="card-lib mb-4">
+      <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="h5 mb-0">Attendance Management System</h2>
+        <span class="system-indicator system-indicator-attendance">Attendance</span>
+      </div>
+      <div class="dashboard-cards">
+        <div class="dashboard-card super-dashboard-card">
+          <span class="super-stat-tag">Attendance</span>
+          <div class="card-icon bg-green"><i class="bi bi-people"></i></div>
+          <div class="card-info">
+            <h6 class="card-label">Total Students</h6>
+            <p class="card-value" th:text="${attendance.totalStudents}">0</p>
+          </div>
+        </div>
+        <div class="dashboard-card super-dashboard-card">
+          <span class="super-stat-tag">Attendance</span>
+          <div class="card-icon bg-blue"><i class="bi bi-journal-bookmark"></i></div>
+          <div class="card-info">
+            <h6 class="card-label">Total Subjects</h6>
+            <p class="card-value" th:text="${attendance.totalSubjects}">0</p>
+          </div>
+        </div>
+        <div class="dashboard-card super-dashboard-card">
+          <span class="super-stat-tag">Attendance</span>
+          <div class="card-icon bg-teal"><i class="bi bi-calendar-check"></i></div>
+          <div class="card-info">
+            <h6 class="card-label">Today's Attendance</h6>
+            <p class="card-value" th:text="${attendance.todayAttendance}">0</p>
+          </div>
+        </div>
+        <div class="dashboard-card super-dashboard-card" th:if="${attendance.lowAttendanceCount > 0}">
+          <span class="super-stat-tag">Attendance</span>
+          <div class="card-icon bg-red"><i class="bi bi-exclamation-triangle"></i></div>
+          <div class="card-info">
+            <h6 class="card-label">Low Attendance Alerts</h6>
+            <p class="card-value text-danger" th:text="${attendance.lowAttendanceCount}">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-lib mb-4">
+      <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
+        <h2 class="h5 mb-0">Library Management System</h2>
+        <span class="system-indicator system-indicator-library">Library</span>
+      </div>
+      <div class="dashboard-cards">
+        <div class="dashboard-card super-dashboard-card">
+          <span class="super-stat-tag super-stat-tag-library">Library</span>
+          <div class="card-icon bg-blue"><i class="bi bi-book"></i></div>
+          <div class="card-info">
+            <h6 class="card-label">Books</h6>
+            <p class="card-value" th:text="${library.bookCount}">0</p>
+          </div>
+        </div>
+        <div class="dashboard-card super-dashboard-card">
+          <span class="super-stat-tag super-stat-tag-library">Library</span>
+          <div class="card-icon bg-green"><i class="bi bi-people"></i></div>
+          <div class="card-info">
+            <h6 class="card-label">Students</h6>
+            <p class="card-value" th:text="${library.studentCount}">0</p>
+          </div>
+        </div>
+        <div class="dashboard-card super-dashboard-card">
+          <span class="super-stat-tag super-stat-tag-library">Library</span>
+          <div class="card-icon bg-teal"><i class="bi bi-journal-check"></i></div>
+          <div class="card-info">
+            <h6 class="card-label">Active Loans</h6>
+            <p class="card-value text-success" th:text="${library.activeLoans}">0</p>
+          </div>
+        </div>
+        <div class="dashboard-card super-dashboard-card">
+          <span class="super-stat-tag super-stat-tag-library">Library</span>
+          <div class="card-icon bg-red"><i class="bi bi-exclamation-triangle"></i></div>
+          <div class="card-info">
+            <h6 class="card-label">Overdue</h6>
+            <p class="card-value text-danger" th:text="${library.overdueLoans}">0</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-md-6">
+        <a th:href="@{/admin}" class="card-lib text-decoration-none d-block p-4 h-100">
+          <h5 class="mb-2"><i class="bi bi-book-half me-2 text-success"></i>Library Admin</h5>
+          <p class="mb-0 text-muted small">Open the full library admin dashboard.</p>
+        </a>
+      </div>
+      <div class="col-md-6">
+        <a th:href="@{/super-admin/bridge/attendance(path='/super-admin')}" class="card-lib text-decoration-none d-block p-4 h-100">
+          <h5 class="mb-2"><i class="bi bi-calendar2-check me-2 text-success"></i>Attendance Admin</h5>
+          <p class="mb-0 text-muted small">Open the full attendance admin dashboard.</p>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
+</body>
+</html>

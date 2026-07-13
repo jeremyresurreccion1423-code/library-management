@@ -23,8 +23,7 @@ public class LibraryUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String role = user.getRole() == UserRole.ADMIN ? "ROLE_ADMIN" : "ROLE_STUDENT";
-        return List.of(new SimpleGrantedAuthority(role));
+        return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     @Override

@@ -27,6 +27,7 @@ public class HomeController {
         }
         
         String redirectPath = switch (user.getUser().getRole()) {
+            case SUPER_ADMIN -> "/super-admin";
             case ADMIN -> "/admin";
             case STUDENT -> "/student";
             case TEACHER -> "/login";

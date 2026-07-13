@@ -36,6 +36,42 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
+    public SecurityFilterChain superAdminChain(HttpSecurity http) throws Exception {
+        http.securityMatcher("/super-admin/**");
+
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/super-admin/login", "/super-admin/sso")
+                        .permitAll()
+                        .anyRequest().hasRole("SUPER_ADMIN"))
+                .formLogin(form -> form
+                        .loginPage("/super-admin/login")
+                        .loginProcessingUrl("/super-admin/login")
+                        .failureHandler((request, response, exception) -> {
+                            HttpSession session = request.getSession();
+                            session.setAttribute("AUTH_ERROR", "Invalid Super Admin credentials.");
+                            response.sendRedirect("/super-admin/login");
+                        })
+                        .successHandler((request, response, authentication) -> response.sendRedirect("/super-admin"))
+                        .permitAll())
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/super-admin/login")))
+                .logout(logout -> logout
+                        .logoutUrl("/super-admin/logout")
+                        .invalidateHttpSession(true)
+                        .clearAuthentication(true)
+                        .deleteCookies("JSESSIONID")
+                        .logoutSuccessUrl("/super-admin/login?logout=true")
+                        .permitAll())
+                .headers(headers -> headers
+                        .cacheControl(cache -> {})
+                        .frameOptions(frameOptions -> frameOptions.sameOrigin()));
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain adminChain(HttpSecurity http) throws Exception {
         http.securityMatcher(new OrRequestMatcher(
                 new AntPathRequestMatcher("/admin/**"),
@@ -51,7 +87,7 @@ public class SecurityConfig {
                                 "/admin/login",
                                 "/forgot-password")
                         .permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/admin/login")
@@ -91,7 +127,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(2)
+    @Order(3)
     public SecurityFilterChain appChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
@@ -125,7 +161,8 @@ public class SecurityConfig {
                         .successHandler((request, response, authentication) -> {
                             var principal = authentication.getPrincipal();
                             if (principal instanceof LibraryUserDetails details) {
-                                if (details.getUser().getRole() == UserRole.ADMIN) {
+                                if (details.getUser().getRole() == UserRole.ADMIN
+                                        || details.getUser().getRole() == UserRole.SUPER_ADMIN) {
                                     new SecurityContextLogoutHandler().logout(request, response, authentication);
                                     request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password.");
                                     response.sendRedirect("/login");
