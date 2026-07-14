@@ -95,7 +95,7 @@ public class AdminAnalyticsController {
             if (sent) {
                 ra.addFlashAttribute("success", "Reminder sent to " + issue.getStudent().getFullName());
             } else {
-                ra.addFlashAttribute("error", "Reminder failed. Check Gmail SMTP credentials/app password.");
+                ra.addFlashAttribute("error", "Reminder failed. Check Brevo SMTP MAIL_PASSWORD configuration.");
             }
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());

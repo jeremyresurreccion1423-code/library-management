@@ -245,7 +245,7 @@ public class UserAccountService {
         boolean sent = mailNotificationService.sendOtpCode(finalEmail, otpCode);
         if (!sent) {
             throw new IllegalStateException(
-                    "Could not send OTP email. Check mail username/app password settings and try again.");
+                    "Could not send OTP email. Check Brevo SMTP MAIL_PASSWORD settings and try again.");
         }
     }
 

@@ -1,15 +1,16 @@
 package com.smartlibrary.service;
 
+import com.smartlibrary.config.CentralMailProperties;
 import com.smartlibrary.config.LibraryProperties;
 import com.smartlibrary.entity.BookIssue;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -23,10 +24,8 @@ public class MailNotificationService {
 
     private final JavaMailSender mailSender;
     private final LibraryProperties libraryProperties;
+    private final CentralMailProperties centralMailProperties;
     private final FineCalculator fineCalculator;
-
-    @Value("${spring.mail.host:}")
-    private String mailHost;
 
     @Value("${spring.mail.password:}")
     private String mailPassword;
@@ -34,14 +33,16 @@ public class MailNotificationService {
     public MailNotificationService(
             JavaMailSender mailSender,
             LibraryProperties libraryProperties,
+            CentralMailProperties centralMailProperties,
             FineCalculator fineCalculator) {
         this.mailSender = mailSender;
         this.libraryProperties = libraryProperties;
+        this.centralMailProperties = centralMailProperties;
         this.fineCalculator = fineCalculator;
     }
 
     public boolean sendDueReminder(BookIssue issue) {
-        if (mailHost == null || mailHost.isBlank()) {
+        if (!isMailConfigured()) {
             log.info("[EMAIL REMINDER] To: {} | Book: '{}' | Due: {}",
                     issue.getStudent().getUser().getEmail(),
                     issue.getBook().getTitle(),
@@ -64,7 +65,7 @@ public class MailNotificationService {
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setFrom(libraryProperties.getMailFrom());
+            helper.setFrom(centralMailProperties.getFromEmail(), centralMailProperties.getFromName());
             helper.setTo(user.getEmail());
             helper.setSubject(subject);
             helper.setText(plainText, html);
@@ -169,27 +170,57 @@ public class MailNotificationService {
     }
 
     public boolean sendOtpCode(String email, String otpCode) {
-        if (mailHost == null || mailHost.isBlank() || mailPassword == null || mailPassword.isBlank()) {
+        if (!isMailConfigured()) {
             log.info("Mail not configured — OTP for {}: {}", email, otpCode);
             return true;
         }
-        
+
         try {
-            SimpleMailMessage msg = new SimpleMailMessage();
-            msg.setFrom(libraryProperties.getMailFrom());
-            msg.setTo(email);
-            msg.setSubject("Smart Library - Registration OTP Code");
-            msg.setText("Welcome to Smart Library!\n\n"
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            helper.setFrom(centralMailProperties.getFromEmail(), centralMailProperties.getFromName());
+            helper.setTo(email);
+            helper.setSubject("Smart Library - Registration OTP Code");
+            helper.setText("Welcome to Smart Library!\n\n"
                     + "Your One-Time Password (OTP) for registration is:\n\n"
                     + otpCode + "\n\n"
                     + "This code is valid for " + libraryProperties.getOtpExpiryMinutes() + " minutes. Do not share this code with anyone.\n\n"
                     + "If you did not request this code, please ignore this email.\n\n"
-                    + "— Smart Library Team");
-            mailSender.send(msg);
+                    + "— Smart Library Team", false);
+            mailSender.send(mimeMessage);
             return true;
         } catch (Exception e) {
             log.error("Could not send OTP email to {}: {}", email, e.getMessage(), e);
             return false;
         }
+    }
+
+    private boolean isMailConfigured() {
+        String password = resolvePassword();
+        return StringUtils.hasText(password)
+                && StringUtils.hasText(centralMailProperties.getFromEmail());
+    }
+
+    private String resolvePassword() {
+        String fromEnv = firstNonBlank(
+                System.getenv("MAIL_PASSWORD"),
+                System.getenv("BREVO_SMTP_PASSWORD"),
+                System.getenv("SPRING_MAIL_PASSWORD"));
+        if (StringUtils.hasText(fromEnv)) {
+            return fromEnv.replace(" ", "").trim();
+        }
+        return mailPassword == null ? "" : mailPassword.replace(" ", "").trim();
+    }
+
+    private static String firstNonBlank(String... values) {
+        if (values == null) {
+            return null;
+        }
+        for (String value : values) {
+            if (StringUtils.hasText(value)) {
+                return value;
+            }
+        }
+        return null;
     }
 }
