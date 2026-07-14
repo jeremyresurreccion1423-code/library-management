@@ -287,6 +287,7 @@
           </p>
 
           <div th:if="${message != null}" class="alert alert-info alert-compact" th:text="${message}"></div>
+          <div th:if="${error != null}" class="alert alert-danger alert-compact" th:text="${error}"></div>
           <div th:if="${devOtp != null}" class="alert alert-warning alert-compact">
             Email not configured for local dev. Your OTP is: <strong th:text="${devOtp}"></strong>
           </div>

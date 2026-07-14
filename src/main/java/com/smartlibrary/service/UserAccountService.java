@@ -253,7 +253,7 @@ public class UserAccountService {
 
         boolean sent = mailNotificationService.sendOtpCode(finalEmail, otpCode);
         if (!sent) {
-            throw new IllegalStateException(
+            throw new IllegalArgumentException(
                     "Could not send OTP email. Check Brevo SMTP MAIL_PASSWORD settings and try again.");
         }
     }
@@ -276,7 +276,12 @@ public class UserAccountService {
     public StudentProfile registerAndSendOtp(
             String username, String rawPassword, String email, String fullName, String phone, String course) {
         StudentProfile profile = registerStudent(username, rawPassword, email, fullName, phone, course);
-        generateAndSendOtp(email);
+        try {
+            generateAndSendOtp(email);
+        } catch (Exception mailEx) {
+            // Keep unverified account so the OTP screen can open and user can Resend.
+            log.warn("OTP email failed after registration for {}: {}", email, mailEx.getMessage());
+        }
         return profile;
     }
 

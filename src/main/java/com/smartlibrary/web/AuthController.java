@@ -150,12 +150,18 @@ public class AuthController {
             ra.addFlashAttribute("course", course);
             ra.addFlashAttribute("firstName", resolvedFirstName);
             ra.addFlashAttribute("lastName", resolvedLastName);
-            String devOtp = userAccountService.getLastGeneratedOtp(email);
-            if (devOtp != null && (mailHost == null || mailHost.isBlank() || mailPassword == null || mailPassword.isBlank())) {
-                ra.addFlashAttribute("devOtp", devOtp);
+            String lastOtp = userAccountService.getLastGeneratedOtp(email);
+            if (lastOtp != null && (mailHost == null || mailHost.isBlank() || mailPassword == null || mailPassword.isBlank())) {
+                ra.addFlashAttribute("devOtp", lastOtp);
             }
-            ra.addFlashAttribute("message", "Account created successfully! Enter the OTP code to verify your email.");
-            logger.info("New registration initiated for email: {}", email);
+            if (lastOtp == null) {
+                ra.addFlashAttribute("error",
+                        "Account created, but the OTP email could not be sent. Click Resend OTP or check mail configuration.");
+            } else {
+                ra.addFlashAttribute("message",
+                        "Account created successfully! Enter the OTP code sent to your email.");
+            }
+            logger.info("New registration initiated for email: {} (otpStored={})", email, lastOtp != null);
             return "redirect:/register";
         } catch (IllegalArgumentException e) {
             String errorMsg = e.getMessage();

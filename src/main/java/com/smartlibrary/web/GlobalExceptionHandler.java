@@ -27,6 +27,13 @@ public class GlobalExceptionHandler {
     public String handleIllegalState(IllegalStateException ex, HttpServletRequest request, RedirectAttributes ra) {
         logger.warn("Business rule violation at {}: {}", request.getRequestURI(), ex.getMessage());
         ra.addFlashAttribute("error", ex.getMessage());
+        String path = request.getRequestURI() == null ? "" : request.getRequestURI();
+        if (path.startsWith("/register")) {
+            return "redirect:/register";
+        }
+        if (path.startsWith("/forgot-password")) {
+            return "redirect:/forgot-password";
+        }
         return safeRedirect(request);
     }
 
@@ -80,10 +87,16 @@ public class GlobalExceptionHandler {
     private String safeRedirect(HttpServletRequest request) {
         if ("POST".equalsIgnoreCase(request.getMethod())) {
             String uri = request.getRequestURI();
-            if (uri.startsWith("/admin/books/save")) {
+            if (uri != null && uri.startsWith("/register")) {
+                return "redirect:/register";
+            }
+            if (uri != null && uri.startsWith("/forgot-password")) {
+                return "redirect:/forgot-password";
+            }
+            if (uri != null && uri.startsWith("/admin/books/save")) {
                 return "redirect:/admin/books/new";
             }
-            if (uri.startsWith("/admin/")) {
+            if (uri != null && uri.startsWith("/admin/")) {
                 return "redirect:/admin/books";
             }
             return "redirect:/";
