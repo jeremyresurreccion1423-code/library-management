@@ -9,6 +9,8 @@ import com.smartlibrary.repository.OtpRepository;
 import com.smartlibrary.repository.StudentProfileRepository;
 import com.smartlibrary.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +19,7 @@ import java.time.LocalDateTime;
 
 @Service
 public class UserAccountService {
+    private static final Logger log = LoggerFactory.getLogger(UserAccountService.class);
     private static final SecureRandom OTP_RANDOM = new SecureRandom();
 
     private final UserRepository userRepository;
@@ -115,7 +118,13 @@ public class UserAccountService {
         
         studentProfileRepository.save(profile);
         userRepository.save(user);
-        sharedAttendanceStudentProfileSyncService.syncFromLibraryRegistration(user, profile);
+        try {
+            sharedAttendanceStudentProfileSyncService.syncFromLibraryRegistration(user, profile);
+        } catch (Exception syncEx) {
+            // Library registration must succeed even if Attendance mirror has a temporary conflict.
+            log.warn("Attendance sync after Library registration failed for {}: {}",
+                    user.getUsername(), syncEx.getMessage());
+        }
         return profile;
     }
 
@@ -281,8 +290,14 @@ public class UserAccountService {
         user.setEnabled(true);
         userRepository.save(user);
 
-        studentProfileRepository.findByUserId(user.getId()).ifPresent(profile ->
-                sharedAttendanceStudentProfileSyncService.syncFromLibraryRegistration(user, profile));
+        studentProfileRepository.findByUserId(user.getId()).ifPresent(profile -> {
+            try {
+                sharedAttendanceStudentProfileSyncService.syncFromLibraryRegistration(user, profile);
+            } catch (Exception syncEx) {
+                log.warn("Attendance sync after OTP verify failed for {}: {}",
+                        user.getUsername(), syncEx.getMessage());
+            }
+        });
 
         return verified;
     }

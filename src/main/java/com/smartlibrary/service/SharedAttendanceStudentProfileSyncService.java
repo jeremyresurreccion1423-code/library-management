@@ -60,23 +60,33 @@ public class SharedAttendanceStudentProfileSyncService {
             email = null;
         }
 
-        jdbcTemplate.update("""
-                INSERT INTO public.students
-                    (user_id, student_number, full_name, email, contact_number,
-                     department_id, section_id, year_level, status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
-                """,
-                user.getId(),
-                studentNumber,
-                stringValue(libraryProfile.getFullName()),
-                email,
-                stringValue(libraryProfile.getPhone()),
-                departmentId,
-                sectionId,
-                "1st Year",
-                "ACTIVE");
+        try {
+            jdbcTemplate.update("""
+                    INSERT INTO public.students
+                        (user_id, student_number, full_name, email, contact_number,
+                         department_id, section_id, year_level, status, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                    """,
+                    user.getId(),
+                    studentNumber,
+                    stringValue(libraryProfile.getFullName()),
+                    email,
+                    stringValue(libraryProfile.getPhone()),
+                    departmentId,
+                    sectionId,
+                    "1st Year",
+                    "ACTIVE");
 
-        log.info("Auto-provisioned Attendance student {} for Library user {}", studentNumber, user.getUsername());
+            log.info("Auto-provisioned Attendance student {} for Library user {}", studentNumber, user.getUsername());
+        } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+            // Concurrent registration or leftover row — treat as already synced.
+            if (attendanceStudentExists(user.getId(), studentNumber)) {
+                log.info("Attendance student {} already exists for user {}; treating sync as complete",
+                        studentNumber, user.getUsername());
+                return;
+            }
+            throw ex;
+        }
     }
 
     private boolean attendanceStudentExists(Long userId, String studentNumber) {
