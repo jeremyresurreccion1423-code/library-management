@@ -10,6 +10,8 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.CompletableFuture;
+
 @Service
 public class LoginNotificationService {
 
@@ -29,6 +31,7 @@ public class LoginNotificationService {
         this.libraryProperties = libraryProperties;
     }
 
+    /** Non-blocking: login continues immediately; email sends in background. */
     public void notifyLogin(User user, HttpServletRequest request) {
         if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
             return;
@@ -36,35 +39,42 @@ public class LoginNotificationService {
         if (mailHost == null || mailHost.isBlank() || mailPassword == null || mailPassword.isBlank()) {
             return;
         }
-        try {
-            String ip = AuditService.clientIp(request);
-            String ua = request != null ? request.getHeader("User-Agent") : "Unknown";
-            String device = summarizeDevice(ua);
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom(libraryProperties.getMailFrom());
-            message.setTo(user.getEmail());
-            message.setSubject("New Login - Smart Library");
-            message.setText("""
-                    New Login Detected
 
-                    Username: %s
-                    Role: %s
-                    Device: %s
-                    IP Address: %s
-                    Time: %s
+        String username = user.getUsername();
+        String role = user.getRole() != null ? user.getRole().name() : "";
+        String email = user.getEmail();
+        String ip = AuditService.clientIp(request);
+        String device = summarizeDevice(request != null ? request.getHeader("User-Agent") : null);
+        String from = libraryProperties.getMailFrom();
 
-                    If this was not you, change your password immediately and contact an administrator.
-                    """.formatted(
-                    user.getUsername(),
-                    user.getRole(),
-                    device,
-                    ip != null ? ip : "Unknown",
-                    java.time.LocalDateTime.now()
-            ));
-            mailSender.send(message);
-        } catch (Exception e) {
-            log.warn("Login notification email failed for {}: {}", user.getUsername(), e.getMessage());
-        }
+        CompletableFuture.runAsync(() -> {
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom(from);
+                message.setTo(email);
+                message.setSubject("New Login - Smart Library");
+                message.setText("""
+                        New Login Detected
+
+                        Username: %s
+                        Role: %s
+                        Device: %s
+                        IP Address: %s
+                        Time: %s
+
+                        If this was not you, change your password immediately and contact an administrator.
+                        """.formatted(
+                        username,
+                        role,
+                        device,
+                        ip != null ? ip : "Unknown",
+                        java.time.LocalDateTime.now()
+                ));
+                mailSender.send(message);
+            } catch (Exception e) {
+                log.warn("Login notification email failed for {}: {}", username, e.getMessage());
+            }
+        });
     }
 
     private static String summarizeDevice(String userAgent) {
