@@ -1,11 +1,11 @@
 package com.smartlibrary.security;
 
 import com.smartlibrary.entity.User;
-import com.smartlibrary.model.UserRole;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -43,7 +43,10 @@ public class LibraryUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        if (user.getLockedUntil() == null) {
+            return true;
+        }
+        return !user.getLockedUntil().isAfter(LocalDateTime.now());
     }
 
     @Override

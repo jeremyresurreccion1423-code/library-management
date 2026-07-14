@@ -5,9 +5,12 @@
 <div class="dashboard-wrapper">
   <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
   <main class="dashboard-main">
-    <div class="dashboard-header">
-      <h1 class="dashboard-title">Dashboard</h1>
-      <p class="dashboard-subtitle">Combined overview of Attendance and Library systems</p>
+    <div class="dashboard-header with-profile">
+      <div>
+        <h1 class="dashboard-title">Dashboard</h1>
+        <p class="dashboard-subtitle">Combined overview of Attendance and Library systems</p>
+      </div>
+      <div th:replace="~{fragments/profile-widget :: widget(photoAction=@{/admin/profile/photo}, passwordAction=@{/admin/account/password}, roleLabel='Super Admin', panelId='sa-dash-profile-panel', logoutMode='super-admin')}"></div>
     </div>
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>

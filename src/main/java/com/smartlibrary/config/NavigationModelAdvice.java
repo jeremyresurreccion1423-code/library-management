@@ -14,5 +14,6 @@ public class NavigationModelAdvice {
         model.addAttribute("navUri", uri);
         model.addAttribute("navLibOpen", uri.startsWith("/admin"));
         model.addAttribute("navDashboardActive", "/super-admin".equals(uri) || "/super-admin/".equals(uri));
+        model.addAttribute("navSecurityActive", uri.startsWith("/super-admin/security"));
     }
 }

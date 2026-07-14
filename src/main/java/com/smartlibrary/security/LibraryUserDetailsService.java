@@ -3,6 +3,7 @@ package com.smartlibrary.security;
 import com.smartlibrary.entity.User;
 import com.smartlibrary.repository.StudentProfileRepository;
 import com.smartlibrary.repository.UserRepository;
+import com.smartlibrary.service.AccountLockoutService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,16 +17,19 @@ public class LibraryUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final StudentProfileRepository studentProfileRepository;
+    private final AccountLockoutService accountLockoutService;
 
     public LibraryUserDetailsService(
             UserRepository userRepository,
-            StudentProfileRepository studentProfileRepository) {
+            StudentProfileRepository studentProfileRepository,
+            AccountLockoutService accountLockoutService) {
         this.userRepository = userRepository;
         this.studentProfileRepository = studentProfileRepository;
+        this.accountLockoutService = accountLockoutService;
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public UserDetails loadUserByUsername(String usernameOrIdOrEmail) throws UsernameNotFoundException {
         String key = usernameOrIdOrEmail == null ? "" : usernameOrIdOrEmail.trim();
         if (key.isEmpty()) {
@@ -42,7 +46,8 @@ public class LibraryUserDetailsService implements UserDetailsService {
             user = userRepository.findByEmailIgnoreCase(key);
         }
 
-        return user.map(LibraryUserDetails::new)
-                .orElseThrow(() -> new UsernameNotFoundException(key));
+        User resolved = user.orElseThrow(() -> new UsernameNotFoundException(key));
+        accountLockoutService.clearExpiredLock(resolved);
+        return new LibraryUserDetails(resolved);
     }
 }

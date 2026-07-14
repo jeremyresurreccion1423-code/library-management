@@ -28,7 +28,21 @@ Set credentials in `src/main/resources/application-local.properties` (copy from 
 
 Use the **same Supabase connection string** as Attendance (Session Pooler URL + `postgres.<project-ref>` username).
 
-## Phase boundaries
+## Security features migration
+
+Run `security_features.sql` in Supabase SQL Editor (shared `public.users` lockout columns + `library.audit_logs`):
+
+```
+security_features.sql
+```
+
+Adds:
+- `public.users.failed_login_attempts`
+- `public.users.locked_until`
+- `library.audit_logs` (Audit Trail for Library)
+
+Safe to re-run (`IF NOT EXISTS`).
+
 
 | Phase | Scope |
 |-------|-------|

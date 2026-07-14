@@ -1,37 +1,61 @@
 package com.smartlibrary.config;
 
-import com.smartlibrary.config.LibraryProperties;
-import com.smartlibrary.model.UserRole;
-import com.smartlibrary.security.LibraryUserDetails;
-import jakarta.servlet.http.HttpSession;
+import com.smartlibrary.security.AuditLogoutHandler;
+import com.smartlibrary.security.LoginAuthenticationFailureHandler;
+import com.smartlibrary.security.LoginAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final LibraryProperties libraryProperties;
+    private final LoginAuthenticationSuccessHandler loginSuccessHandler;
+    private final LoginAuthenticationFailureHandler loginFailureHandler;
+    private final AuditLogoutHandler auditLogoutHandler;
 
-    public SecurityConfig(LibraryProperties libraryProperties) {
-        this.libraryProperties = libraryProperties;
+    public SecurityConfig(
+            LoginAuthenticationSuccessHandler loginSuccessHandler,
+            LoginAuthenticationFailureHandler loginFailureHandler,
+            AuditLogoutHandler auditLogoutHandler) {
+        this.loginSuccessHandler = loginSuccessHandler;
+        this.loginFailureHandler = loginFailureHandler;
+        this.auditLogoutHandler = auditLogoutHandler;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    private void applySecurityHeaders(HeadersConfigurer<HttpSecurity> headers) {
+        headers
+                .cacheControl(cache -> {})
+                .frameOptions(frame -> frame.sameOrigin())
+                .contentTypeOptions(contentType -> {})
+                .referrerPolicy(referrer -> referrer.policy(
+                        ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                .contentSecurityPolicy(csp -> csp.policyDirectives(
+                        "default-src 'self'; "
+                                + "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+                                + "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+                                + "img-src 'self' data: blob:; "
+                                + "font-src 'self' data: https://cdn.jsdelivr.net https://fonts.gstatic.com; "
+                                + "connect-src 'self'; "
+                                + "frame-ancestors 'self'"));
     }
 
     @Bean
@@ -47,34 +71,20 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/super-admin/login")
                         .loginProcessingUrl("/super-admin/login")
-                        .failureHandler((request, response, exception) -> {
-                            HttpSession session = request.getSession();
-                            session.setAttribute("AUTH_ERROR", "Invalid Super Admin credentials.");
-                            response.sendRedirect("/super-admin/login");
-                        })
-                        .successHandler((request, response, authentication) -> {
-                            boolean isSuperAdmin = authentication.getAuthorities().stream()
-                                    .anyMatch(a -> "ROLE_SUPER_ADMIN".equals(a.getAuthority()));
-                            if (!isSuperAdmin) {
-                                new SecurityContextLogoutHandler().logout(request, response, authentication);
-                                response.sendRedirect("/super-admin/login");
-                                return;
-                            }
-                            response.sendRedirect("/super-admin");
-                        })
+                        .successHandler(loginSuccessHandler)
+                        .failureHandler(loginFailureHandler)
                         .permitAll())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/super-admin/login")))
                 .logout(logout -> logout
                         .logoutUrl("/super-admin/logout")
+                        .addLogoutHandler(auditLogoutHandler)
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
                         .logoutSuccessUrl("/super-admin/login?logout=true")
                         .permitAll())
-                .headers(headers -> headers
-                        .cacheControl(cache -> {})
-                        .frameOptions(frameOptions -> frameOptions.sameOrigin()));
+                .headers(this::applySecurityHeaders);
 
         return http.build();
     }
@@ -101,36 +111,20 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/admin/login")
                         .loginProcessingUrl("/admin/login")
-                        .failureHandler((request, response, exception) -> {
-                            HttpSession session = request.getSession();
-                            session.setAttribute("AUTH_ERROR", "Invalid username or password.");
-                            response.sendRedirect("/admin/login");
-                        })
-                        .successHandler((request, response, authentication) -> {
-                            var principal = authentication.getPrincipal();
-                            if (principal instanceof LibraryUserDetails details) {
-                                if (details.getUser().getRole() != UserRole.ADMIN) {
-                                    new SecurityContextLogoutHandler().logout(request, response, authentication);
-                                    request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password.");
-                                    response.sendRedirect("/admin/login");
-                                    return;
-                                }
-                            }
-                            response.sendRedirect("/admin");
-                        })
+                        .successHandler(loginSuccessHandler)
+                        .failureHandler(loginFailureHandler)
                         .permitAll())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/admin/login")))
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")
+                        .addLogoutHandler(auditLogoutHandler)
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
                         .logoutSuccessUrl("/admin/login?logout=true")
                         .permitAll())
-                .headers(headers -> headers
-                        .cacheControl(cache -> {})
-                        .frameOptions(frameOptions -> frameOptions.sameOrigin()));
+                .headers(this::applySecurityHeaders);
 
         return http.build();
     }
@@ -162,43 +156,18 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/login")
                         .loginProcessingUrl("/login")
-                        .failureHandler((request, response, exception) -> {
-                            HttpSession session = request.getSession();
-                            session.setAttribute("AUTH_ERROR", "Invalid username or password.");
-                            response.sendRedirect("/login");
-                        })
-                        .successHandler((request, response, authentication) -> {
-                            var principal = authentication.getPrincipal();
-                            if (principal instanceof LibraryUserDetails details) {
-                                if (details.getUser().getRole() == UserRole.ADMIN
-                                        || details.getUser().getRole() == UserRole.SUPER_ADMIN) {
-                                    new SecurityContextLogoutHandler().logout(request, response, authentication);
-                                    request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password.");
-                                    response.sendRedirect("/login");
-                                    return;
-                                }
-                                if (details.getUser().getRole() == UserRole.TEACHER) {
-                                    new SecurityContextLogoutHandler().logout(request, response, authentication);
-                                    request.getSession().setAttribute("AUTH_ERROR",
-                                            "Teacher accounts must sign in via the Attendance System: "
-                                                    + libraryProperties.getAttendanceLoginUrl());
-                                    response.sendRedirect("/login");
-                                    return;
-                                }
-                            }
-                            response.sendRedirect("/redirect-home");
-                        })
+                        .successHandler(loginSuccessHandler)
+                        .failureHandler(loginFailureHandler)
                         .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/logout")
+                        .addLogoutHandler(auditLogoutHandler)
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
                         .logoutSuccessUrl("/login?logout=true")
                         .permitAll())
-                .headers(headers -> headers
-                        .cacheControl(cache -> {})
-                        .frameOptions(frameOptions -> frameOptions.sameOrigin()));
+                .headers(this::applySecurityHeaders);
 
         return http.build();
     }

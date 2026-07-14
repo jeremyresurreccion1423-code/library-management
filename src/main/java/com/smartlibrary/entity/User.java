@@ -9,6 +9,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(
         name = "users",
@@ -45,6 +47,12 @@ public class User extends BaseEntity {
 
     @Column(nullable = false)
     private boolean enabled = true;
+
+    @Column(name = "failed_login_attempts")
+    private Integer failedLoginAttempts = 0;
+
+    @Column(name = "locked_until")
+    private LocalDateTime lockedUntil;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private StudentProfile studentProfile;
