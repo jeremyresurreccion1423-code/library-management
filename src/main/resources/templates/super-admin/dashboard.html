@@ -5,10 +5,10 @@
 <div class="dashboard-wrapper">
   <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
   <main class="dashboard-main">
-    <div class="dashboard-header with-profile">
+    <div class="page-header page-header--ams with-profile">
       <div>
-        <h1 class="dashboard-title">Dashboard</h1>
-        <p class="dashboard-subtitle">Combined overview of Attendance and Library systems</p>
+        <h1>Dashboard</h1>
+        <span>Combined overview of Attendance and Library systems</span>
       </div>
       <div th:replace="~{fragments/profile-widget :: widget(photoAction=@{/admin/profile/photo}, passwordAction=@{/admin/account/password}, roleLabel='Super Admin', panelId='sa-dash-profile-panel', logoutMode='super-admin')}"></div>
     </div>
@@ -16,105 +16,72 @@
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <div th:if="${attendanceAvailable == false}" class="alert alert-warning">
+    <div th:if="${attendanceAvailable == false}" class="alert alert-warning ams-alert-error">
       Attendance stats are temporarily unavailable. Library data below is still current.
     </div>
 
-    <div class="card-lib mb-4">
-      <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-        <h2 class="h5 mb-0">Attendance Management System</h2>
+    <div class="ams-card">
+      <div class="super-dashboard-section-head">
+        <h3>Attendance Management System</h3>
         <span class="system-indicator system-indicator-attendance">Attendance</span>
       </div>
-      <div class="dashboard-cards">
-        <div class="dashboard-card super-dashboard-card">
+      <div class="ams-stats-grid">
+        <div class="ams-stat-card super-stat-card">
           <span class="super-stat-tag">Attendance</span>
-          <div class="card-icon bg-green"><i class="bi bi-people"></i></div>
-          <div class="card-info">
-            <h6 class="card-label">Total Students</h6>
-            <p class="card-value" th:text="${attTotalStudents}">0</p>
-          </div>
+          <div class="value" th:text="${attTotalStudents}">0</div>
+          <div class="label">Total Students</div>
         </div>
-        <div class="dashboard-card super-dashboard-card">
+        <div class="ams-stat-card super-stat-card">
           <span class="super-stat-tag">Attendance</span>
-          <div class="card-icon bg-blue"><i class="bi bi-journal-bookmark"></i></div>
-          <div class="card-info">
-            <h6 class="card-label">Total Subjects</h6>
-            <p class="card-value" th:text="${attTotalSubjects}">0</p>
-          </div>
+          <div class="value" th:text="${attTotalSubjects}">0</div>
+          <div class="label">Total Subjects</div>
         </div>
-        <div class="dashboard-card super-dashboard-card">
+        <div class="ams-stat-card super-stat-card">
           <span class="super-stat-tag">Attendance</span>
-          <div class="card-icon bg-teal"><i class="bi bi-calendar-check"></i></div>
-          <div class="card-info">
-            <h6 class="card-label">Today's Attendance</h6>
-            <p class="card-value" th:text="${attTodayAttendance}">0</p>
-          </div>
+          <div class="value" th:text="${attTodayAttendance}">0</div>
+          <div class="label">Today's Attendance</div>
         </div>
-        <div class="dashboard-card super-dashboard-card" th:if="${attLowAttendanceCount > 0}">
+        <div class="ams-stat-card super-stat-card" th:if="${attLowAttendanceCount > 0}">
           <span class="super-stat-tag">Attendance</span>
-          <div class="card-icon bg-red"><i class="bi bi-exclamation-triangle"></i></div>
-          <div class="card-info">
-            <h6 class="card-label">Low Attendance Alerts</h6>
-            <p class="card-value text-danger" th:text="${attLowAttendanceCount}">0</p>
-          </div>
+          <div class="value" style="color:#dc2626;" th:text="${attLowAttendanceCount}">0</div>
+          <div class="label">Low Attendance Alerts</div>
         </div>
       </div>
     </div>
 
-    <div class="card-lib mb-4">
-      <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-        <h2 class="h5 mb-0">Library Management System</h2>
+    <div class="ams-card">
+      <div class="super-dashboard-section-head">
+        <h3>Library Management System</h3>
         <span class="system-indicator system-indicator-library">Library</span>
       </div>
-      <div class="dashboard-cards">
-        <div class="dashboard-card super-dashboard-card">
+      <div class="ams-stats-grid">
+        <div class="ams-stat-card super-stat-card">
           <span class="super-stat-tag super-stat-tag-library">Library</span>
-          <div class="card-icon bg-blue"><i class="bi bi-book"></i></div>
-          <div class="card-info">
-            <h6 class="card-label">Books</h6>
-            <p class="card-value" th:text="${libBookCount}">0</p>
-          </div>
+          <div class="value" th:text="${libBookCount}">0</div>
+          <div class="label">Books</div>
         </div>
-        <div class="dashboard-card super-dashboard-card">
+        <div class="ams-stat-card super-stat-card">
           <span class="super-stat-tag super-stat-tag-library">Library</span>
-          <div class="card-icon bg-green"><i class="bi bi-people"></i></div>
-          <div class="card-info">
-            <h6 class="card-label">Students</h6>
-            <p class="card-value" th:text="${libStudentCount}">0</p>
-          </div>
+          <div class="value" th:text="${libStudentCount}">0</div>
+          <div class="label">Students</div>
         </div>
-        <div class="dashboard-card super-dashboard-card">
+        <div class="ams-stat-card super-stat-card">
           <span class="super-stat-tag super-stat-tag-library">Library</span>
-          <div class="card-icon bg-teal"><i class="bi bi-journal-check"></i></div>
-          <div class="card-info">
-            <h6 class="card-label">Active Loans</h6>
-            <p class="card-value text-success" th:text="${libActiveLoans}">0</p>
-          </div>
+          <div class="value" th:text="${libActiveLoans}">0</div>
+          <div class="label">Active Loans</div>
         </div>
-        <div class="dashboard-card super-dashboard-card">
+        <div class="ams-stat-card super-stat-card">
           <span class="super-stat-tag super-stat-tag-library">Library</span>
-          <div class="card-icon bg-red"><i class="bi bi-exclamation-triangle"></i></div>
-          <div class="card-info">
-            <h6 class="card-label">Overdue</h6>
-            <p class="card-value text-danger" th:text="${libOverdueLoans}">0</p>
-          </div>
+          <div class="value" th:style="${libOverdueLoans > 0} ? 'color:#dc2626;' : ''" th:text="${libOverdueLoans}">0</div>
+          <div class="label">Overdue Loans</div>
         </div>
       </div>
     </div>
 
-    <div class="row g-3">
-      <div class="col-md-6">
-        <a th:href="@{/admin}" class="card-lib text-decoration-none d-block p-4 h-100">
-          <h5 class="mb-2"><i class="bi bi-book-half me-2 text-success"></i>Library Admin</h5>
-          <p class="mb-0 text-muted small">Open the full library admin dashboard.</p>
-        </a>
-      </div>
-      <div class="col-md-6">
-        <a th:href="@{/super-admin/bridge/attendance(path='/super-admin')}" class="card-lib text-decoration-none d-block p-4 h-100">
-          <h5 class="mb-2"><i class="bi bi-calendar2-check me-2 text-success"></i>Attendance Admin</h5>
-          <p class="mb-0 text-muted small">Open the full attendance admin dashboard.</p>
-        </a>
-      </div>
+    <div class="ams-card">
+      <h3>Quick Actions</h3>
+      <a th:href="@{/admin}" class="btn btn-ams-primary">Library Admin</a>
+      <a th:href="@{/super-admin/bridge/attendance(path='/super-admin')}" class="btn btn-ams-secondary" style="margin-left:0.5rem;">Attendance Admin</a>
     </div>
   </main>
 </div>

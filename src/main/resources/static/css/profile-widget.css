@@ -329,7 +329,9 @@
 }
 
 /* Avoid double My Profile when the page header already has one */
-body:has(.dashboard-header.with-profile) .dashboard-header-bar .page-header-profile-widget {
+body:has(.dashboard-header.with-profile) .dashboard-header-bar .page-header-profile-widget,
+body:has(.page-header--ams.with-profile) .dashboard-header-bar .page-header-profile-widget,
+body:has(.profile-topbar) .dashboard-header-bar .page-header-profile-widget {
   display: none;
 }
 

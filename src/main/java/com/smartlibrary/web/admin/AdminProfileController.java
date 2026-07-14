@@ -1,9 +1,12 @@
 package com.smartlibrary.web.admin;
 
 import com.smartlibrary.entity.User;
+import com.smartlibrary.model.UserRole;
 import com.smartlibrary.repository.UserRepository;
 import com.smartlibrary.security.LibraryUserDetails;
 import com.smartlibrary.service.ProfilePhotoService;
+import com.smartlibrary.web.SafeRedirects;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,8 +19,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.smartlibrary.web.SafeRedirects;
-import jakarta.servlet.http.HttpServletRequest;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/profile")
@@ -34,10 +38,33 @@ public class AdminProfileController {
     @GetMapping
     public String form(@AuthenticationPrincipal LibraryUserDetails user, Model model) {
         User fresh = userRepository.findById(user.getUser().getId()).orElseThrow();
+
+        String displayName = (fresh.getFullName() != null && !fresh.getFullName().isBlank())
+                ? fresh.getFullName()
+                : fresh.getUsername();
+
+        Map<String, String> profileDetails = new LinkedHashMap<>();
+        profileDetails.put("Username", fresh.getUsername());
+        profileDetails.put("Full Name", fresh.getFullName() != null && !fresh.getFullName().isBlank()
+                ? fresh.getFullName() : "-");
+        profileDetails.put("Email", fresh.getEmail() != null ? fresh.getEmail() : "-");
+        profileDetails.put("Role", fresh.getRole().name().toLowerCase().replace('_', ' '));
+        profileDetails.put("Account", fresh.isEnabled() ? "Active" : "Disabled");
+        profileDetails.put("Created At", fresh.getCreatedAt() != null
+                ? fresh.getCreatedAt().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"))
+                : "-");
+
+        boolean superAdmin = fresh.getRole() == UserRole.SUPER_ADMIN;
         model.addAttribute("username", fresh.getUsername());
         model.addAttribute("fullName", fresh.getFullName());
         model.addAttribute("email", fresh.getEmail());
-        model.addAttribute("role", user.getAuthorities().toString());
+        model.addAttribute("displayName", displayName);
+        model.addAttribute("profileCode", "ID " + fresh.getId());
+        model.addAttribute("roleName", fresh.getRole().name());
+        model.addAttribute("roleLabel", superAdmin ? "Super Admin" : "Administrator");
+        model.addAttribute("logoutMode", superAdmin ? "super-admin" : "admin");
+        model.addAttribute("profileDetails", profileDetails);
+        model.addAttribute("dashboardPath", superAdmin ? "/super-admin" : "/admin");
         return "admin/profile";
     }
 
