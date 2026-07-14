@@ -1295,6 +1295,21 @@ body.modal-open {
   font-weight: 700;
 }
 
+.ams-stats-grid--top {
+  margin-bottom: 1.5rem;
+}
+
+.ams-quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.ams-quick-actions .btn {
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .page-header--ams {
     flex-wrap: wrap;
