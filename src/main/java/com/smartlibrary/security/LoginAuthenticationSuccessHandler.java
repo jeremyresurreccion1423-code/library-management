@@ -6,7 +6,6 @@ import com.smartlibrary.model.UserRole;
 import com.smartlibrary.repository.UserRepository;
 import com.smartlibrary.service.AccountLockoutService;
 import com.smartlibrary.service.AuditService;
-import com.smartlibrary.service.LoginNotificationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,19 +22,16 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
     private final UserRepository userRepository;
     private final AccountLockoutService accountLockoutService;
     private final AuditService auditService;
-    private final LoginNotificationService loginNotificationService;
     private final LibraryProperties libraryProperties;
 
     public LoginAuthenticationSuccessHandler(
             UserRepository userRepository,
             AccountLockoutService accountLockoutService,
             AuditService auditService,
-            LoginNotificationService loginNotificationService,
             LibraryProperties libraryProperties) {
         this.userRepository = userRepository;
         this.accountLockoutService = accountLockoutService;
         this.auditService = auditService;
-        this.loginNotificationService = loginNotificationService;
         this.libraryProperties = libraryProperties;
     }
 
@@ -61,9 +57,6 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
                     : "User login";
             auditService.log(user, "LOGIN", "User", user.getId(),
                     portalLabel + " from " + AuditService.clientIp(request));
-            if (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.SUPER_ADMIN) {
-                loginNotificationService.notifyLogin(user, request);
-            }
         }
 
         if (isSuperAdminPortal) {
