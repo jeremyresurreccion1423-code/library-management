@@ -26,9 +26,10 @@ public class SharedAuthDataSourceMigrationProcessor implements BeanPostProcessor
             ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
             populator.addScript(new ClassPathResource("db/phase3-shared-auth.sql"));
             populator.addScript(new ClassPathResource("db/pre-jpa-schema-fixes.sql"));
+            populator.addScript(new ClassPathResource("db/security_features.sql"));
             populator.setContinueOnError(true);
             populator.execute((DataSource) bean);
-            log.info("Applied shared auth and pre-JPA schema fixes");
+            log.info("Applied shared auth, pre-JPA schema fixes, and security features schema");
         } catch (Exception ex) {
             log.warn("Phase 3 schema migration skipped or partially applied: {}", ex.getMessage());
         }

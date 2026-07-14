@@ -1,4 +1,4 @@
--- Security features migration (shared public.users + library audit)
+-- Security features: lockout columns + library audit trail (run before JPA)
 -- Safe to re-run
 
 ALTER TABLE public.users ADD COLUMN IF NOT EXISTS failed_login_attempts INTEGER DEFAULT 0;
