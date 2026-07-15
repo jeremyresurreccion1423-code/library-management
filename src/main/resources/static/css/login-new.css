@@ -7,8 +7,11 @@
   --el-primary-mid: #356540;
   --el-accent: #6FA882;
   --el-beige: #D8C3A5;
-  --el-bg: #F6F1EA;
-  --el-bg-2: #EFE8DE;
+  --el-bg: #F7F3EC;
+  --el-bg-2: #F3EDE4;
+  --el-ivory: #FCFAF6;
+  --el-cream: #F8F4ED;
+  --el-warm: #EFE6DA;
   --el-panel: #FBF6F0;
   --el-surface: #FFFFFF;
   --el-muted: #6B7280;
@@ -20,6 +23,10 @@
   --el-system: #C4A882;
   --el-glass: rgba(255, 255, 255, 0.55);
   --el-glass-border: rgba(255, 255, 255, 0.45);
+  --el-orb-green: rgba(39, 71, 47, 0.14);
+  --el-orb-mint: rgba(143, 188, 158, 0.22);
+  --el-orb-warm: rgba(212, 184, 150, 0.28);
+  --el-orb-ivory: rgba(255, 252, 247, 0.7);
   --el-radius-sm: 10px;
   --el-radius-md: 14px;
   --el-radius-lg: 22px;
@@ -46,16 +53,21 @@ body[data-auth-page="true"],
   color: var(--el-text);
   position: relative;
   overflow-x: hidden;
-  background:
-    radial-gradient(1200px 600px at 8% -10%, rgba(111, 168, 130, 0.18), transparent 55%),
-    radial-gradient(900px 500px at 100% 10%, rgba(196, 168, 130, 0.22), transparent 50%),
-    radial-gradient(700px 420px at 70% 110%, rgba(39, 71, 47, 0.1), transparent 55%),
-    linear-gradient(160deg, var(--el-bg) 0%, #FBF7F2 45%, var(--el-bg-2) 100%);
+  isolation: isolate;
+  background-color: var(--el-cream);
+  background-image:
+    radial-gradient(ellipse 70% 50% at 50% 42%, rgba(255, 255, 255, 0.72), transparent 70%),
+    radial-gradient(ellipse 55% 45% at 12% 18%, rgba(111, 168, 130, 0.16), transparent 62%),
+    radial-gradient(ellipse 50% 40% at 88% 78%, rgba(39, 71, 47, 0.09), transparent 65%),
+    radial-gradient(ellipse 60% 50% at 82% 12%, rgba(232, 214, 188, 0.35), transparent 58%),
+    radial-gradient(ellipse 50% 45% at 18% 88%, rgba(245, 236, 222, 0.55), transparent 60%),
+    linear-gradient(165deg, var(--el-ivory) 0%, var(--el-cream) 38%, #F4EEE5 72%, var(--el-warm) 100%);
+  background-attachment: fixed;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* Soft background decorations */
+/* Large blurred corner orbs */
 body::before,
 body::after {
   content: "";
@@ -63,29 +75,35 @@ body::after {
   pointer-events: none;
   z-index: 0;
   border-radius: 50%;
-  filter: blur(2px);
+  will-change: transform;
 }
 
 body::before {
-  width: 460px;
-  height: 460px;
-  top: -140px;
-  left: -160px;
-  opacity: 0.35;
+  width: min(62vw, 680px);
+  height: min(62vw, 680px);
+  top: -18%;
+  left: -14%;
   background:
-    radial-gradient(circle at 40% 40%, rgba(39, 71, 47, 0.16), transparent 62%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath fill='%2327472F' opacity='0.1' d='M40 160c20-50 55-85 100-110-10 45-5 85 15 120-40-10-80 5-115-10z'/%3E%3Cpath fill='%2327472F' opacity='0.07' d='M20 100c30-40 70-60 110-55-25 35-30 75-20 110-35-5-65 5-90-55z'/%3E%3C/svg%3E") no-repeat left top / 380px 380px;
+    radial-gradient(circle at 42% 42%, var(--el-orb-ivory) 0%, transparent 58%),
+    radial-gradient(circle at 55% 48%, var(--el-orb-mint) 0%, transparent 55%),
+    radial-gradient(circle at 38% 60%, var(--el-orb-green) 0%, transparent 52%);
+  filter: blur(48px);
+  opacity: 0.95;
+  transform: translate3d(0, 0, 0);
 }
 
 body::after {
-  width: 480px;
-  height: 480px;
-  right: -180px;
-  bottom: -160px;
-  opacity: 0.32;
+  width: min(68vw, 740px);
+  height: min(68vw, 740px);
+  right: -18%;
+  bottom: -22%;
   background:
-    radial-gradient(circle at 55% 55%, rgba(196, 168, 130, 0.22), transparent 60%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath fill='%2327472F' opacity='0.08' d='M160 30c-25 45-60 75-110 95 20-40 15-80-5-115 40 8 80-5 115 20z'/%3E%3Cpath fill='%23C4A882' opacity='0.16' d='M180 90c-35 35-75 50-120 40 30-30 40-70 30-105 35 10 65 20 90 65z'/%3E%3C/svg%3E") no-repeat right bottom / 400px 400px;
+    radial-gradient(circle at 48% 45%, rgba(255, 250, 244, 0.75) 0%, transparent 55%),
+    radial-gradient(circle at 58% 52%, var(--el-orb-warm) 0%, transparent 58%),
+    radial-gradient(circle at 40% 62%, rgba(39, 71, 47, 0.1) 0%, transparent 50%);
+  filter: blur(56px);
+  opacity: 0.9;
+  transform: translate3d(0, 0, 0);
 }
 
 .auth-page {
@@ -97,6 +115,36 @@ body::after {
   justify-content: center;
   padding: 32px 20px;
   animation: authFadeIn var(--el-slow) var(--el-ease);
+}
+
+/* Ambient organic shape + soft glass wash (behind card) */
+.auth-page::before,
+.auth-page::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.auth-page::before {
+  width: min(42vw, 460px);
+  height: min(42vw, 460px);
+  top: 8%;
+  right: 6%;
+  border-radius: 42% 58% 48% 52% / 48% 42% 58% 52%;
+  background:
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.45), transparent 65%),
+    radial-gradient(circle at 65% 60%, rgba(143, 188, 158, 0.14), transparent 60%);
+  filter: blur(40px);
+  opacity: 0.75;
+  mix-blend-mode: soft-light;
+}
+
+.auth-page::after {
+  inset: 0;
+  background:
+    radial-gradient(ellipse 90% 75% at 50% 50%, transparent 45%, rgba(39, 71, 47, 0.035) 100%),
+    linear-gradient(125deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 42%, rgba(255,255,255,0) 68%);
 }
 
 @keyframes authFadeIn {
@@ -121,6 +169,8 @@ body::after {
 
 /* Main card — same 46/54 split */
 .auth-card {
+  position: relative;
+  z-index: 1;
   width: min(1120px, 100%);
   height: min(680px, calc(100vh - 64px));
   min-height: 620px;
