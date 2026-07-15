@@ -163,10 +163,10 @@ body::after {
 .login-card {
   background: #ffffff;
   border-radius: 18px;
-  padding: 52px 48px;
+  padding: 58px 54px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
   width: 100%;
-  max-width: 520px;
+  max-width: 580px;
   margin-left: 0;
   position: relative;
   z-index: 10;
@@ -435,7 +435,7 @@ body::after {
 
   .login-card {
     margin-left: 0;
-    max-width: 540px;
+    max-width: 600px;
   }
 
   .brand-name {
