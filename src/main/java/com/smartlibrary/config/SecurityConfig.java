@@ -55,6 +55,8 @@ public class SecurityConfig {
                                 + "img-src 'self' data: blob:; "
                                 + "font-src 'self' data: https://cdn.jsdelivr.net https://fonts.gstatic.com; "
                                 + "connect-src 'self'; "
+                                + "media-src 'self' blob:; "
+                                + "worker-src 'self' blob:; "
                                 + "frame-ancestors 'self'"));
     }
 

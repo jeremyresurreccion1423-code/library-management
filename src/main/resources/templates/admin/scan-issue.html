@@ -107,7 +107,7 @@
   </div>
 </main>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script>
   const csrfMeta = document.querySelector('meta[name="_csrf"]');
   const csrfToken = csrfMeta ? csrfMeta.getAttribute('content') : null;
@@ -331,6 +331,18 @@
   async function startScanner() {
     statusEl.textContent = 'Initializing camera...';
 
+    if (typeof Html5Qrcode === 'undefined') {
+      statusEl.textContent = 'Scanner library failed to load. Refresh the page.';
+      showFlash('error', 'Scanner library blocked or offline. Refresh and try again.');
+      return;
+    }
+
+    if (!window.isSecureContext) {
+      statusEl.textContent = 'Camera needs HTTPS.';
+      showFlash('error', 'Open this page using https:// so the camera can start.');
+      return;
+    }
+
     if (html5QrCode) {
       try { await html5QrCode.stop(); } catch(e) {}
       try { html5QrCode.clear(); } catch(e) {}
@@ -343,31 +355,48 @@
     lastScannedCode = '';
     lastScanTime = 0;
 
+    let cameraConfig = { facingMode: 'environment' };
     try {
       const cameras = await Html5Qrcode.getCameras();
-      if (!cameras.length) {
-        statusEl.textContent = 'No camera found.';
-        return;
+      if (cameras && cameras.length) {
+        const backCamera = cameras.find(c => {
+          const label = (c.label || '').toLowerCase();
+          return label.includes('back') || label.includes('environment') || label.includes('rear');
+        });
+        cameraConfig = backCamera ? backCamera.id : cameras[0].id;
       }
+    } catch (e) {
+      console.warn('getCameras failed, using facingMode', e);
+    }
 
-      let cameraId = cameras[0].id;
-      const backCamera = cameras.find(c =>
-        c.label.toLowerCase().includes('back') ||
-        c.label.toLowerCase().includes('environment') ||
-        c.label.toLowerCase().includes('rear')
-      );
-      if (backCamera) cameraId = backCamera.id;
-
+    try {
       await html5QrCode.start(
-        cameraId,
-        { fps: 15, qrbox: { width: 250, height: 250 } },
+        cameraConfig,
+        { fps: 10, qrbox: { width: 220, height: 220 } },
         (decodedText) => { onScan(decodedText); },
-        (error) => {}
+        () => {}
       );
       statusEl.textContent = 'Camera ready. Point at QR/barcode...';
     } catch (e) {
       console.error('Scanner error:', e);
-      statusEl.textContent = 'Camera error: ' + e;
+      try {
+        await html5QrCode.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 220, height: 220 } },
+          (decodedText) => { onScan(decodedText); },
+          () => {}
+        );
+        statusEl.textContent = 'Camera ready. Point at QR/barcode...';
+      } catch (e2) {
+        console.error('Scanner fallback error:', e2);
+        const msg = String(e2 && e2.message ? e2.message : e2);
+        if (String(e2.name || '').includes('NotAllowed') || msg.includes('Permission')) {
+          statusEl.textContent = 'Camera permission denied. Allow camera, then Restart.';
+        } else {
+          statusEl.textContent = 'Camera error: ' + msg;
+        }
+        showFlash('error', statusEl.textContent);
+      }
     }
   }
 
