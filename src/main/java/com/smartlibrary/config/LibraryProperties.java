@@ -10,7 +10,7 @@ public class LibraryProperties {
     private int loanDays = 14;
     private BigDecimal finePerDay = new BigDecimal("5.00");
     private String uploadDir = System.getProperty("user.home") + "/smart-library-uploads/ebooks";
-    private String mailFrom = "noreply.lu.system@gmail.com";
+    private String mailFrom = "edulibrary67@gmail.com";
     private int reminderDaysBeforeDue = 2;
     private int otpExpiryMinutes = 5;
     private boolean seedEnabled = true;
