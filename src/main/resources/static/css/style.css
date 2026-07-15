@@ -1194,8 +1194,8 @@ body.modal-open {
   margin-left: 0;
 }
 .profile-topbar .page-header-profile-widget .profile-trigger {
-  min-width: 200px;
-  padding: 0.45rem 0.85rem;
+  min-width: 0;
+  padding: 0.4rem 0.75rem 0.4rem 0.35rem;
 }
 .profile-topbar .page-header-profile-widget .profile-avatar {
   width: 34px;

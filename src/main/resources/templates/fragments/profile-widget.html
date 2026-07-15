@@ -11,7 +11,7 @@
 -->
 <div th:fragment="widget(photoAction, passwordAction, roleLabel, panelId, logoutMode)"
      class="page-header-profile-widget">
-  <button type="button" class="profile-trigger" onclick="toggleProfileMenu(this)">
+  <button type="button" class="profile-trigger" onclick="toggleProfileMenu(this)" aria-haspopup="true">
     <img th:if="${profilePhotoUrl != null}"
          class="profile-avatar profile-avatar-img"
          th:src="${profilePhotoUrl}"
@@ -23,34 +23,50 @@
       <strong>My Profile</strong>
       <small th:text="${#authentication.name != null ? #authentication.name : 'User'}">user</small>
     </span>
-    <span class="profile-caret">▾</span>
+    <i class="bi bi-chevron-down profile-caret" aria-hidden="true"></i>
   </button>
 
-  <div class="profile-menu">
+  <div class="profile-menu" role="menu">
     <a th:if="${logoutMode == 'student'}"
        th:href="@{/student/profile}"
-       class="profile-menu-action">
-      <i class="bi bi-person"></i>
-      <span>My Profile</span>
+       class="profile-menu-action"
+       role="menuitem">
+      <span class="profile-menu-icon"><i class="bi bi-person"></i></span>
+      <span class="profile-menu-text">
+        <span class="profile-menu-label">My Profile</span>
+        <span class="profile-menu-hint">View &amp; edit details</span>
+      </span>
     </a>
     <a th:unless="${logoutMode == 'student'}"
        th:href="@{/admin/profile}"
-       class="profile-menu-action">
-      <i class="bi bi-person"></i>
-      <span>My Profile</span>
+       class="profile-menu-action"
+       role="menuitem">
+      <span class="profile-menu-icon"><i class="bi bi-person"></i></span>
+      <span class="profile-menu-text">
+        <span class="profile-menu-label">My Profile</span>
+        <span class="profile-menu-hint">View &amp; edit details</span>
+      </span>
     </a>
 
     <a th:if="${logoutMode == 'student'}"
        th:href="@{/student/account/password}"
-       class="profile-menu-action">
-      <i class="bi bi-shield-lock"></i>
-      <span>Change Password</span>
+       class="profile-menu-action"
+       role="menuitem">
+      <span class="profile-menu-icon"><i class="bi bi-shield-lock"></i></span>
+      <span class="profile-menu-text">
+        <span class="profile-menu-label">Change Password</span>
+        <span class="profile-menu-hint">OTP verification required</span>
+      </span>
     </a>
     <a th:if="${logoutMode == 'admin'}"
        th:href="@{/admin/account/password}"
-       class="profile-menu-action">
-      <i class="bi bi-shield-lock"></i>
-      <span>Change Password</span>
+       class="profile-menu-action"
+       role="menuitem">
+      <span class="profile-menu-icon"><i class="bi bi-shield-lock"></i></span>
+      <span class="profile-menu-text">
+        <span class="profile-menu-label">Change Password</span>
+        <span class="profile-menu-hint">Update account security</span>
+      </span>
     </a>
 
     <div class="profile-menu-divider" aria-hidden="true"></div>
@@ -58,22 +74,28 @@
     <th:block th:if="${logoutMode == 'super-admin'}">
       <form th:action="@{/super-admin/logout}" method="post" class="profile-logout m-0">
         <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <button type="submit" class="profile-menu-action profile-logout">
-          <i class="bi bi-box-arrow-right"></i>
-          <span>Logout</span>
+        <button type="submit" class="profile-menu-action profile-logout" role="menuitem">
+          <span class="profile-menu-icon profile-menu-icon-danger"><i class="bi bi-box-arrow-right"></i></span>
+          <span class="profile-menu-text">
+            <span class="profile-menu-label">Logout</span>
+          </span>
         </button>
       </form>
     </th:block>
     <th:block th:if="${logoutMode == 'admin'}">
-      <button type="button" class="profile-menu-action profile-logout" onclick="showAdminLogoutModal()">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>Logout</span>
+      <button type="button" class="profile-menu-action profile-logout" onclick="showAdminLogoutModal()" role="menuitem">
+        <span class="profile-menu-icon profile-menu-icon-danger"><i class="bi bi-box-arrow-right"></i></span>
+        <span class="profile-menu-text">
+          <span class="profile-menu-label">Logout</span>
+        </span>
       </button>
     </th:block>
     <th:block th:if="${logoutMode == 'student'}">
-      <button type="button" class="profile-menu-action profile-logout" onclick="showStudentLogoutModal()">
-        <i class="bi bi-box-arrow-right"></i>
-        <span>Logout</span>
+      <button type="button" class="profile-menu-action profile-logout" onclick="showStudentLogoutModal()" role="menuitem">
+        <span class="profile-menu-icon profile-menu-icon-danger"><i class="bi bi-box-arrow-right"></i></span>
+        <span class="profile-menu-text">
+          <span class="profile-menu-label">Logout</span>
+        </span>
       </button>
     </th:block>
   </div>
