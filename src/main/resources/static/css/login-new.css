@@ -163,10 +163,10 @@ body::after {
 .login-card {
   background: #ffffff;
   border-radius: 18px;
-  padding: 42px 40px;
+  padding: 52px 48px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
   width: 100%;
-  max-width: 420px;
+  max-width: 520px;
   margin-left: 0;
   position: relative;
   z-index: 10;
@@ -182,7 +182,7 @@ body::after {
 }
 
 .welcome-title {
-  font-size: 1.55rem;
+  font-size: 1.75rem;
   font-weight: 600;
   color: #111827;
   margin-bottom: 0.35rem;
@@ -251,7 +251,7 @@ body::after {
   border-radius: 10px;
   overflow: hidden;
   transition: all 0.2s ease;
-  min-height: 48px;
+  min-height: 52px;
 }
 
 .input-wrapper:focus-within {
@@ -295,7 +295,7 @@ body::after {
   align-items: center;
   justify-content: center;
   transition: color 0.2s ease;
-  height: 48px;
+  height: 52px;
 }
 
 .toggle-password:hover {
@@ -435,7 +435,7 @@ body::after {
 
   .login-card {
     margin-left: 0;
-    max-width: 460px;
+    max-width: 540px;
   }
 
   .brand-name {
