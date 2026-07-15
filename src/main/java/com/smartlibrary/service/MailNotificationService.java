@@ -1,16 +1,11 @@
 package com.smartlibrary.service;
 
-import com.smartlibrary.config.CentralMailProperties;
+import com.smartlibrary.config.BrevoMailTransport;
 import com.smartlibrary.config.LibraryProperties;
 import com.smartlibrary.entity.BookIssue;
-import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -22,27 +17,21 @@ public class MailNotificationService {
     private static final DateTimeFormatter DUE_DATE_FORMAT =
             DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy 'at' h:mm a", Locale.ENGLISH);
 
-    private final JavaMailSender mailSender;
+    private final BrevoMailTransport brevoMailTransport;
     private final LibraryProperties libraryProperties;
-    private final CentralMailProperties centralMailProperties;
     private final FineCalculator fineCalculator;
 
-    @Value("${spring.mail.password:}")
-    private String mailPassword;
-
     public MailNotificationService(
-            JavaMailSender mailSender,
+            BrevoMailTransport brevoMailTransport,
             LibraryProperties libraryProperties,
-            CentralMailProperties centralMailProperties,
             FineCalculator fineCalculator) {
-        this.mailSender = mailSender;
+        this.brevoMailTransport = brevoMailTransport;
         this.libraryProperties = libraryProperties;
-        this.centralMailProperties = centralMailProperties;
         this.fineCalculator = fineCalculator;
     }
 
     public boolean sendDueReminder(BookIssue issue) {
-        if (!isMailConfigured()) {
+        if (!brevoMailTransport.isConfigured()) {
             log.info("[EMAIL REMINDER] To: {} | Book: '{}' | Due: {}",
                     issue.getStudent().getUser().getEmail(),
                     issue.getBook().getTitle(),
@@ -63,13 +52,7 @@ public class MailNotificationService {
             String plainText = buildDueReminderPlainText(studentName, bookTitle, dueDate, studentId, finePerDay);
             String html = buildDueReminderHtml(studentName, bookTitle, dueDate, studentId, finePerDay);
 
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setFrom(centralMailProperties.getFromEmail(), centralMailProperties.getFromName());
-            helper.setTo(user.getEmail());
-            helper.setSubject(subject);
-            helper.setText(plainText, html);
-            mailSender.send(mimeMessage);
+            brevoMailTransport.sendHtml(user.getEmail(), subject, plainText, html);
             return true;
         } catch (Exception e) {
             log.warn("Could not send email to {}: {}", issue.getStudent().getUser().getEmail(), e.getMessage());
@@ -170,57 +153,26 @@ public class MailNotificationService {
     }
 
     public boolean sendOtpCode(String email, String otpCode) {
-        if (!isMailConfigured()) {
+        if (!brevoMailTransport.isConfigured()) {
             log.info("Mail not configured — OTP for {}: {}", email, otpCode);
             return true;
         }
 
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-            helper.setFrom(centralMailProperties.getFromEmail(), centralMailProperties.getFromName());
-            helper.setTo(email);
-            helper.setSubject("Smart Library - Registration OTP Code");
-            helper.setText("Welcome to Smart Library!\n\n"
-                    + "Your One-Time Password (OTP) for registration is:\n\n"
-                    + otpCode + "\n\n"
-                    + "This code is valid for " + libraryProperties.getOtpExpiryMinutes() + " minutes. Do not share this code with anyone.\n\n"
-                    + "If you did not request this code, please ignore this email.\n\n"
-                    + "— Smart Library Team", false);
-            mailSender.send(mimeMessage);
+            brevoMailTransport.sendText(
+                    email,
+                    "Smart Library - Registration OTP Code",
+                    "Welcome to Smart Library!\n\n"
+                            + "Your One-Time Password (OTP) for registration is:\n\n"
+                            + otpCode + "\n\n"
+                            + "This code is valid for " + libraryProperties.getOtpExpiryMinutes()
+                            + " minutes. Do not share this code with anyone.\n\n"
+                            + "If you did not request this code, please ignore this email.\n\n"
+                            + "— Smart Library Team");
             return true;
         } catch (Exception e) {
             log.error("Could not send OTP email to {}: {}", email, e.getMessage(), e);
             return false;
         }
-    }
-
-    private boolean isMailConfigured() {
-        String password = resolvePassword();
-        return StringUtils.hasText(password)
-                && StringUtils.hasText(centralMailProperties.getFromEmail());
-    }
-
-    private String resolvePassword() {
-        String fromEnv = firstNonBlank(
-                System.getenv("MAIL_PASSWORD"),
-                System.getenv("BREVO_SMTP_PASSWORD"),
-                System.getenv("SPRING_MAIL_PASSWORD"));
-        if (StringUtils.hasText(fromEnv)) {
-            return fromEnv.replace(" ", "").trim();
-        }
-        return mailPassword == null ? "" : mailPassword.replace(" ", "").trim();
-    }
-
-    private static String firstNonBlank(String... values) {
-        if (values == null) {
-            return null;
-        }
-        for (String value : values) {
-            if (StringUtils.hasText(value)) {
-                return value;
-            }
-        }
-        return null;
     }
 }
