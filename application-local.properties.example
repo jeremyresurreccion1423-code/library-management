@@ -22,5 +22,5 @@ spring.mail.username=${MAIL_USERNAME:b20400001@smtp-brevo.com}
 spring.mail.password=${MAIL_PASSWORD:${BREVO_SMTP_PASSWORD:}}
 central.mail.brevo-api-key=${BREVO_API_KEY:}
 central.mail.from-name=LU Centralized System
-central.mail.from-email=noreply.lu.system@gmail.com
-library.mail.from=noreply.lu.system@gmail.com
+central.mail.from-email=edulibrary67@gmail.com
+library.mail.from=edulibrary67@gmail.com
