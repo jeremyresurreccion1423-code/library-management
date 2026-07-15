@@ -12,13 +12,14 @@
 <div th:fragment="widget(photoAction, passwordAction, roleLabel, panelId, logoutMode)"
      class="page-header-profile-widget">
   <button type="button" class="profile-trigger" onclick="toggleProfileMenu(this)" aria-haspopup="true" aria-label="My Profile">
-    <img th:if="${profilePhotoUrl != null}"
-         class="profile-avatar profile-avatar-img"
-         th:src="${profilePhotoUrl}"
-         alt=""/>
-    <span th:unless="${profilePhotoUrl != null}"
-          class="profile-avatar"
-          th:text="${profileInitial ?: 'U'}">U</span>
+    <span class="profile-trigger-avatar">
+      <img th:if="${profilePhotoUrl != null}"
+           th:src="${profilePhotoUrl}"
+           alt=""/>
+      <span th:unless="${profilePhotoUrl != null}"
+            class="profile-trigger-initial"
+            th:text="${profileInitial ?: 'U'}">U</span>
+    </span>
     <i class="bi bi-chevron-down profile-caret" aria-hidden="true"></i>
   </button>
 

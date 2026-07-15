@@ -1,69 +1,119 @@
-/* Profile widget — trigger + dropdown (EduLibrary header) */
+/* Profile widget — compact white pill on green header */
 .page-header-profile-widget {
   position: relative;
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  height: 56px;
 }
 
 .page-header-profile-widget .profile-trigger {
-  width: auto;
-  min-width: 0;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  justify-content: center;
+  gap: 4px;
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 2px 7px 2px 2px;
   background: #ffffff;
   color: #166534;
-  border: 1px solid rgba(187, 247, 208, 0.85);
+  border: 1px solid #bbf7d0;
   border-radius: 999px;
-  padding: 0.18rem 0.4rem 0.18rem 0.18rem;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+  box-shadow: none;
   cursor: pointer;
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
-  font-weight: 500;
+  line-height: 1;
+  font: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .page-header-profile-widget .profile-trigger:hover,
 .page-header-profile-widget:has(.profile-menu.show) .profile-trigger {
   background: #ffffff;
   border-color: #86efac;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
 }
 
-.page-header-profile-widget .profile-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 999px;
-  background: #ecfdf5;
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-size: 0.72rem;
-  color: #166534;
-  flex-shrink: 0;
+.page-header-profile-widget .profile-trigger-avatar {
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
+  max-width: 26px !important;
+  max-height: 26px !important;
+  border-radius: 50%;
   overflow: hidden;
+  background: #ecfdf5;
   border: none;
+  flex-shrink: 0;
 }
 
-.page-header-profile-widget .profile-avatar-img {
-  width: 100%;
-  height: 100%;
+.page-header-profile-widget .profile-trigger-avatar img {
+  position: absolute;
+  inset: 0;
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 26px !important;
+  max-height: 26px !important;
   object-fit: cover;
+  object-position: center;
   display: block;
+  border-radius: 50%;
+}
+
+.page-header-profile-widget .profile-trigger-initial {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #166534;
+  line-height: 1;
 }
 
 .page-header-profile-widget .profile-meta {
-  display: none;
+  display: none !important;
 }
 
 .page-header-profile-widget .profile-caret {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: #4ade80;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   line-height: 1;
-  margin-right: 0.1rem;
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  padding: 0;
   transition: transform 0.15s ease;
 }
 
 .page-header-profile-widget:has(.profile-menu.show) .profile-caret {
   transform: rotate(180deg);
+}
+
+/* Legacy class hooks (in case old markup is cached) */
+.page-header-profile-widget .profile-avatar,
+.page-header-profile-widget .profile-avatar-img {
+  width: 26px !important;
+  height: 26px !important;
+  min-width: 26px !important;
+  min-height: 26px !important;
+  max-width: 26px !important;
+  max-height: 26px !important;
+  font-size: 0.7rem !important;
+  border: none !important;
 }
 
 .page-header-profile-widget .profile-menu,
@@ -335,39 +385,39 @@
   padding: 0.45rem 0.85rem;
 }
 
-/* Fit on the green header bar */
 .dashboard-header-bar .page-header-profile-widget {
   margin-left: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
 }
 
 .dashboard-header-bar .header-bar-right {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  height: 56px;
 }
 
 /* Light surfaces keep the same compact white pill */
+.dashboard-header.with-profile .page-header-profile-widget,
+.page-header--ams.with-profile .page-header-profile-widget,
+.profile-topbar .page-header-profile-widget {
+  height: auto;
+}
+
 .dashboard-header.with-profile .page-header-profile-widget .profile-trigger,
 .page-header--ams.with-profile .page-header-profile-widget .profile-trigger,
 .profile-topbar .page-header-profile-widget .profile-trigger {
+  height: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  padding: 2px 7px 2px 2px;
   background: #ffffff;
-  color: #166534;
   border: 1px solid #bbf7d0;
   border-radius: 999px;
-  padding: 0.18rem 0.4rem 0.18rem 0.18rem;
   box-shadow: 0 2px 8px rgba(22, 101, 52, 0.1);
-}
-
-.dashboard-header.with-profile .page-header-profile-widget .profile-caret,
-.page-header--ams.with-profile .page-header-profile-widget .profile-caret,
-.profile-topbar .page-header-profile-widget .profile-caret {
-  color: #4ade80;
-}
-
-.dashboard-header.with-profile .page-header-profile-widget .profile-avatar,
-.page-header--ams.with-profile .page-header-profile-widget .profile-avatar,
-.profile-topbar .page-header-profile-widget .profile-avatar {
-  border: none;
 }
 
 /* Page-header placement (Super Admin dashboard) */
@@ -387,12 +437,20 @@ body:has(.profile-topbar) .dashboard-header-bar .page-header-profile-widget {
 
 @media (max-width: 640px) {
   .page-header-profile-widget .profile-trigger {
-    padding: 0.16rem 0.35rem 0.16rem 0.16rem;
+    height: 30px;
+    min-height: 30px;
+    max-height: 30px;
+    padding: 2px 6px 2px 2px;
   }
 
-  .page-header-profile-widget .profile-avatar {
-    width: 26px;
-    height: 26px;
+  .page-header-profile-widget .profile-trigger-avatar,
+  .page-header-profile-widget .profile-trigger-avatar img {
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
   }
 
   .page-header-profile-widget .profile-menu {
