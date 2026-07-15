@@ -109,10 +109,13 @@ body::after {
   top: 0;
   right: 0;
   bottom: 0;
-  width: 68%;
-  background-size: cover;
-  background-position: center;
+  width: 72%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
   z-index: 0;
+  display: block;
+  pointer-events: none;
 }
 
 .auth-brand-fade {
@@ -122,11 +125,11 @@ body::after {
   background: linear-gradient(
     90deg,
     #FBF6F0 0%,
-    #FBF6F0 28%,
-    rgba(251, 246, 240, 0.96) 40%,
-    rgba(251, 246, 240, 0.78) 52%,
-    rgba(251, 246, 240, 0.4) 68%,
-    rgba(251, 246, 240, 0.1) 84%,
+    #FBF6F0 26%,
+    rgba(251, 246, 240, 0.94) 38%,
+    rgba(251, 246, 240, 0.7) 52%,
+    rgba(251, 246, 240, 0.32) 68%,
+    rgba(251, 246, 240, 0.08) 84%,
     rgba(251, 246, 240, 0) 100%
   );
   pointer-events: none;

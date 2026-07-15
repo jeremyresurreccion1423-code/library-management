@@ -104,6 +104,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/img/**",
+                                "/images/**",
                                 "/uploads/**",
                                 "/admin/login",
                                 "/forgot-password")
@@ -141,6 +142,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/img/**",
+                                "/images/**",
                                 "/uploads/**",
                                 "/register",
                                 "/register/**",
