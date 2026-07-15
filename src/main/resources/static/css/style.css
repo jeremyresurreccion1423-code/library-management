@@ -1195,11 +1195,11 @@ body.modal-open {
 }
 .profile-topbar .page-header-profile-widget .profile-trigger {
   min-width: 0;
-  padding: 0.4rem 0.75rem 0.4rem 0.35rem;
+  padding: 0.18rem 0.4rem 0.18rem 0.18rem;
 }
 .profile-topbar .page-header-profile-widget .profile-avatar {
-  width: 34px;
-  height: 34px;
+  width: 28px;
+  height: 28px;
 }
 
 .profile-dashboard-grid {
