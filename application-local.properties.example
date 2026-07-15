@@ -16,10 +16,11 @@ spring.jpa.properties.hibernate.default_schema=library
 spring.jpa.properties.hibernate.create_namespaces=true
 spring.datasource.hikari.connection-init-sql=CREATE SCHEMA IF NOT EXISTS library
 
-# --- LU Centralized System — Brevo SMTP (same as Attendance) ---
-# Set password via env: MAIL_PASSWORD or BREVO_SMTP_PASSWORD
+# --- LU Centralized System — Brevo (HTTPS preferred; SMTP fallback) ---
+# Railway: set BREVO_API_KEY (required on Hobby). Optional SMTP: MAIL_PASSWORD / BREVO_SMTP_PASSWORD
 spring.mail.username=${MAIL_USERNAME:b20400001@smtp-brevo.com}
 spring.mail.password=${MAIL_PASSWORD:${BREVO_SMTP_PASSWORD:}}
+central.mail.brevo-api-key=${BREVO_API_KEY:}
 central.mail.from-name=LU Centralized System
-central.mail.from-email=edulibrary67@gmail.com
-library.mail.from=edulibrary67@gmail.com
+central.mail.from-email=noreply.lu.system@gmail.com
+library.mail.from=noreply.lu.system@gmail.com

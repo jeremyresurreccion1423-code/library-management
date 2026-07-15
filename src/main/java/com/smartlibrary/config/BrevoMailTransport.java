@@ -1,6 +1,7 @@
 package com.smartlibrary.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import java.util.Map;
 
 /**
  * Central LU mail transport: Brevo HTTPS API (Railway-safe) with Brevo SMTP fallback.
+ * When BREVO_API_KEY is present, SMTP is never used.
  */
 @Component
 public class BrevoMailTransport {
@@ -50,6 +52,17 @@ public class BrevoMailTransport {
         this.objectMapper = objectMapper;
     }
 
+    @PostConstruct
+    void logMailTransportMode() {
+        if (StringUtils.hasText(resolveApiKey())) {
+            log.info("BREVO_API_KEY detected — emails will use Brevo HTTPS API ({})", BREVO_API_URL);
+        } else if (StringUtils.hasText(resolveSmtpPassword())) {
+            log.warn("BREVO_API_KEY not set — emails will use Brevo SMTP fallback (blocked on Railway Hobby)");
+        } else {
+            log.warn("Mail not configured: set BREVO_API_KEY (preferred) or MAIL_PASSWORD for SMTP fallback");
+        }
+    }
+
     public boolean isConfigured() {
         return StringUtils.hasText(centralMailProperties.getFromEmail())
                 && (StringUtils.hasText(resolveApiKey()) || StringUtils.hasText(resolveSmtpPassword()));
@@ -72,10 +85,12 @@ public class BrevoMailTransport {
 
         String apiKey = resolveApiKey();
         if (StringUtils.hasText(apiKey)) {
+            log.info("Sending email via Brevo HTTPS API to {} (SMTP skipped; BREVO_API_KEY present)", to);
             sendViaHttpsApi(apiKey, to, subject, textBody, htmlBody);
             return;
         }
 
+        log.info("Sending email via Brevo SMTP fallback to {} (BREVO_API_KEY missing)", to);
         try {
             sendViaSmtp(to, subject, textBody, htmlBody);
         } catch (Exception smtpEx) {
@@ -136,7 +151,7 @@ public class BrevoMailTransport {
             helper.setText(textBody == null ? "" : textBody, false);
         }
         mailSender.send(mimeMessage);
-        log.info("Email sent via Brevo SMTP to {} from {}", to, centralMailProperties.getFromHeader());
+        log.info("Email sent via Brevo SMTP fallback to {} from {}", to, centralMailProperties.getFromHeader());
     }
 
     private String resolveApiKey() {

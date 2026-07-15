@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public class CentralMailProperties {
 
     private String fromName = "LU Centralized System";
-    private String fromEmail = "edulibrary67@gmail.com";
+    private String fromEmail = "noreply.lu.system@gmail.com";
 
     public String getFromName() {
         return fromName;
