@@ -6,85 +6,112 @@
   <meta name="_csrf" th:content="${_csrf.token}"/>
   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
   <title>EduLibrary - Login</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link th:href="@{/css/login-new.css(v=ilearn-style-3)}" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link th:href="@{/css/login-new.css(v=edupresence-blue-1)}" rel="stylesheet"/>
 </head>
-<body data-auth-page="true" class="auth-ilearn">
-  <div class="login-split">
-    <div class="split-left">
-      <div class="brand-watermark" aria-hidden="true">
-        <i class="bi bi-book-half"></i>
-      </div>
-      <div class="logo-area">
-        <div class="brand-mark">
+<body data-auth-page="true" class="auth-page-body">
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-brand-blob auth-brand-blob-1"></div>
+      <div class="auth-brand-blob auth-brand-blob-2"></div>
+      <div class="auth-brand-content">
+        <div class="auth-brand-logo-ring">
           <i class="bi bi-book-half"></i>
         </div>
-        <h1 class="brand-name">EduLibrary</h1>
-        <p class="brand-tagline">Smart Library System</p>
+        <div class="auth-brand-title">EduLibrary</div>
+        <div class="auth-brand-sub">SYSTEM</div>
       </div>
+      <ul class="auth-brand-points">
+        <li>
+          <span class="auth-brand-point-icon"><i class="bi bi-journal-bookmark"></i></span>
+          <span>Discover Books.</span>
+        </li>
+        <li>
+          <span class="auth-brand-point-icon"><i class="bi bi-box-seam"></i></span>
+          <span>Borrow Easily.</span>
+        </li>
+        <li>
+          <span class="auth-brand-point-icon"><i class="bi bi-lightbulb"></i></span>
+          <span>Study Smarter.</span>
+        </li>
+      </ul>
     </div>
 
-    <div class="split-right">
-      <div class="login-card floating">
-        <h2 class="welcome-title">Welcome to <span class="brand-highlight">EduLibrary</span></h2>
-        <p class="welcome-subtitle">Laguna University Learning Management System</p>
+    <div class="auth-form">
+      <div class="auth-form-head">
+        <div>
+          <h1>Welcome to <span>EduLibrary</span></h1>
+          <p>Smart Library System<br>Laguna University</p>
+        </div>
+        <span class="auth-shield" aria-hidden="true"><i class="bi bi-shield-check"></i></span>
+      </div>
 
-        <div class="role-divider">
-          <span>COLLEGE STUDENT</span>
+      <div class="auth-divider"></div>
+
+      <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+      <div th:if="${success}" class="alert alert-success" role="status" th:text="${success}"></div>
+      <div th:if="${message}" class="alert alert-info" role="status" th:text="${message}"></div>
+
+      <form th:action="@{/login}" method="post" class="auth-fields sl-validate">
+        <div class="form-group">
+          <label for="username">Username, Student ID, or Email</label>
+          <div class="auth-input">
+            <span class="auth-input-icon"><i class="bi bi-person"></i></span>
+            <input type="text" id="username" name="username" required autofocus
+                   placeholder="e.g. student1 or 101-007" autocomplete="username"/>
+          </div>
         </div>
 
-        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" aria-live="polite" th:text="${errorMessage}"></div>
-        <div th:if="${success}" class="alert alert-success" role="status" aria-live="polite" th:text="${success}"></div>
-        <div th:if="${message}" class="alert alert-info" role="status" aria-live="polite" th:text="${message}"></div>
-
-        <form th:action="@{/login}" method="post" class="login-form sl-validate">
-          <div class="form-group">
-            <div class="input-wrapper">
-              <span class="input-icon"><i class="bi bi-person"></i></span>
-              <input type="text" name="username" class="form-input"
-                     placeholder="Username, Student ID, or Email"
-                     required autocomplete="username"/>
-            </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="auth-input">
+            <span class="auth-input-icon"><i class="bi bi-lock"></i></span>
+            <input type="password" id="password" name="password" required
+                   placeholder="••••••••" autocomplete="current-password"/>
+            <button type="button" class="auth-input-toggle" id="togglePasswordBtn" aria-label="Show password">
+              <i class="bi bi-eye"></i>
+            </button>
           </div>
+        </div>
 
-          <div class="form-group">
-            <div class="input-wrapper">
-              <span class="input-icon"><i class="bi bi-lock"></i></span>
-              <input type="password" name="password" id="password" class="form-input"
-                     placeholder="Password"
-                     required autocomplete="current-password"/>
-              <button type="button" class="toggle-password" id="togglePasswordBtn" aria-label="Show password">
-                <i class="bi bi-eye"></i>
-              </button>
-            </div>
-          </div>
+        <div class="auth-row">
+          <label class="auth-remember">
+            <input type="checkbox" name="remember-me"/>
+            <span>Remember me</span>
+          </label>
+          <a th:href="@{/forgot-password}" class="auth-forgot">Forgot password?</a>
+        </div>
 
-          <button type="submit" class="btn-login">LOGIN</button>
+        <button type="submit" class="auth-submit">LOGIN</button>
+      </form>
 
-          <div class="form-footer">
-            <a th:href="@{/forgot-password}" class="forgot-link">Recover My Account</a>
-            <a th:href="@{/register}" class="forgot-link-alt">Don't have an account? Register</a>
-          </div>
-        </form>
-      </div>
+      <p class="auth-footer-text">
+        Don't have an account?
+        <a th:href="@{/register}">Register</a>
+      </p>
+
+      <a th:href="@{/super-admin/login}" class="auth-super-admin-link">
+        <i class="bi bi-shield-lock"></i>
+        Super Admin? Sign in via the System Control Center
+      </a>
     </div>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script th:src="@{/js/forms.js}"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const passwordInput = document.getElementById('password');
-      const btn = document.getElementById('togglePasswordBtn');
-      if (!passwordInput || !btn) return;
-      btn.addEventListener('click', function () {
-        const isHidden = passwordInput.type === 'password';
-        passwordInput.type = isHidden ? 'text' : 'password';
-        btn.querySelector('i').className = isHidden ? 'bi bi-eye-slash' : 'bi bi-eye';
-      });
+<script th:src="@{/js/forms.js}"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const passwordInput = document.getElementById('password');
+    const btn = document.getElementById('togglePasswordBtn');
+    if (!passwordInput || !btn) return;
+    btn.addEventListener('click', function () {
+      const show = passwordInput.type === 'password';
+      passwordInput.type = show ? 'text' : 'password';
+      btn.querySelector('i').className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
     });
-  </script>
+  });
+</script>
 </body>
 </html>
