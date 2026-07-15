@@ -8,7 +8,7 @@
   <title>EduLibrary - Login</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <link th:href="@{/css/login-new.css(v=ref-match-4)}" rel="stylesheet"/>
+  <link th:href="@{/css/login-new.css(v=premium-1)}" rel="stylesheet"/>
 </head>
 <body data-auth-page="true" class="auth-page-body">
 <div class="auth-page">
@@ -19,7 +19,7 @@
 
       <div class="auth-brand-top">
         <div class="auth-brand-logo">
-          <span class="auth-brand-logo-icon"><i class="bi bi-book"></i></span>
+          <span class="auth-brand-logo-icon" aria-hidden="true"><i class="bi bi-book"></i></span>
           <div class="auth-brand-logo-text">
             <strong>EduLibrary</strong>
             <span>SYSTEM</span>
@@ -30,25 +30,25 @@
       <div class="auth-brand-content">
         <h1 class="auth-brand-welcome">Welcome to EduLibrary</h1>
         <p class="auth-brand-subtitle">Smart Library System | Laguna University</p>
-        <div class="auth-brand-rule"></div>
+        <div class="auth-brand-rule" aria-hidden="true"></div>
         <p class="auth-brand-copy">
           Your all-in-one platform for discovering, borrowing, and managing library resources.
         </p>
       </div>
 
-      <div class="auth-feature-card">
-        <div class="auth-feature">
-          <i class="bi bi-book auth-feature-glyph"></i>
+      <div class="auth-feature-card" role="list">
+        <div class="auth-feature" role="listitem">
+          <i class="bi bi-book auth-feature-glyph" aria-hidden="true"></i>
           <strong>Discover Books</strong>
           <span>Explore a wide collection.</span>
         </div>
-        <div class="auth-feature">
-          <i class="bi bi-bookmark auth-feature-glyph"></i>
+        <div class="auth-feature" role="listitem">
+          <i class="bi bi-bookmark auth-feature-glyph" aria-hidden="true"></i>
           <strong>Borrow Easily</strong>
           <span>Quick and hassle-free borrowing.</span>
         </div>
-        <div class="auth-feature">
-          <i class="bi bi-mortarboard auth-feature-glyph"></i>
+        <div class="auth-feature" role="listitem">
+          <i class="bi bi-mortarboard auth-feature-glyph" aria-hidden="true"></i>
           <strong>Study Smarter</strong>
           <span>Access resources anytime, anywhere.</span>
         </div>
@@ -72,20 +72,23 @@
         <div class="form-group">
           <label for="username">Username, Student ID, or Email</label>
           <div class="auth-input">
-            <span class="auth-input-icon"><i class="bi bi-person"></i></span>
+            <span class="auth-input-icon" aria-hidden="true"><i class="bi bi-person"></i></span>
             <input type="text" id="username" name="username" required autofocus
-                   placeholder="Enter your username, ID, or email" autocomplete="username"/>
+                   placeholder="Enter your username, ID, or email" autocomplete="username"
+                   aria-required="true"/>
           </div>
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
           <div class="auth-input">
-            <span class="auth-input-icon"><i class="bi bi-lock"></i></span>
+            <span class="auth-input-icon" aria-hidden="true"><i class="bi bi-lock"></i></span>
             <input type="password" id="password" name="password" required
-                   placeholder="Enter your password" autocomplete="current-password"/>
-            <button type="button" class="auth-input-toggle" id="togglePasswordBtn" aria-label="Show password">
-              <i class="bi bi-eye"></i>
+                   placeholder="Enter your password" autocomplete="current-password"
+                   aria-required="true"/>
+            <button type="button" class="auth-input-toggle" id="togglePasswordBtn"
+                    aria-label="Show password" aria-pressed="false">
+              <i class="bi bi-eye" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -108,7 +111,7 @@
         </p>
 
         <div class="auth-super-admin">
-          <i class="bi bi-shield-check"></i>
+          <i class="bi bi-shield-check" aria-hidden="true"></i>
           <span>
             Super Admin? Sign in via the
             <a th:href="@{/super-admin/login}">System Control Center</a>
@@ -128,6 +131,8 @@
     btn.addEventListener('click', function () {
       const show = passwordInput.type === 'password';
       passwordInput.type = show ? 'text' : 'password';
+      btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+      btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
       btn.querySelector('i').className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
     });
   });
