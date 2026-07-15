@@ -11,7 +11,7 @@
   <link th:href="@{/css/style.css(v=ams-layout-2)}" rel="stylesheet"/>
   <link th:href="@{/css/super-admin-nav.css(v=3)}" rel="stylesheet"/>
   <link th:href="@{/css/profile-photo.css}" rel="stylesheet"/>
-  <link th:href="@{/css/profile-widget.css(v=3)}" rel="stylesheet"/>
+  <link th:href="@{/css/profile-widget.css(v=4)}" rel="stylesheet"/>
 </head>
 <body>
 <th:block th:fragment="navbar">
@@ -56,7 +56,7 @@
             <li sec:authorize="hasRole('STUDENT')"><a class="dropdown-item" th:href="@{/student/profile}"><i class="bi bi-person me-2"></i>My Profile</a></li>
             <li sec:authorize="hasRole('STUDENT')"><a class="dropdown-item" th:href="@{/student}"><i class="bi bi-journal-bookmark me-2"></i>Borrowed Books</a></li>
             <li sec:authorize="hasRole('STUDENT')"><a class="dropdown-item" th:href="@{/student}"><i class="bi bi-clock-history me-2"></i>History</a></li>
-            <li sec:authorize="hasRole('STUDENT')"><a class="dropdown-item" th:href="@{/student/account/password}"><i class="bi bi-gear me-2"></i>Settings</a></li>
+            <li sec:authorize="hasRole('STUDENT')"><a class="dropdown-item" th:href="@{/student/account/password}"><i class="bi bi-shield-lock me-2"></i>Change Password</a></li>
             
             <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item" th:href="@{/admin}"><i class="bi bi-person me-2"></i>My Profile</a></li>
             <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item" th:href="@{/admin/account/password}"><i class="bi bi-shield-lock me-2"></i>Change Password</a></li>

@@ -99,10 +99,12 @@
   display: none;
   background: #ffffff;
   color: #1f2937;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
-  border: 1px solid #dce4ea;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+  border: 1px solid #e5ebe7;
+  min-width: 220px;
+  padding: 0.4rem;
 }
 
 .page-header-profile-widget .profile-menu.show {
@@ -110,37 +112,55 @@
 }
 
 .page-header-profile-widget .profile-menu a,
-.page-header-profile-widget .profile-menu button {
-  display: block;
+.page-header-profile-widget .profile-menu button,
+.page-header-profile-widget .profile-menu .profile-menu-action {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   width: 100%;
   text-align: left;
   background: transparent;
   border: 0;
-  padding: 0.8rem 1.2rem;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
   color: #1f2937;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  line-height: 1.2;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s ease, color 0.15s ease;
   font-weight: 500;
   text-decoration: none;
+  font-family: inherit;
+}
+
+.page-header-profile-widget .profile-menu a i,
+.page-header-profile-widget .profile-menu button i,
+.page-header-profile-widget .profile-menu .profile-menu-action i {
+  font-size: 1rem;
+  width: 1.1rem;
+  text-align: center;
+  color: #4b5563;
+  flex-shrink: 0;
 }
 
 .page-header-profile-widget .profile-menu a:hover,
-.page-header-profile-widget .profile-menu button:hover {
-  background: #eff8f3;
+.page-header-profile-widget .profile-menu button:hover,
+.page-header-profile-widget .profile-menu .profile-menu-action:hover {
+  background: #f0fdf4;
   color: #166534;
-  padding-left: 1.4rem;
 }
 
-.page-header-profile-widget .profile-menu a + a,
-.page-header-profile-widget .profile-menu button + button,
-.page-header-profile-widget .profile-menu a + button,
-.page-header-profile-widget .profile-menu button + a,
-.page-header-profile-widget .profile-menu form + button,
-.page-header-profile-widget .profile-menu button + form,
-.page-header-profile-widget .profile-menu a + form,
-.page-header-profile-widget .profile-menu form + a {
-  border-top: 1px solid #e0e8de;
+.page-header-profile-widget .profile-menu a:hover i,
+.page-header-profile-widget .profile-menu button:hover i,
+.page-header-profile-widget .profile-menu .profile-menu-action:hover i {
+  color: #166534;
+}
+
+.page-header-profile-widget .profile-menu-divider {
+  height: 1px;
+  margin: 0.35rem 0.5rem;
+  background: #e8eee9;
+  border: 0;
 }
 
 .page-header-profile-widget .profile-menu .profile-logout,
@@ -150,6 +170,12 @@
   font-weight: 600;
 }
 
+.page-header-profile-widget .profile-menu .profile-logout i,
+.page-header-profile-widget .profile-menu .profile-logout button i,
+.page-header-profile-widget .profile-menu-action.profile-logout i {
+  color: #b91c1c;
+}
+
 .page-header-profile-widget .profile-menu .profile-logout:hover,
 .page-header-profile-widget .profile-menu .profile-logout button:hover,
 .page-header-profile-widget .profile-menu-action.profile-logout:hover {
@@ -157,20 +183,19 @@
   color: #991b1b;
 }
 
+.page-header-profile-widget .profile-menu .profile-logout:hover i,
+.page-header-profile-widget .profile-menu .profile-logout button:hover i,
+.page-header-profile-widget .profile-menu-action.profile-logout:hover i {
+  color: #991b1b;
+}
+
 .page-header-profile-widget .profile-menu form.profile-logout {
   margin: 0;
+  width: 100%;
 }
 
 .page-header-profile-widget .profile-menu form.profile-logout button {
   width: 100%;
-  text-align: left;
-  padding: 0.8rem 1.2rem;
-  background: transparent;
-  border: 0;
-  font: inherit;
-  font-weight: 600;
-  color: #b91c1c;
-  cursor: pointer;
 }
 
 /* Keep panel available but off by default (profile page is preferred) */

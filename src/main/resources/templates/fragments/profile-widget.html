@@ -29,22 +29,52 @@
   <div class="profile-menu">
     <a th:if="${logoutMode == 'student'}"
        th:href="@{/student/profile}"
-       class="profile-menu-action">My Profile</a>
+       class="profile-menu-action">
+      <i class="bi bi-person"></i>
+      <span>My Profile</span>
+    </a>
     <a th:unless="${logoutMode == 'student'}"
        th:href="@{/admin/profile}"
-       class="profile-menu-action">My Profile</a>
+       class="profile-menu-action">
+      <i class="bi bi-person"></i>
+      <span>My Profile</span>
+    </a>
+
+    <a th:if="${logoutMode == 'student'}"
+       th:href="@{/student/account/password}"
+       class="profile-menu-action">
+      <i class="bi bi-shield-lock"></i>
+      <span>Change Password</span>
+    </a>
+    <a th:if="${logoutMode == 'admin'}"
+       th:href="@{/admin/account/password}"
+       class="profile-menu-action">
+      <i class="bi bi-shield-lock"></i>
+      <span>Change Password</span>
+    </a>
+
+    <div class="profile-menu-divider" aria-hidden="true"></div>
 
     <th:block th:if="${logoutMode == 'super-admin'}">
       <form th:action="@{/super-admin/logout}" method="post" class="profile-logout m-0">
         <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <button type="submit">Logout</button>
+        <button type="submit" class="profile-menu-action profile-logout">
+          <i class="bi bi-box-arrow-right"></i>
+          <span>Logout</span>
+        </button>
       </form>
     </th:block>
     <th:block th:if="${logoutMode == 'admin'}">
-      <button type="button" class="profile-menu-action profile-logout" onclick="showAdminLogoutModal()">Logout</button>
+      <button type="button" class="profile-menu-action profile-logout" onclick="showAdminLogoutModal()">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Logout</span>
+      </button>
     </th:block>
     <th:block th:if="${logoutMode == 'student'}">
-      <button type="button" class="profile-menu-action profile-logout" onclick="showStudentLogoutModal()">Logout</button>
+      <button type="button" class="profile-menu-action profile-logout" onclick="showStudentLogoutModal()">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Logout</span>
+      </button>
     </th:block>
   </div>
 
