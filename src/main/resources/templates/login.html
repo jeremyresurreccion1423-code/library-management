@@ -8,7 +8,7 @@
   <title>EduLibrary - Login</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <link th:href="@{/css/login-new.css(v=ref-match-1)}" rel="stylesheet"/>
+  <link th:href="@{/css/login-new.css(v=ref-match-3)}" rel="stylesheet"/>
 </head>
 <body data-auth-page="true" class="auth-page-body">
 <div class="auth-page">
@@ -83,7 +83,7 @@
           <div class="auth-input">
             <span class="auth-input-icon"><i class="bi bi-lock"></i></span>
             <input type="password" id="password" name="password" required
-                   placeholder="••••••••" autocomplete="current-password"/>
+                   placeholder="Enter your password" autocomplete="current-password"/>
             <button type="button" class="auth-input-toggle" id="togglePasswordBtn" aria-label="Show password">
               <i class="bi bi-eye"></i>
             </button>
@@ -107,10 +107,13 @@
           <a th:href="@{/register}">Register</a>
         </p>
 
-        <a th:href="@{/super-admin/login}" class="auth-super-admin-link">
+        <div class="auth-super-admin">
           <i class="bi bi-shield-check"></i>
-          Super Admin? Sign in via the System Control Center
-        </a>
+          <span>
+            Super Admin? Sign in via the
+            <a th:href="@{/super-admin/login}">System Control Center</a>
+          </span>
+        </div>
       </div>
     </div>
   </div>
