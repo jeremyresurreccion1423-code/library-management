@@ -420,7 +420,7 @@
   box-shadow: 0 2px 8px rgba(22, 101, 52, 0.1);
 }
 
-/* Page-header placement (Super Admin dashboard) */
+/* Page-header placement (admin dashboard) */
 .dashboard-header.with-profile {
   display: flex;
   justify-content: space-between;

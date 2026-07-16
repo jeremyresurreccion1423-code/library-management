@@ -1050,7 +1050,7 @@ body.modal-open {
   border-color: #93c5fd;
 }
 
-/* AMS-matching Super Admin dashboard + My Profile layouts */
+/* AMS-matching admin dashboard + My Profile layouts */
 .page-header--ams {
   display: flex;
   justify-content: space-between;
