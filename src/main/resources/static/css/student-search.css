@@ -412,7 +412,8 @@ body:has(#studentSidebar) .sl-search-empty i {
 
 /* Sidebar reading stats */
 body:has(#studentSidebar) .sidebar-reading-stats {
-  margin: auto 12px 16px;
+  flex-shrink: 0;
+  margin: 8px 12px 16px;
   padding: 14px;
   border-radius: 14px;
   background: linear-gradient(145deg, #ecfdf3, #f0fdf4);

@@ -816,6 +816,7 @@ body.modal-open {
   z-index: 1000;
   box-shadow: 4px 0 24px rgba(22, 101, 52, 0.08);
   transition: transform 0.3s ease, width 0.3s ease;
+  overflow: hidden;
 }
 
 .admin-sidebar.collapsed {
@@ -863,6 +864,7 @@ body.modal-open {
 
 .sidebar-nav {
   flex: 1;
+  min-height: 0;
   padding: 16px 12px;
   display: flex;
   flex-direction: column;
