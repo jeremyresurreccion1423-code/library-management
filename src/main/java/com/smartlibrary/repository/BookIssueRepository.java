@@ -2,6 +2,7 @@ package com.smartlibrary.repository;
 
 import com.smartlibrary.entity.BookIssue;
 import com.smartlibrary.model.IssueStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -76,6 +77,15 @@ public interface BookIssueRepository extends JpaRepository<BookIssue, Long> {
             ORDER BY issue_date ASC
             """, nativeQuery = true)
     List<Object[]> countIssuesByDateSince(@Param("since") LocalDateTime since);
+
+    @Query("""
+            SELECT bi FROM BookIssue bi
+            JOIN FETCH bi.book
+            JOIN FETCH bi.student s
+            JOIN FETCH s.user
+            ORDER BY bi.issuedAt DESC
+            """)
+    List<BookIssue> findRecentWithDetails(Pageable pageable);
 
     long countByStudent_Id(Long studentId);
 

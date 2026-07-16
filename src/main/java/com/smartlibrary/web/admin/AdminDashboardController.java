@@ -1,12 +1,19 @@
 package com.smartlibrary.web.admin;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smartlibrary.model.IssueStatus;
+import com.smartlibrary.model.ReservationStatus;
 import com.smartlibrary.model.UserRole;
 import com.smartlibrary.repository.BookIssueRepository;
 import com.smartlibrary.repository.BookRepository;
+import com.smartlibrary.repository.ReservationRepository;
 import com.smartlibrary.repository.StudentProfileRepository;
 import com.smartlibrary.repository.UserRepository;
 import com.smartlibrary.security.LibraryUserDetails;
+import com.smartlibrary.service.AnalyticsService;
 import com.smartlibrary.service.UserAccountService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,36 +24,120 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 @Controller
 @RequestMapping("/admin")
 public class AdminDashboardController {
 
+    private static final DateTimeFormatter ACTIVITY_TIME = DateTimeFormatter.ofPattern("MMM d, h:mm a");
+
     private final BookRepository bookRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final BookIssueRepository bookIssueRepository;
+    private final ReservationRepository reservationRepository;
     private final UserAccountService userAccountService;
     private final UserRepository userRepository;
+    private final AnalyticsService analyticsService;
+    private final ObjectMapper objectMapper;
 
     public AdminDashboardController(
             BookRepository bookRepository,
             StudentProfileRepository studentProfileRepository,
             BookIssueRepository bookIssueRepository,
+            ReservationRepository reservationRepository,
             UserAccountService userAccountService,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            AnalyticsService analyticsService,
+            ObjectMapper objectMapper) {
         this.bookRepository = bookRepository;
         this.studentProfileRepository = studentProfileRepository;
         this.bookIssueRepository = bookIssueRepository;
+        this.reservationRepository = reservationRepository;
         this.userAccountService = userAccountService;
         this.userRepository = userRepository;
+        this.analyticsService = analyticsService;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping({"", "/"})
-    public String dashboard(Model model) {
+    public String dashboard(@AuthenticationPrincipal LibraryUserDetails user, Model model)
+            throws JsonProcessingException {
         model.addAttribute("bookCount", bookRepository.count());
         model.addAttribute("studentCount", studentProfileRepository.count());
-        model.addAttribute("activeLoans", bookIssueRepository.countByStatus(com.smartlibrary.model.IssueStatus.BORROWED));
-        model.addAttribute("overdueLoans", bookIssueRepository.countByStatus(com.smartlibrary.model.IssueStatus.OVERDUE));
+        model.addAttribute("activeLoans", bookIssueRepository.countByStatus(IssueStatus.BORROWED));
+        model.addAttribute("reservationCount", reservationRepository.countByStatus(ReservationStatus.WAITING));
+        model.addAttribute("overdueLoans", bookIssueRepository.countByStatus(IssueStatus.OVERDUE));
+        model.addAttribute("topBooks", analyticsService.mostBorrowedBooks(5));
+        model.addAttribute("overdueBooks", bookIssueRepository.findByStatusWithDetails(IssueStatus.OVERDUE));
+        model.addAttribute("recentActivities", buildRecentActivities());
+
+        List<Map<String, Object>> trend = analyticsService.borrowsByRecentDays(14);
+        model.addAttribute("dailyTrendJson", objectMapper.writeValueAsString(trend));
+
+        String displayName = user != null && user.getUser().getFullName() != null
+                && !user.getUser().getFullName().isBlank()
+                ? user.getUser().getFullName()
+                : user != null ? user.getUsername() : "Admin";
+        model.addAttribute("adminDisplayName", displayName);
         return "admin/dashboard";
+    }
+
+    private List<Map<String, Object>> buildRecentActivities() {
+        List<Map<String, Object>> activities = new ArrayList<>();
+        var recent = bookIssueRepository.findRecentWithDetails(PageRequest.of(0, 8));
+        for (var issue : recent) {
+            String studentName = issue.getStudent().getFullName() != null
+                    ? issue.getStudent().getFullName()
+                    : issue.getStudent().getUser().getUsername();
+            String type;
+            String icon;
+            String tone;
+            LocalDateTime when = issue.getIssuedAt();
+
+            if (issue.getStatus() == IssueStatus.RETURNED && issue.getReturnedAt() != null) {
+                type = "Book returned";
+                icon = "bi-arrow-return-left";
+                tone = "blue";
+                when = issue.getReturnedAt();
+            } else if (issue.getStatus() == IssueStatus.OVERDUE) {
+                type = "Overdue book";
+                icon = "bi-exclamation-circle";
+                tone = "red";
+            } else {
+                type = "Book issued";
+                icon = "bi-journal-arrow-up";
+                tone = "green";
+            }
+
+            activities.add(Map.of(
+                    "type", type,
+                    "icon", icon,
+                    "tone", tone,
+                    "bookTitle", issue.getBook().getTitle(),
+                    "personName", studentName,
+                    "whenLabel", formatActivityTime(when)));
+        }
+        return activities;
+    }
+
+    private static String formatActivityTime(LocalDateTime when) {
+        if (when == null) {
+            return "";
+        }
+        long days = ChronoUnit.DAYS.between(when.toLocalDate(), LocalDateTime.now().toLocalDate());
+        if (days == 0) {
+            return "Today, " + when.format(DateTimeFormatter.ofPattern("h:mm a"));
+        }
+        if (days == 1) {
+            return "Yesterday, " + when.format(DateTimeFormatter.ofPattern("h:mm a"));
+        }
+        return when.format(ACTIVITY_TIME);
     }
 
     @GetMapping("/admins")

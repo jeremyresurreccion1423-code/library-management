@@ -7,7 +7,53 @@
 <div class="dashboard-wrapper">
   <div th:replace="~{fragments/student-sidebar :: sidebar}"></div>
   <main class="dashboard-main">
-    <div class="dashboard-header">
+    <div class="el-portal-greeting">
+      <h1>Welcome back, <span th:text="${profile.fullName}">Student</span>! 👋</h1>
+      <p>Student ID: <strong th:text="${profile.studentId}"></strong> — here's your library at a glance.</p>
+    </div>
+
+    <div class="el-portal-stats">
+      <div class="el-stat-card">
+        <div>
+          <div class="stat-label">Books Borrowed</div>
+          <div class="stat-value" th:text="${borrowedCount}">0</div>
+        </div>
+        <span class="el-stat-icon el-stat-icon--green"><i class="bi bi-journal-arrow-up"></i></span>
+      </div>
+      <div class="el-stat-card">
+        <div>
+          <div class="stat-label">Overdue</div>
+          <div class="stat-value" th:text="${overdueCount}">0</div>
+        </div>
+        <span class="el-stat-icon el-stat-icon--red"><i class="bi bi-exclamation-circle"></i></span>
+      </div>
+      <div class="el-stat-card">
+        <div>
+          <div class="stat-label">Reservations</div>
+          <div class="stat-value" th:text="${reservationWaitingCount}">0</div>
+        </div>
+        <span class="el-stat-icon el-stat-icon--orange"><i class="bi bi-calendar-check"></i></span>
+      </div>
+      <div class="el-stat-card">
+        <div>
+          <div class="stat-label">E-Books</div>
+          <div class="stat-value" th:text="${digitalBookCount}">0</div>
+        </div>
+        <span class="el-stat-icon el-stat-icon--blue"><i class="bi bi-file-earmark-pdf"></i></span>
+      </div>
+    </div>
+
+    <div class="el-panel" style="margin-bottom:24px;">
+      <div class="el-panel-head"><h3>Quick Actions</h3></div>
+      <div class="el-quick-grid el-quick-grid--student">
+        <a th:href="@{/search}" class="el-quick-btn"><i class="bi bi-search"></i><span>Search Books</span></a>
+        <a th:href="@{/books-categories}" class="el-quick-btn"><i class="bi bi-grid-3x3-gap"></i><span>Browse</span></a>
+        <a th:href="@{/scan}" class="el-quick-btn"><i class="bi bi-qr-code-scan"></i><span>Scan Book</span></a>
+        <a th:href="@{/student/profile}" class="el-quick-btn"><i class="bi bi-person"></i><span>My Profile</span></a>
+      </div>
+    </div>
+
+    <div class="dashboard-header" style="display:none;">
       <h1 class="dashboard-title">Welcome, <span th:text="${profile.fullName}"></span></h1>
       <p class="dashboard-subtitle">Student ID: <strong th:text="${profile.studentId}"></strong></p>
     </div>

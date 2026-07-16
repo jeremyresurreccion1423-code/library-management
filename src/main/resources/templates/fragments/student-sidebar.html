@@ -2,16 +2,19 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block th:fragment="sidebar">
-<link rel="stylesheet" th:href="@{/css/student-premium.css(v=1)}">
+<link rel="stylesheet" th:href="@{/css/student-premium.css(v=2)}">
 
 <div class="dashboard-header-bar">
   <div class="header-bar-left">
     <button type="button" class="header-bar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
       <i class="bi bi-list"></i>
     </button>
-    <a th:href="@{/}" class="header-bar-brand">
+    <a th:href="@{/student}" class="header-bar-brand">
       <i class="bi bi-book-half"></i>
-      <span>EDULIBRARY</span>
+      <span>
+        EDULIBRARY
+        <small class="header-bar-brand-sub">Student Portal</small>
+      </span>
     </a>
   </div>
   <div class="header-bar-right">
@@ -20,8 +23,12 @@
 </div>
 
 <aside class="admin-sidebar" id="studentSidebar" aria-label="Student sidebar navigation">
+  <div class="sidebar-portal-label">
+    <i class="bi bi-mortarboard"></i>
+    <span>Student Portal</span>
+  </div>
   <div class="sidebar-header">
-    <a th:href="@{/}" class="sidebar-brand">
+    <a th:href="@{/student}" class="sidebar-brand">
       <i class="bi bi-book-half"></i>
       <span>EDULIBRARY</span>
     </a>
@@ -44,6 +51,11 @@
       <span>Scan Book</span>
     </a>
   </nav>
+  <div class="sidebar-footer-quote">
+    <div class="quote-icon"><i class="bi bi-book"></i></div>
+    <p>"A book is a dream that you hold in your hands."</p>
+    <cite>— Neil Gaiman</cite>
+  </div>
 </aside>
 
 

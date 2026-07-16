@@ -68,6 +68,9 @@ public class StudentDashboardController {
         model.addAttribute("issues", issues);
         model.addAttribute("borrowedCount", borrowedCount);
         model.addAttribute("overdueCount", overdueCount);
+        model.addAttribute("reservationWaitingCount", reservationService.forStudent(profile.getId()).stream()
+                .filter(r -> r.getStatus().name().equals("WAITING")).count());
+        model.addAttribute("digitalBookCount", bookService.listDigitalBooksForStudent(profile.getId()).size());
         model.addAttribute("reservations", reservationService.forStudent(profile.getId()));
         model.addAttribute("digitalBooks", bookService.listDigitalBooksForStudent(profile.getId()));
         model.addAttribute("defaultFinePerDay", libraryProperties.getFinePerDay());

@@ -27,4 +27,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Optional<Reservation> findByIdWithDetails(@Param("id") Long id);
 
     long countByStudent_Id(Long studentId);
+
+    long countByStatus(ReservationStatus status);
 }

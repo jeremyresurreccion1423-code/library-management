@@ -791,6 +791,179 @@ body:has(#studentSidebar) a:not(.btn):not(.sidebar-link):not(.header-bar-brand):
   color: var(--stu-forest-dark);
 }
 
+/* ========== Student portal chrome extras ========== */
+body:has(#studentSidebar) .header-bar-brand-sub {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.2;
+}
+
+body:has(#studentSidebar) .sidebar-portal-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 18px 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stu-muted);
+}
+
+body:has(#studentSidebar) .sidebar-portal-label i {
+  color: var(--stu-forest);
+}
+
+body:has(#studentSidebar) .sidebar-footer-quote {
+  margin: auto 12px 16px;
+  padding: 16px;
+  border-radius: var(--stu-radius);
+  background: linear-gradient(145deg, #ecfdf3, #d1fae5);
+  border: 1px solid rgba(22, 101, 52, 0.14);
+}
+
+body:has(#studentSidebar) .sidebar-footer-quote .quote-icon {
+  font-size: 1.6rem;
+  color: var(--stu-forest);
+  margin-bottom: 8px;
+}
+
+body:has(#studentSidebar) .sidebar-footer-quote p {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: #334155;
+  margin: 0 0 6px;
+  font-style: italic;
+}
+
+body:has(#studentSidebar) .sidebar-footer-quote cite {
+  font-size: 0.68rem;
+  color: var(--stu-muted);
+  font-style: normal;
+}
+
+/* ========== Student portal dashboard (green) ========== */
+body:has(#studentSidebar) .el-portal-greeting h1 {
+  font-size: clamp(1.5rem, 2.2vw, 1.85rem);
+  font-weight: 700;
+  color: var(--stu-text);
+  margin: 0 0 6px;
+}
+
+body:has(#studentSidebar) .el-portal-greeting p {
+  color: var(--stu-muted);
+  margin: 0;
+}
+
+body:has(#studentSidebar) .el-portal-greeting strong {
+  color: var(--stu-forest);
+}
+
+body:has(#studentSidebar) .el-portal-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin: 24px 0;
+}
+
+body:has(#studentSidebar) .el-stat-card {
+  background: var(--stu-white);
+  border: 1px solid rgba(22, 101, 52, 0.1);
+  border-radius: var(--stu-radius);
+  padding: 20px;
+  box-shadow: var(--stu-shadow);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  transition: transform 0.22s var(--stu-ease), box-shadow 0.22s var(--stu-ease);
+}
+
+body:has(#studentSidebar) .el-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--stu-shadow-lg);
+}
+
+body:has(#studentSidebar) .el-stat-card .stat-label {
+  font-size: 0.84rem;
+  color: var(--stu-muted);
+  margin-bottom: 6px;
+}
+
+body:has(#studentSidebar) .el-stat-card .stat-value {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: var(--stu-text);
+}
+
+body:has(#studentSidebar) .el-stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+}
+
+body:has(#studentSidebar) .el-stat-icon--green { background: #dcfce7; color: #16a34a; }
+body:has(#studentSidebar) .el-stat-icon--blue { background: #dbeafe; color: #1d4ed8; }
+body:has(#studentSidebar) .el-stat-icon--orange { background: #ffedd5; color: #ea580c; }
+body:has(#studentSidebar) .el-stat-icon--red { background: #fee2e2; color: #dc2626; }
+
+body:has(#studentSidebar) .el-panel {
+  background: var(--stu-white);
+  border: 1px solid rgba(22, 101, 52, 0.1);
+  border-radius: var(--stu-radius);
+  padding: 20px;
+  box-shadow: var(--stu-shadow);
+}
+
+body:has(#studentSidebar) .el-panel-head h3 {
+  margin: 0 0 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--stu-text);
+}
+
+body:has(#studentSidebar) .el-quick-grid--student {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+body:has(#studentSidebar) .el-quick-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(22, 101, 52, 0.12);
+  background: #fff;
+  text-decoration: none;
+  color: var(--stu-text);
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.2s var(--stu-ease);
+}
+
+body:has(#studentSidebar) .el-quick-btn i {
+  font-size: 1.35rem;
+  color: var(--stu-forest);
+}
+
+body:has(#studentSidebar) .el-quick-btn:hover {
+  border-color: rgba(22, 101, 52, 0.22);
+  background: #ecfdf3;
+  color: var(--stu-forest-dark);
+  transform: translateY(-2px);
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 991px) {
   body:has(#studentSidebar) .dashboard-main {
@@ -799,6 +972,14 @@ body:has(#studentSidebar) a:not(.btn):not(.sidebar-link):not(.header-bar-brand):
 
   body:has(#studentSidebar) .dashboard-title {
     font-size: 1.45rem;
+  }
+
+  body:has(#studentSidebar) .el-portal-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body:has(#studentSidebar) .el-quick-grid--student {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

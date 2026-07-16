@@ -5,68 +5,154 @@
 <div class="dashboard-wrapper">
   <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
   <main class="dashboard-main">
-    <div class="page-header page-header--ams with-profile">
-      <h1>Admin Dashboard</h1>
-      <th:block sec:authorize="hasRole('SUPER_ADMIN')">
-        <div th:replace="~{fragments/profile-widget :: widget(photoAction=@{/admin/profile/photo}, passwordAction=@{/admin/account/password}, roleLabel='Super Admin', panelId='lib-dash-profile-sa', logoutMode='super-admin')}"></div>
-      </th:block>
-      <th:block sec:authorize="hasRole('ADMIN') and !hasRole('SUPER_ADMIN')">
-        <div th:replace="~{fragments/profile-widget :: widget(photoAction=@{/admin/profile/photo}, passwordAction=@{/admin/account/password}, roleLabel='Admin', panelId='lib-dash-profile-admin', logoutMode='admin')}"></div>
-      </th:block>
-    </div>
-
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <div class="ams-stats-grid ams-stats-grid--top">
-      <div class="ams-stat-card">
-        <div class="value" th:text="${bookCount}">0</div>
-        <div class="label">Total Books</div>
+    <div class="el-portal-greeting">
+      <h1>Good morning, <span th:text="${adminDisplayName}">Admin</span>! 👋</h1>
+      <p>Here's what's happening in the library today.</p>
+    </div>
+
+    <div class="el-portal-stats">
+      <div class="el-stat-card">
+        <div>
+          <div class="stat-label">Total Books</div>
+          <div class="stat-value" th:text="${bookCount}">0</div>
+        </div>
+        <span class="el-stat-icon el-stat-icon--blue"><i class="bi bi-book"></i></span>
       </div>
-      <div class="ams-stat-card">
-        <div class="value" th:text="${studentCount}">0</div>
-        <div class="label">Total Students</div>
+      <div class="el-stat-card">
+        <div>
+          <div class="stat-label">Total Students</div>
+          <div class="stat-value" th:text="${studentCount}">0</div>
+        </div>
+        <span class="el-stat-icon el-stat-icon--purple"><i class="bi bi-people"></i></span>
       </div>
-      <div class="ams-stat-card">
-        <div class="value" th:text="${activeLoans}">0</div>
-        <div class="label">Active Loans</div>
+      <div class="el-stat-card">
+        <div>
+          <div class="stat-label">Books Issued</div>
+          <div class="stat-value" th:text="${activeLoans}">0</div>
+        </div>
+        <span class="el-stat-icon el-stat-icon--green"><i class="bi bi-journal-arrow-up"></i></span>
       </div>
-      <div class="ams-stat-card" th:if="${overdueLoans > 0}">
-        <div class="value" style="color:#dc2626;" th:text="${overdueLoans}">0</div>
-        <div class="label">Overdue Loans</div>
+      <div class="el-stat-card">
+        <div>
+          <div class="stat-label">Reservations</div>
+          <div class="stat-value" th:text="${reservationCount}">0</div>
+        </div>
+        <span class="el-stat-icon el-stat-icon--orange"><i class="bi bi-calendar-check"></i></span>
       </div>
     </div>
 
-    <div class="ams-card">
-      <h3>Library Loan Analytics</h3>
-      <div class="ams-stats-grid">
-        <div class="ams-stat-card">
-          <div class="value" th:text="${activeLoans}">0</div>
-          <div class="label">Active Loans</div>
+    <div class="el-portal-row">
+      <div class="el-panel">
+        <div class="el-panel-head">
+          <h3>Library Overview</h3>
         </div>
-        <div class="ams-stat-card">
-          <div class="value" th:text="${studentCount}">0</div>
-          <div class="label">Enrolled Students</div>
+        <div class="el-chart-wrap">
+          <canvas id="libraryTrendChart"></canvas>
         </div>
-        <div class="ams-stat-card">
-          <div class="value" th:text="${bookCount}">0</div>
-          <div class="label">Books in Catalog</div>
+      </div>
+      <div class="el-panel">
+        <div class="el-panel-head">
+          <h3>Recent Activities</h3>
+        </div>
+        <div class="el-activity-list">
+          <div class="el-activity-item" th:each="act : ${recentActivities}">
+            <span class="el-activity-icon"
+                  th:classappend="${' el-activity-icon--' + act.tone}">
+              <i class="bi" th:classappend="${act.icon}"></i>
+            </span>
+            <div class="el-activity-body">
+              <strong th:text="${act.type + ': ' + act.bookTitle}">Activity</strong>
+              <span th:text="${act.personName}">Student</span>
+            </div>
+            <span class="el-activity-time" th:text="${act.whenLabel}">Today</span>
+          </div>
+          <p th:if="${#lists.isEmpty(recentActivities)}" class="text-muted mb-0">No recent library activity yet.</p>
         </div>
       </div>
     </div>
 
-    <div class="ams-card">
-      <h3>Quick Actions</h3>
-      <div class="ams-quick-actions">
-        <a th:href="@{/admin/books}" class="btn btn-ams-primary">Manage Books</a>
-        <a th:href="@{/admin/students}" class="btn btn-ams-primary">Manage Students</a>
-        <a th:href="@{/admin/scan-issue}" class="btn btn-ams-primary">Scan &amp; Issue</a>
-        <a th:href="@{/admin/analytics}" class="btn btn-ams-secondary">Analytics</a>
+    <div class="el-panel" style="margin-bottom:20px;">
+      <div class="el-panel-head"><h3>Quick Actions</h3></div>
+      <div class="el-quick-grid">
+        <a th:href="@{/admin/scan-issue}" class="el-quick-btn"><i class="bi bi-qr-code-scan"></i><span>Scan &amp; Issue</span></a>
+        <a th:href="@{/admin/issues}" class="el-quick-btn"><i class="bi bi-arrow-return-left"></i><span>Return Book</span></a>
+        <a th:href="@{/admin/issues/reservations}" class="el-quick-btn"><i class="bi bi-calendar-plus"></i><span>Reservations</span></a>
+        <a th:href="@{/admin/students}" class="el-quick-btn"><i class="bi bi-person-plus"></i><span>Students</span></a>
+        <a th:href="@{/admin/books/new}" class="el-quick-btn"><i class="bi bi-book-half"></i><span>Add Book</span></a>
+        <a th:href="@{/admin/analytics}" class="el-quick-btn"><i class="bi bi-graph-up"></i><span>Analytics</span></a>
+      </div>
+    </div>
+
+    <div class="el-bottom-row">
+      <div class="el-panel">
+        <div class="el-panel-head"><h3>Top Borrowed Books</h3></div>
+        <div th:each="book, stat : ${topBooks}" class="el-rank-item">
+          <span class="el-rank-num" th:text="${stat.count}">1</span>
+          <div>
+            <strong th:text="${book.title}">Book</strong>
+            <div class="small text-muted" th:text="${book.borrowCount + ' borrows'}">0 borrows</div>
+          </div>
+        </div>
+        <p th:if="${#lists.isEmpty(topBooks)}" class="text-muted mb-0">No borrow data yet.</p>
+      </div>
+      <div class="el-panel">
+        <div class="el-panel-head"><h3>Overdue Books</h3></div>
+        <div th:each="issue : ${overdueBooks}" class="el-overdue-item">
+          <div>
+            <strong th:text="${issue.book.title}">Book</strong>
+            <div class="small text-muted" th:text="${issue.student.fullName != null ? issue.student.fullName : issue.student.user.username}">Student</div>
+          </div>
+          <span class="el-overdue-badge"
+                th:with="days=${T(java.time.temporal.ChronoUnit).DAYS.between(issue.dueAt.toLocalDate(), T(java.time.LocalDate).now())}"
+                th:text="${days + ' days overdue'}">Overdue</span>
+        </div>
+        <p th:if="${#lists.isEmpty(overdueBooks)}" class="text-muted mb-0">No overdue books. Great job!</p>
       </div>
     </div>
   </main>
 </div>
 <div th:replace="~{fragments/layout :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', function () {
+    const trend = /*[[${dailyTrendJson}]]*/ '[]';
+    let rows = [];
+    try { rows = typeof trend === 'string' ? JSON.parse(trend) : trend; } catch (e) { rows = []; }
+    const labels = rows.map(r => r.label);
+    const counts = rows.map(r => r.count);
+    const canvas = document.getElementById('libraryTrendChart');
+    if (canvas && typeof Chart !== 'undefined' && labels.length) {
+      new Chart(canvas, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Books borrowed',
+            data: counts,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37, 99, 235, 0.12)',
+            fill: true,
+            tension: 0.35,
+            pointRadius: 4,
+            pointBackgroundColor: '#2563eb'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+            x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 11 } } }
+          }
+        }
+      });
+    }
+  });
+</script>
 <div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
 </body>
 </html>
