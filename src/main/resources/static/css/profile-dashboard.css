@@ -639,10 +639,18 @@ body:has(#adminSidebar) .pd-badge--role {
   color: #2563eb;
 }
 
-/* Change password page */
+/* Profile + change-password — center in main area (sidebar open or collapsed) */
+.dashboard-main:has(> .cp-page),
+.dashboard-main:has(> .pd-page) {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .dashboard-main > .cp-page,
 .dashboard-main > .pd-page {
   width: 100%;
+  max-width: 980px;
   margin-left: auto;
   margin-right: auto;
 }
@@ -651,14 +659,10 @@ body:has(#adminSidebar) .pd-badge--role {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 980px;
 }
 
 .pd-page {
   width: 100%;
-  max-width: 980px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .pd-page--edit {
@@ -945,6 +949,8 @@ body:has(#adminSidebar) .pd-badge--role {
   border: 1px solid rgba(22, 101, 52, 0.12);
   color: #166534;
   font-size: 0.84rem;
+  position: static;
+  margin-top: 8px;
 }
 
 .cp-reminder i {

@@ -819,12 +819,26 @@ body:has(#studentSidebar) .sidebar-portal-label i {
   color: var(--stu-forest);
 }
 
+body:has(#studentSidebar) .admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+body:has(#studentSidebar) .sidebar-nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 body:has(#studentSidebar) .sidebar-footer-quote {
+  flex-shrink: 0;
   margin: auto 12px 16px;
   padding: 16px;
   border-radius: var(--stu-radius);
   background: linear-gradient(145deg, #ecfdf3, #d1fae5);
   border: 1px solid rgba(22, 101, 52, 0.14);
+  text-align: center;
 }
 
 body:has(#studentSidebar) .sidebar-footer-quote .quote-icon {

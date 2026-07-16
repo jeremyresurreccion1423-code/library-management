@@ -93,6 +93,10 @@ body.dashboard-body:has(#adminSidebar) .dashboard-main {
   padding: 28px;
 }
 
+body.dashboard-body:has(#adminSidebar) .dashboard-main.expanded {
+  margin-left: 0;
+}
+
 body.dashboard-body:has(#adminSidebar) .sidebar-portal-label {
   display: flex;
   align-items: center;
@@ -153,11 +157,12 @@ body.dashboard-body:has(#adminSidebar) .sidebar-sublink:hover {
 
 body.dashboard-body:has(#adminSidebar) .sidebar-footer-quote {
   flex-shrink: 0;
-  margin: 8px 12px 16px;
+  margin: auto 12px 16px;
   padding: 16px;
   border-radius: var(--portal-radius);
   background: linear-gradient(145deg, #EFF6FF, #DBEAFE);
   border: 1px solid var(--portal-primary-border);
+  text-align: center;
 }
 
 body.dashboard-body:has(#adminSidebar) .sidebar-footer-quote .quote-icon {
@@ -172,6 +177,12 @@ body.dashboard-body:has(#adminSidebar) .sidebar-footer-quote p {
   color: #57534e;
   margin: 0 0 6px;
   font-style: italic;
+}
+
+body.dashboard-body:has(#adminSidebar) .sidebar-footer-quote cite {
+  font-size: 0.68rem;
+  color: var(--portal-muted);
+  font-style: normal;
 }
 
 body.dashboard-body:has(#adminSidebar) .el-books-grid-head {
