@@ -24,8 +24,9 @@
 
         const modalElement = document.getElementById("confirmModal");
         if (!modalElement || typeof bootstrap === "undefined" || !bootstrap.Modal) {
-            if (confirm(message) && typeof onConfirm === "function") onConfirm();
-            return Promise.resolve(false);
+            const accepted = confirm(message);
+            if (accepted && typeof onConfirm === "function") onConfirm();
+            return Promise.resolve(accepted);
         }
 
         const title = options.title || (options.type === "danger" ? "Confirm Delete" : "Confirm Action");
@@ -150,14 +151,16 @@
     function validatePasswordForm(form) {
         const newPass = form.querySelector('input[name="newPassword"]');
         const confirm = form.querySelector('input[name="confirmPassword"]');
-        if (!newPass || !confirm) return true;
+        if (!newPass) return true;
         clearFieldError(newPass);
-        clearFieldError(confirm);
-        if (newPass.value.length < 6) {
-            showFieldError(newPass, "Password must be at least 6 characters.");
+        if (confirm) clearFieldError(confirm);
+
+        const minLen = Number.parseInt(newPass.getAttribute("minlength") || "8", 10);
+        if (newPass.value.length < minLen) {
+            showFieldError(newPass, "Password must be at least " + minLen + " characters.");
             return false;
         }
-        if (newPass.value !== confirm.value) {
+        if (confirm && newPass.value !== confirm.value) {
             showFieldError(confirm, "Passwords do not match.");
             return false;
         }
@@ -387,12 +390,19 @@
     const authPage = isAuthPage();
     const successAlert = document.querySelector(".alert.alert-success");
     const errorAlert = document.querySelector(".alert.alert-danger");
+    const infoAlert = document.querySelector(".alert.alert-info");
     if (successAlert && successAlert.textContent.trim() && !authPage) {
         showStatusModal("success", successAlert.textContent.trim());
         successAlert.style.display = "none";
-    } else if (errorAlert && errorAlert.textContent.trim() && !authPage) {
-        showStatusModal("error", errorAlert.textContent.trim());
-        errorAlert.style.display = "none";
+    } else if (errorAlert && errorAlert.textContent.trim()) {
+        if (authPage) {
+            errorAlert.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } else {
+            showStatusModal("error", errorAlert.textContent.trim());
+            errorAlert.style.display = "none";
+        }
+    } else if (infoAlert && infoAlert.textContent.trim() && authPage) {
+        infoAlert.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
     initLoginUsernameRestore();

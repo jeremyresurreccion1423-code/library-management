@@ -222,6 +222,12 @@ public class AuthController {
             return "redirect:/forgot-password";
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
+            if (otp != null && !otp.isBlank()) {
+                ra.addFlashAttribute("otpRequired", true);
+                ra.addFlashAttribute("emailOrUsername", emailOrUsername);
+            } else if (emailOrUsername != null && !emailOrUsername.isBlank()) {
+                ra.addFlashAttribute("emailOrUsername", emailOrUsername);
+            }
             logger.warn("Password reset request failed: {}", e.getMessage());
             return "redirect:/forgot-password";
         }

@@ -72,6 +72,11 @@ public class StudentPasswordController {
             return "redirect:/student/account/password";
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
+            if (otp != null && !otp.isBlank()) {
+                ra.addFlashAttribute("otpRequired", true);
+                ra.addFlashAttribute("email", user.getUser().getEmail());
+                ra.addFlashAttribute("newPassword", newPassword);
+            }
             return SafeRedirects.toRefererOr(request, "/student/account/password");
         }
     }
