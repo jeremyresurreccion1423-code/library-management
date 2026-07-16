@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Controller
 @RequestMapping("/admin/profile")
 public class AdminProfileController {
@@ -36,7 +40,28 @@ public class AdminProfileController {
         User fresh = userRepository.findById(user.getUser().getId()).orElseThrow();
         boolean superAdmin = fresh.getRole() == UserRole.SUPER_ADMIN;
 
+        String displayName = (fresh.getFullName() != null && !fresh.getFullName().isBlank())
+                ? fresh.getFullName()
+                : fresh.getUsername();
+
+        Map<String, String> profileDetails = new LinkedHashMap<>();
+        profileDetails.put("Username", fresh.getUsername());
+        profileDetails.put("Email", fresh.getEmail() != null ? fresh.getEmail() : "—");
+        profileDetails.put("Role", superAdmin ? "Super Admin" : "Administrator");
+        profileDetails.put("Account Status", fresh.isEnabled() ? "Active" : "Disabled");
+        profileDetails.put("Created At", fresh.getCreatedAt() != null
+                ? fresh.getCreatedAt().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"))
+                : "—");
+
         model.addAttribute("username", fresh.getUsername());
+        model.addAttribute("displayName", displayName);
+        model.addAttribute("profileCode", "ID: " + fresh.getId());
+        model.addAttribute("roleLabel", superAdmin ? "Super Admin" : "Administrator");
+        model.addAttribute("accountActive", fresh.isEnabled());
+        model.addAttribute("memberSince", fresh.getCreatedAt() != null
+                ? fresh.getCreatedAt().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+                : "—");
+        model.addAttribute("profileDetails", profileDetails);
         model.addAttribute("dashboardPath", superAdmin ? "/super-admin" : "/admin");
         return "admin/profile";
     }

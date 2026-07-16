@@ -5,59 +5,103 @@
 <div class="dashboard-wrapper">
   <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
   <main class="dashboard-main">
-    <div class="pd-page pd-page--edit">
+    <div class="pd-page">
 
       <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
       <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-      <section class="pd-card pd-card--edit">
-        <div class="pd-card__head">
-          <i class="bi bi-person-gear"></i>
-          <h3>My Profile</h3>
-        </div>
+      <header class="pd-page-header">
+        <h1>My Profile</h1>
+        <p>View your personal information.</p>
+      </header>
 
-        <div class="pd-photo-row">
-          <div class="pd-photo-row__avatar">
-            <img th:if="${profilePhotoUrl != null}"
-                 th:src="${profilePhotoUrl}"
-                 alt="Profile photo"
-                 width="72"
-                 height="72"/>
-            <span th:unless="${profilePhotoUrl != null}" th:text="${profileInitial ?: 'U'}">U</span>
+      <!-- Hero -->
+      <section class="pd-hero pd-hero--view">
+        <div class="pd-hero__avatar pd-hero__avatar--round">
+          <img th:if="${profilePhotoUrl != null}"
+               th:src="${profilePhotoUrl}"
+               alt="Profile photo"
+               width="88"
+               height="88"/>
+          <span th:unless="${profilePhotoUrl != null}" th:text="${profileInitial ?: 'U'}">U</span>
+        </div>
+        <div class="pd-hero__body">
+          <h2 th:text="${username}">admin</h2>
+          <div class="pd-hero__meta">
+            <span class="pd-badge pd-badge--role" th:text="${roleLabel}">Administrator</span>
+            <span th:if="${accountActive}" class="pd-badge pd-badge--active"><i class="bi bi-circle-fill" style="font-size:0.45rem"></i> Active</span>
+            <span th:unless="${accountActive}" class="pd-badge pd-badge--inactive"><i class="bi bi-circle-fill" style="font-size:0.45rem"></i> Inactive</span>
           </div>
-          <form th:action="@{/admin/profile/photo}" method="post" enctype="multipart/form-data" class="pd-photo-row__form">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-            <label class="form-label">Profile Photo</label>
-            <div class="pd-photo-row__inputs">
-              <input type="file" name="photo" accept="image/*" class="form-control" required>
-              <button type="submit" class="pd-btn pd-btn--primary">
-                <i class="bi bi-upload"></i> Upload
-              </button>
-            </div>
-            <div class="form-text text-muted">JPG, PNG, GIF, or WebP. Max 5MB.</div>
-          </form>
+          <div class="pd-hero__id" th:text="${profileCode}">ID: 16</div>
         </div>
+        <div class="pd-hero__aside">
+          <div class="pd-hero__aside-icon"><i class="bi bi-calendar3"></i></div>
+          <div>
+            <span class="pd-hero__aside-label">Member Since</span>
+            <strong class="pd-hero__aside-value" th:text="${memberSince}">20 Jun 2026</strong>
+          </div>
+        </div>
+      </section>
 
-        <hr class="pd-divider"/>
+      <!-- Personal Information -->
+      <section class="pd-card">
+        <h3 class="pd-card__title">Personal Information</h3>
+        <ul class="pd-info-list">
+          <li class="pd-info-row">
+            <div class="pd-info-row__icon"><i class="bi bi-person"></i></div>
+            <span class="pd-info-row__label">Username</span>
+            <span class="pd-info-row__value" th:text="${profileDetails['Username']}">admin</span>
+          </li>
+          <li class="pd-info-row">
+            <div class="pd-info-row__icon"><i class="bi bi-envelope"></i></div>
+            <span class="pd-info-row__label">Email</span>
+            <span class="pd-info-row__value" th:text="${profileDetails['Email']}">admin@example.com</span>
+          </li>
+          <li class="pd-info-row">
+            <div class="pd-info-row__icon"><i class="bi bi-shield-check"></i></div>
+            <span class="pd-info-row__label">Role</span>
+            <span class="pd-info-row__value" th:text="${profileDetails['Role']}">Administrator</span>
+          </li>
+          <li class="pd-info-row">
+            <div class="pd-info-row__icon"><i class="bi bi-check-circle"></i></div>
+            <span class="pd-info-row__label">Account Status</span>
+            <span class="pd-info-row__value">
+              <span th:if="${accountActive}" class="pd-badge pd-badge--active"><i class="bi bi-circle-fill" style="font-size:0.45rem"></i> Active</span>
+              <span th:unless="${accountActive}" class="pd-badge pd-badge--inactive">Disabled</span>
+            </span>
+          </li>
+          <li class="pd-info-row">
+            <div class="pd-info-row__icon"><i class="bi bi-calendar3"></i></div>
+            <span class="pd-info-row__label">Created At</span>
+            <span class="pd-info-row__value" th:text="${profileDetails['Created At']}">20 Jun 2026</span>
+          </li>
+        </ul>
+      </section>
 
+      <!-- Edit Account -->
+      <section class="pd-card">
+        <h3 class="pd-card__title">Edit Account</h3>
+        <form th:action="@{/admin/profile/photo}" method="post" enctype="multipart/form-data" class="mb-4">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <label class="form-label">Profile Photo</label>
+          <div class="pd-photo-row__inputs">
+            <input type="file" name="photo" accept="image/*" class="form-control" required>
+            <button type="submit" class="pd-btn pd-btn--primary"><i class="bi bi-upload"></i> Upload</button>
+          </div>
+          <div class="form-text text-muted">JPG, PNG, GIF, or WebP. Max 5MB.</div>
+        </form>
         <form th:action="@{/admin/profile}" method="post">
           <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <div class="mb-3">
-            <label class="form-label"><i class="bi bi-at me-1"></i> Username</label>
+            <label class="form-label">Username</label>
             <input type="text" class="form-control" name="username"
                    th:value="${username}" required
                    pattern="[A-Za-z0-9_-]+"
-                   placeholder="Username"
                    title="Only letters, numbers, underscore, and hyphen allowed."/>
-            <div class="form-text text-muted">Letters, numbers, underscore, and hyphen only.</div>
           </div>
           <div class="pd-actions">
-            <button type="submit" class="pd-btn pd-btn--primary">
-              <i class="bi bi-check-lg"></i> Save Changes
-            </button>
-            <a class="pd-btn pd-btn--ghost" th:href="${dashboardPath}">
-              <i class="bi bi-arrow-left"></i> Back
-            </a>
+            <button type="submit" class="pd-btn pd-btn--primary"><i class="bi bi-check-lg"></i> Save Username</button>
+            <a class="pd-btn pd-btn--ghost" th:href="${dashboardPath}"><i class="bi bi-arrow-left"></i> Back</a>
           </div>
         </form>
       </section>

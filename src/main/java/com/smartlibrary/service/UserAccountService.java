@@ -223,35 +223,33 @@ public class UserAccountService {
         return user;
     }
 
+    public String resolveOtpDeliveryEmail(String email) {
+        email = normalizeEmail(email);
+        if (email.isBlank()) {
+            return email;
+        }
+        if (!email.contains("@")) {
+            return "edulibrary67+" + email + "@gmail.com";
+        }
+        if (email.endsWith("@library.local") || email.endsWith("@admin.local")) {
+            String name = email.substring(0, email.indexOf("@"));
+            return "edulibrary67+" + name + "@gmail.com";
+        }
+        return email;
+    }
+
     @Transactional
     public void generateAndSendOtp(String email) {
-        email = normalizeEmail(email);
+        String deliveryEmail = resolveOtpDeliveryEmail(email);
 
-        final String finalEmail;
-        if (!email.isBlank() && !email.contains("@")) {
-            finalEmail = "edulibrary67+" + email + "@gmail.com";
-        } else if (email.endsWith("@library.local")) {
-            String name = email.substring(0, email.indexOf("@"));
-            finalEmail = "edulibrary67+" + name + "@gmail.com";
-        } else {
-            finalEmail = email;
-        }
-
-        if (!finalEmail.equals(email)) {
-            userRepository.findByEmailIgnoreCase(email).ifPresent(user -> {
-                user.setEmail(finalEmail);
-                userRepository.save(user);
-            });
-        }
-
-        otpRepository.findByEmailAndVerifiedFalse(finalEmail).ifPresent(otpRepository::delete);
+        otpRepository.findByEmailAndVerifiedFalse(deliveryEmail).ifPresent(otpRepository::delete);
 
         String otpCode = String.format("%06d", OTP_RANDOM.nextInt(1_000_000));
 
-        OtpCode otp = new OtpCode(finalEmail, otpCode, LocalDateTime.now().plusMinutes(libraryProperties.getOtpExpiryMinutes()));
+        OtpCode otp = new OtpCode(deliveryEmail, otpCode, LocalDateTime.now().plusMinutes(libraryProperties.getOtpExpiryMinutes()));
         otpRepository.save(otp);
 
-        boolean sent = mailNotificationService.sendOtpCode(finalEmail, otpCode);
+        boolean sent = mailNotificationService.sendOtpCode(deliveryEmail, otpCode);
         if (!sent) {
             throw new IllegalArgumentException(
                     "Could not send OTP email. Check Brevo SMTP MAIL_PASSWORD settings and try again.");
@@ -260,7 +258,8 @@ public class UserAccountService {
 
     @Transactional
     public boolean verifyOtp(String email, String otpCode) {
-        OtpCode otp = otpRepository.findByEmailAndCodeAndVerifiedFalse(email, otpCode)
+        String deliveryEmail = resolveOtpDeliveryEmail(email);
+        OtpCode otp = otpRepository.findByEmailAndCodeAndVerifiedFalse(deliveryEmail, otpCode)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid OTP code"));
 
         if (otp.getExpiresAt().isBefore(LocalDateTime.now())) {
@@ -323,8 +322,8 @@ public class UserAccountService {
     }
 
     public String getLastGeneratedOtp(String email) {
-        email = normalizeEmail(email);
-        return otpRepository.findByEmailAndVerifiedFalse(email)
+        String deliveryEmail = resolveOtpDeliveryEmail(email);
+        return otpRepository.findByEmailAndVerifiedFalse(deliveryEmail)
                 .map(OtpCode::getCode)
                 .orElse(null);
     }
