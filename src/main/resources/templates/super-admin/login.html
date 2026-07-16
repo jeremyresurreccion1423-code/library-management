@@ -53,7 +53,9 @@
         <div th:if="${errorMessage}" class="alert alert-danger" role="alert" aria-live="polite" th:text="${errorMessage}"></div>
         <div th:if="${success}" class="alert alert-success" role="status" aria-live="polite" th:text="${success}"></div>
 
-        <form th:action="@{/super-admin/login}" method="post" class="login-form sl-validate">
+        <form th:action="@{/super-admin/login/process}" method="post" class="login-form sl-validate">
+          <input type="hidden" name="loginPortal" value="super-admin"/>
+          <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
           <div class="form-group">
             <label class="form-label">Username</label>
             <div class="input-wrapper">

@@ -26,16 +26,8 @@ public class LoginAuthenticationFailureHandler extends SimpleUrlAuthenticationFa
                                         HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
         String username = request.getParameter("username");
-        String servletPath = request.getServletPath();
-        if (servletPath == null || servletPath.isBlank()) {
-            servletPath = request.getRequestURI() != null ? request.getRequestURI() : "";
-        }
-
-        boolean isSuperAdminPortal = servletPath.startsWith("/super-admin");
-        boolean isAdminPortal = servletPath.startsWith("/admin");
-        String loginPath = isSuperAdminPortal ? "/super-admin/login"
-                : isAdminPortal ? "/admin/login"
-                : "/login";
+        String portalKey = LoginPortalPaths.portalKey(request);
+        String loginPath = LoginPortalPaths.resolveLoginPath(request);
 
         if (exception instanceof LockedException) {
             request.getSession().setAttribute("AUTH_ERROR",
@@ -50,12 +42,13 @@ public class LoginAuthenticationFailureHandler extends SimpleUrlAuthenticationFa
             return;
         }
 
-        accountLockoutService.onFailedLogin(username);
+        try {
+            accountLockoutService.onFailedLogin(username);
+        } catch (RuntimeException ex) {
+            // Never block the login error redirect if lockout bookkeeping fails.
+        }
 
-        String message = isSuperAdminPortal
-                ? "Invalid Super Admin credentials."
-                : "Incorrect username or password.";
-        request.getSession().setAttribute("AUTH_ERROR", message);
+        request.getSession().setAttribute("AUTH_ERROR", LoginPortalPaths.failureMessage(portalKey));
         getRedirectStrategy().sendRedirect(request, response, loginPath + "?error=true");
     }
 }

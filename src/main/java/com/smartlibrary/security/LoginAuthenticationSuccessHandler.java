@@ -40,8 +40,9 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
         String uri = request.getRequestURI() != null ? request.getRequestURI() : "";
-        boolean isSuperAdminPortal = uri.startsWith("/super-admin");
-        boolean isAdminPortal = uri.startsWith("/admin");
+        String portalKey = LoginPortalPaths.portalKey(request);
+        boolean isSuperAdminPortal = "super-admin".equals(portalKey);
+        boolean isAdminPortal = "admin".equals(portalKey);
 
         User user = null;
         if (authentication.getPrincipal() instanceof LibraryUserDetails details) {

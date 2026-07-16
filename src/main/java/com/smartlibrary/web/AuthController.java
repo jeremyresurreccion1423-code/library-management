@@ -2,6 +2,7 @@ package com.smartlibrary.web;
 
 import com.smartlibrary.config.LibraryProperties;
 import com.smartlibrary.security.LibraryUserDetails;
+import com.smartlibrary.security.LoginPortalPaths;
 import jakarta.servlet.http.HttpSession;
 import com.smartlibrary.service.UserAccountService;
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +61,7 @@ public class AuthController {
         if (logout != null) {
             model.addAttribute("success", "You have been logged out successfully.");
         }
+        session.setAttribute(LoginPortalPaths.SESSION_PORTAL, "student");
         model.addAttribute("attendanceLoginUrl", libraryProperties.getAttendanceLoginUrl());
         return "login";
     }

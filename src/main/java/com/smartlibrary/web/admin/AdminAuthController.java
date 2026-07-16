@@ -1,6 +1,7 @@
 package com.smartlibrary.web.admin;
 
 import com.smartlibrary.model.UserRole;
+import com.smartlibrary.security.LoginPortalPaths;
 import com.smartlibrary.security.LibraryUserDetails;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
@@ -44,6 +45,7 @@ public class AdminAuthController {
         if (logout != null) {
             model.addAttribute("success", "You have been logged out successfully.");
         }
+        session.setAttribute(LoginPortalPaths.SESSION_PORTAL, "admin");
         return "admin/login";
     }
 }

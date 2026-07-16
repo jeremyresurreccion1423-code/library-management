@@ -1,6 +1,7 @@
 package com.smartlibrary.config;
 
 import com.smartlibrary.security.AuditLogoutHandler;
+import com.smartlibrary.security.LoginPortalPaths;
 import com.smartlibrary.security.LoginAuthenticationFailureHandler;
 import com.smartlibrary.security.LoginAuthenticationSuccessHandler;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 @Configuration
@@ -63,16 +65,16 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain superAdminChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/super-admin/**");
+        http.securityMatcher(new AntPathRequestMatcher("/super-admin/**"));
 
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/super-admin/login", "/super-admin/sso")
+                        .requestMatchers("/super-admin/login", "/super-admin/login/process", "/super-admin/sso")
                         .permitAll()
                         .anyRequest().hasRole("SUPER_ADMIN"))
                 .formLogin(form -> form
-                        .loginPage("/super-admin/login")
-                        .loginProcessingUrl("/super-admin/login")
+                        .loginPage(LoginPortalPaths.SUPER_ADMIN_LOGIN)
+                        .loginProcessingUrl(LoginPortalPaths.SUPER_ADMIN_PROCESS)
                         .successHandler(loginSuccessHandler)
                         .failureHandler(loginFailureHandler)
                         .permitAll())
@@ -94,9 +96,7 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain adminChain(HttpSecurity http) throws Exception {
-        http.securityMatcher(new OrRequestMatcher(
-                new AntPathRequestMatcher("/admin/**"),
-                new AntPathRequestMatcher("/admin/login")));
+        http.securityMatcher(new AntPathRequestMatcher("/admin/**"));
 
         http
                 .authorizeHttpRequests(auth -> auth
@@ -106,14 +106,15 @@ public class SecurityConfig {
                                 "/img/**",
                                 "/images/**",
                                 "/uploads/**",
-                                "/admin/login",
+                                LoginPortalPaths.ADMIN_LOGIN,
+                                LoginPortalPaths.ADMIN_PROCESS,
                                 "/forgot-password")
                         .permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
-                        .loginPage("/admin/login")
-                        .loginProcessingUrl("/admin/login")
+                        .loginPage(LoginPortalPaths.ADMIN_LOGIN)
+                        .loginProcessingUrl(LoginPortalPaths.ADMIN_PROCESS)
                         .successHandler(loginSuccessHandler)
                         .failureHandler(loginFailureHandler)
                         .permitAll())
@@ -135,6 +136,11 @@ public class SecurityConfig {
     @Bean
     @Order(3)
     public SecurityFilterChain appChain(HttpSecurity http) throws Exception {
+        http.securityMatcher(new NegatedRequestMatcher(
+                new OrRequestMatcher(
+                        new AntPathRequestMatcher("/super-admin/**"),
+                        new AntPathRequestMatcher("/admin/**"))));
+
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(

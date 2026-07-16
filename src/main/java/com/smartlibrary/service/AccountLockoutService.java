@@ -34,7 +34,7 @@ public class AccountLockoutService {
         if (user != null && user.getLockedUntil() != null && !user.getLockedUntil().isAfter(LocalDateTime.now())) {
             user.setLockedUntil(null);
             user.setFailedLoginAttempts(0);
-            userRepository.save(user);
+            userRepository.updateLockoutState(user.getId(), 0, null);
         }
     }
 
@@ -52,14 +52,16 @@ public class AccountLockoutService {
                 return;
             }
             int attempts = (user.getFailedLoginAttempts() == null ? 0 : user.getFailedLoginAttempts()) + 1;
+            LocalDateTime lockedUntil = attempts >= MAX_ATTEMPTS
+                    ? LocalDateTime.now().plusMinutes(LOCK_MINUTES)
+                    : null;
+            userRepository.updateLockoutState(user.getId(), attempts, lockedUntil);
             user.setFailedLoginAttempts(attempts);
+            user.setLockedUntil(lockedUntil);
             if (attempts >= MAX_ATTEMPTS) {
-                user.setLockedUntil(LocalDateTime.now().plusMinutes(LOCK_MINUTES));
-                userRepository.save(user);
                 auditService.log(user, "ACCOUNT_LOCKED", "User", user.getId(),
                         "Account locked after " + attempts + " failed attempts for " + LOCK_MINUTES + " minutes");
             } else {
-                userRepository.save(user);
                 auditService.log(user, "LOGIN_FAILED", "User", user.getId(),
                         "Failed login attempt " + attempts + "/" + MAX_ATTEMPTS);
             }
@@ -73,7 +75,7 @@ public class AccountLockoutService {
         }
         user.setFailedLoginAttempts(0);
         user.setLockedUntil(null);
-        userRepository.save(user);
+        userRepository.updateLockoutState(user.getId(), 0, null);
     }
 
     @Transactional
@@ -83,7 +85,7 @@ public class AccountLockoutService {
         }
         user.setFailedLoginAttempts(0);
         user.setLockedUntil(null);
-        userRepository.save(user);
+        userRepository.updateLockoutState(user.getId(), 0, null);
         auditService.log(actor, "ACCOUNT_UNLOCKED", "User", user.getId(),
                 "Account unlocked by admin: " + user.getUsername());
     }

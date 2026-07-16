@@ -1,5 +1,6 @@
 package com.smartlibrary.web.superadmin;
 
+import com.smartlibrary.security.LoginPortalPaths;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,6 +30,7 @@ public class SuperAdminAuthController {
         if (logout != null) {
             model.addAttribute("success", "You have been logged out of the System Control Center.");
         }
+        session.setAttribute(LoginPortalPaths.SESSION_PORTAL, "super-admin");
         return "super-admin/login";
     }
 }
