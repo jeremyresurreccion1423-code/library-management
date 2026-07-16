@@ -440,3 +440,71 @@ body:has(#adminSidebar) .pd-btn--ghost {
     height: 72px;
   }
 }
+
+/* Simplified edit-only profile page */
+.pd-page--edit {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.pd-card--edit {
+  padding: 24px;
+}
+
+.pd-photo-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.pd-photo-row__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.1);
+}
+
+.pd-photo-row__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pd-photo-row__form {
+  flex: 1;
+  min-width: 220px;
+}
+
+.pd-photo-row__inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.pd-photo-row__inputs .form-control {
+  flex: 1;
+  min-width: 160px;
+}
+
+.pd-divider {
+  margin: 22px 0;
+  border: none;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+body:has(#studentSidebar) .pd-photo-row__avatar {
+  background: linear-gradient(145deg, #166534, #22c55e);
+}
+
+body:has(#adminSidebar) .pd-photo-row__avatar {
+  background: linear-gradient(145deg, #1d4ed8, #3b82f6);
+}
