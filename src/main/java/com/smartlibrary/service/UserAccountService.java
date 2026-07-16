@@ -71,9 +71,7 @@ public class UserAccountService {
         if (fullName.isBlank() || fullName.length() < 3 || fullName.split("\\s+").length < 2) {
             throw new IllegalArgumentException("Full name is required and should include first and last name");
         }
-        if (!fullName.matches("^[A-Za-z\\s]+$")) {
-            throw new IllegalArgumentException("Name must contain letters and spaces only");
-        }
+        validateLettersOnlyField(fullName, "Full name");
         phone = (phone == null ? "" : phone.trim());
         if (!phone.isBlank() && !phone.matches("^09[0-9]{9}$")) {
             throw new IllegalArgumentException("Phone number must start with 09 and be exactly 11 digits");
@@ -81,6 +79,9 @@ public class UserAccountService {
         course = (course == null ? "" : course.trim());
         if (!course.isBlank() && course.length() < 2) {
             throw new IllegalArgumentException("Course name must be at least 2 characters if provided");
+        }
+        if (!course.isBlank()) {
+            validateLettersOnlyField(course, "Course");
         }
         
         userRepository.findByUsername(username).ifPresent(user -> {
@@ -190,8 +191,12 @@ public class UserAccountService {
         User u = userRepository.findByUsername(username).orElseThrow();
         StudentProfile profile = studentProfileRepository.findByUserId(u.getId())
                 .orElseThrow(() -> new IllegalStateException("Not a student account"));
-        if (fullName != null && !fullName.matches("^[A-Za-z\\s]+$")) {
-            throw new IllegalArgumentException("Name must contain letters and spaces only");
+        fullName = fullName == null ? "" : fullName.trim();
+        phone = phone == null ? "" : phone.trim();
+        course = course == null ? "" : course.trim();
+        validateLettersOnlyField(fullName, "Full name");
+        if (!course.isBlank()) {
+            validateLettersOnlyField(course, "Course");
         }
         profile.setFullName(fullName);
         profile.setPhone(phone);
@@ -353,6 +358,12 @@ public class UserAccountService {
         profile.setFirstName(firstName == null ? null : firstName.trim());
         profile.setLastName(lastName == null ? null : lastName.trim());
         studentProfileRepository.save(profile);
+    }
+
+    private static void validateLettersOnlyField(String value, String fieldLabel) {
+        if (value != null && !value.isBlank() && !value.matches("^[A-Za-z\\s]+$")) {
+            throw new IllegalArgumentException(fieldLabel + " must contain letters and spaces only (no numbers).");
+        }
     }
 
     private static String normalizeEmail(String email) {

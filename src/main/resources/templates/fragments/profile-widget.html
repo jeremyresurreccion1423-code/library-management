@@ -71,7 +71,17 @@
       <span class="profile-menu-icon"><i class="bi bi-shield-lock"></i></span>
       <span class="profile-menu-text">
         <span class="profile-menu-label">Change Password</span>
-        <span class="profile-menu-hint">Update account security</span>
+        <span class="profile-menu-hint">OTP verification required</span>
+      </span>
+    </a>
+    <a th:if="${logoutMode == 'super-admin'}"
+       th:href="@{/admin/account/password}"
+       class="profile-menu-action"
+       role="menuitem">
+      <span class="profile-menu-icon"><i class="bi bi-shield-lock"></i></span>
+      <span class="profile-menu-text">
+        <span class="profile-menu-label">Change Password</span>
+        <span class="profile-menu-hint">OTP verification required</span>
       </span>
     </a>
 

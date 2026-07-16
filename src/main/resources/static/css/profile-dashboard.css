@@ -640,11 +640,29 @@ body:has(#adminSidebar) .pd-badge--role {
 }
 
 /* Change password page */
+.dashboard-main > .cp-page,
+.dashboard-main > .pd-page {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .cp-page {
   display: flex;
   flex-direction: column;
   gap: 20px;
   max-width: 980px;
+}
+
+.pd-page {
+  width: 100%;
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pd-page--edit {
+  max-width: 560px;
 }
 
 .cp-breadcrumb {
