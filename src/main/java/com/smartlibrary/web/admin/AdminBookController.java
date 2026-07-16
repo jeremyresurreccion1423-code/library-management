@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
@@ -42,16 +43,32 @@ public class AdminBookController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long authorId,
             @RequestParam(required = false) Boolean availableOnly,
+            @RequestParam(required = false, defaultValue = "all") String statusFilter,
             Model model) {
-        model.addAttribute("books", bookService.search(q, categoryId, authorId, Boolean.TRUE.equals(availableOnly)));
+        List<Book> books = bookService.search(q, categoryId, authorId, Boolean.TRUE.equals(availableOnly));
+        if (statusFilter != null && !statusFilter.isBlank() && !"all".equalsIgnoreCase(statusFilter)) {
+            books = books.stream().filter(b -> matchesBookStatus(b, statusFilter)).toList();
+        }
+        model.addAttribute("books", books);
+        model.addAttribute("bookCount", books.size());
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("authors", authorRepository.findAll());
         model.addAttribute("q", q);
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("authorId", authorId);
         model.addAttribute("availableOnly", availableOnly);
+        model.addAttribute("statusFilter", statusFilter);
         model.addAttribute("defaultFinePerDay", libraryProperties.getFinePerDay());
         return "admin/books";
+    }
+
+    private static boolean matchesBookStatus(Book book, String statusFilter) {
+        return switch (statusFilter.toLowerCase()) {
+            case "available" -> book.getAvailableCopies() > 0 && book.getAvailableCopies() == book.getTotalCopies();
+            case "borrowed" -> book.getAvailableCopies() < book.getTotalCopies();
+            case "unavailable" -> book.getAvailableCopies() == 0;
+            default -> true;
+        };
     }
 
     @GetMapping("/new")

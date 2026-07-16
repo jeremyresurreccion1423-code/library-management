@@ -5,128 +5,170 @@
 <div class="dashboard-wrapper">
   <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
   <main class="dashboard-main">
-    <div class="dashboard-header">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h1 class="dashboard-title">Books</h1>
-          <p class="dashboard-subtitle">Manage library collection</p>
+    <div class="el-page-header">
+      <div>
+        <h1>Books</h1>
+        <p>Manage and organize the library collection</p>
+      </div>
+      <a class="el-btn-primary" th:href="@{/admin/books/new}">
+        <i class="bi bi-plus-lg"></i> Add Book
+      </a>
+    </div>
+
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div class="el-panel el-books-filter">
+      <form method="get" th:action="@{/admin/books}" class="el-filter-form">
+        <input type="hidden" name="statusFilter" th:value="${statusFilter}"/>
+        <div class="el-filter-row">
+          <div class="el-filter-field el-filter-field--grow">
+            <label for="bookSearch">Search</label>
+            <div class="el-input-icon-wrap">
+              <i class="bi bi-search"></i>
+              <input id="bookSearch" class="el-input" name="q" th:value="${q}"
+                     placeholder="Search by title, ISBN, or barcode..."/>
+            </div>
+          </div>
+          <div class="el-filter-field">
+            <label for="bookCategory">Category</label>
+            <select id="bookCategory" class="el-select" name="categoryId">
+              <option value="">All Categories</option>
+              <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
+                      th:selected="${categoryId == c.id}"></option>
+            </select>
+          </div>
+          <div class="el-filter-field">
+            <label for="bookAuthor">Author</label>
+            <select id="bookAuthor" class="el-select" name="authorId">
+              <option value="">All Authors</option>
+              <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.name}"
+                      th:selected="${authorId == a.id}"></option>
+            </select>
+          </div>
+          <div class="el-filter-actions">
+            <button type="submit" class="el-btn-primary el-btn-sm">
+              <i class="bi bi-search"></i> Search
+            </button>
+            <a th:href="@{/admin/books}" class="el-btn-ghost el-btn-sm">
+              <i class="bi bi-arrow-counterclockwise"></i> Reset
+            </a>
+          </div>
         </div>
-        <a class="btn btn-accent" th:href="@{/admin/books/new}">
-          <i class="bi bi-plus-lg me-1"></i>Add book
-        </a>
+      </form>
+
+      <div class="el-status-pills">
+        <span class="el-status-pills-label"><i class="bi bi-funnel"></i> Quick filters</span>
+        <a th:href="@{/admin/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='all')}"
+           class="el-pill" th:classappend="${statusFilter == 'all'} ? ' active'">All</a>
+        <a th:href="@{/admin/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='available')}"
+           class="el-pill el-pill--available" th:classappend="${statusFilter == 'available'} ? ' active'">Available</a>
+        <a th:href="@{/admin/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='borrowed')}"
+           class="el-pill el-pill--borrowed" th:classappend="${statusFilter == 'borrowed'} ? ' active'">Borrowed</a>
+        <a th:href="@{/admin/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='unavailable')}"
+           class="el-pill el-pill--maintenance" th:classappend="${statusFilter == 'unavailable'} ? ' active'">Unavailable</a>
       </div>
     </div>
-  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
-  <div class="card-lib p-3 mb-3">
-    <form method="get" th:action="@{/admin/books}">
-      <div class="row g-3">
-        <div class="col-md-4">
-          <label class="form-label">Keyword</label>
-          <input class="form-control" name="q" th:value="${q}" placeholder="Search by title, ISBN, or barcode..."/>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Category</label>
-          <select class="form-select" name="categoryId">
-            <option value="">All</option>
-            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
-                    th:selected="${categoryId == c.id}"></option>
-          </select>
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Author</label>
-          <select class="form-select" name="authorId">
-            <option value="">Any</option>
-            <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.name}"
-                    th:selected="${authorId == a.id}"></option>
-          </select>
-        </div>
-        <div class="col-md-2 d-flex align-items-end">
-          <button type="submit" class="btn btn-accent w-100">
-            <i class="bi bi-search me-1"></i>Search
-          </button>
-        </div>
+    <div class="el-panel el-books-table-panel">
+      <div class="table-responsive">
+        <table class="el-books-table" id="booksTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Book Details</th>
+              <th>Category</th>
+              <th>Author</th>
+              <th>ISBN</th>
+              <th>Status</th>
+              <th>Copies</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr th:each="b, stat : ${books}">
+            <td class="el-books-num" th:text="${stat.count}">1</td>
+            <td>
+              <div class="el-book-detail">
+                <div class="el-book-thumb" th:text="${#strings.substring(b.title, 0, 1)}">B</div>
+                <div>
+                  <strong class="el-book-title" th:text="${b.title}">Title</strong>
+                  <div class="el-book-meta" th:if="${b.barcode != null and !b.barcode.isEmpty()}">
+                    <i class="bi bi-upc-scan"></i>
+                    <span th:text="${b.barcode}">BARCODE</span>
+                  </div>
+                  <div class="el-book-meta" th:if="${b.createdAt != null}">
+                    <i class="bi bi-calendar3"></i>
+                    <span th:text="${'Added ' + #temporals.format(b.createdAt, 'MMM d, yyyy')}">Added date</span>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="el-tag el-tag--category"
+                    th:text="${b.category != null ? b.category.name : 'Uncategorized'}">Category</span>
+            </td>
+            <td th:text="${b.author != null ? b.author.name : '—'}">Author</td>
+            <td class="el-books-isbn" th:text="${b.isbn != null ? b.isbn : '—'}">ISBN</td>
+            <td>
+              <span class="el-badge el-badge--available"
+                    th:if="${b.availableCopies == b.totalCopies and b.totalCopies > 0}">Available</span>
+              <span class="el-badge el-badge--borrowed"
+                    th:if="${b.availableCopies > 0 and b.availableCopies < b.totalCopies}">Borrowed</span>
+              <span class="el-badge el-badge--borrowed"
+                    th:if="${b.availableCopies == 0 and b.totalCopies > 0}">Borrowed</span>
+              <span class="el-badge el-badge--maintenance"
+                    th:if="${b.totalCopies == 0}">Maintenance</span>
+            </td>
+            <td>
+              <span class="el-copies"
+                    th:classappend="${b.availableCopies == 0 ? ' el-copies--danger' : (b.availableCopies < b.totalCopies ? ' el-copies--warn' : '')}"
+                    th:text="${b.availableCopies + '/' + b.totalCopies}">0/0</span>
+            </td>
+            <td>
+              <div class="el-row-actions">
+                <a th:if="${b.ebook != null}" class="el-icon-btn" th:href="@{/ebook/read/{id}(id=${b.id})}"
+                   target="_blank" title="View PDF"><i class="bi bi-eye"></i></a>
+                <a class="el-icon-btn" th:href="@{/admin/books/{id}/edit(id=${b.id})}" title="Edit">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <button type="button" class="el-icon-btn el-icon-btn--danger delete-book-btn"
+                        title="Delete"
+                        th:attr="data-book-id=${b.id},data-book-title=${b.title}">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr th:if="${#lists.isEmpty(books)}">
+            <td colspan="8" class="el-books-empty">
+              <i class="bi bi-inbox"></i>
+              <p>No books found. Try adjusting your filters or add a new book.</p>
+            </td>
+          </tr>
+          </tbody>
+        </table>
       </div>
-    </form>
-  </div>
-
-  <div class="card-lib p-3 mb-3" th:if="${!#lists.isEmpty(books)}">
-    <div class="d-flex flex-wrap gap-2 align-items-center">
-      <span class="text-muted-lib small me-1"><i class="bi bi-funnel me-1"></i>Filter:</span>
-      <button type="button" class="btn btn-sm btn-accent category-filter active" data-category="">All</button>
-      <button type="button" class="btn btn-sm btn-outline-secondary category-filter"
-              th:each="c : ${categories}" th:attr="data-category=${c.name}" th:text="${c.name}"></button>
-    </div>
-  </div>
-
-  
-  <div class="books-grid" id="booksGrid">
-    <div class="book-card" th:each="b : ${books}" th:attr="data-category=${b.category != null ? b.category.name : ''}">
-      <div class="book-card-header">
-        <div class="book-icon">
-          <i class="bi bi-book"></i>
-        </div>
-        <div class="book-status" th:classappend="${b.availableCopies > 0 ? 'available' : 'unavailable'}">
-          <span th:text="${b.availableCopies + '/' + b.totalCopies}"></span>
-        </div>
-      </div>
-      <div class="book-card-body">
-        <h5 class="book-title" th:text="${b.title}">Book Title</h5>
-        <div class="book-details">
-          <p class="book-isbn" th:if="${b.isbn != null && !b.isbn.isEmpty()}">
-            <i class="bi bi-upc"></i>
-            <span th:text="${b.isbn}"></span>
-          </p>
-          <p class="book-barcode" th:if="${b.barcode != null && !b.barcode.isEmpty()}">
-            <i class="bi bi-qr-code"></i>
-            <span th:text="${b.barcode}"></span>
-          </p>
-          <p class="book-fine small mb-0">
-            <i class="bi bi-cash-coin"></i>
-            Fine:
-            <strong th:if="${b.finePerDay != null}" th:text="${'₱' + b.finePerDay + '/day'}"></strong>
-            <span th:if="${b.finePerDay == null}" th:text="${'₱' + defaultFinePerDay + '/day (default)'}"></span>
-          </p>
-        </div>
-      </div>
-      <div class="book-card-footer">
-        <a class="btn btn-sm btn-outline-success" th:if="${b.ebook != null}" th:href="@{/ebook/read/{id}(id=${b.id})}" target="_blank">
-          <i class="bi bi-file-earmark-pdf"></i> View PDF
-        </a>
-        <a class="btn btn-sm btn-outline-primary" th:href="@{/admin/books/{id}/edit(id=${b.id})}">
-          <i class="bi bi-pencil"></i> Edit
-        </a>
-        <button class="btn btn-sm btn-outline-danger delete-book-btn" type="button"
-                th:attr="data-book-id=${b.id},data-book-title=${b.title}">
-          <i class="bi bi-trash"></i> Delete
-        </button>
+      <div class="el-table-footer" th:if="${!#lists.isEmpty(books)}">
+        <span th:text="${'Showing ' + bookCount + ' book' + (bookCount == 1 ? '' : 's')}">Showing 0 books</span>
       </div>
     </div>
-  </div>
-  
-  
-  <div class="empty-state" th:if="${#lists.isEmpty(books)}">
-    <i class="bi bi-inbox"></i>
-    <p>No books found in the library.</p>
-  </div>
   </main>
 </div>
 <div th:replace="~{fragments/layout :: scripts}"></div>
 <div th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    const deleteButtons = document.querySelectorAll('.delete-book-btn');
-    deleteButtons.forEach(function(button) {
+    document.querySelectorAll('.delete-book-btn').forEach(function(button) {
       button.addEventListener('click', function() {
         const bookId = button.getAttribute('data-book-id');
         const bookTitle = button.getAttribute('data-book-title');
-        const message = 'Delete "' + bookTitle + '"? This action cannot be undone and related records may be affected.';
+        const message = 'Delete "' + bookTitle + '"? This action cannot be undone.';
 
         const submitDelete = function() {
           const form = document.createElement('form');
           form.method = 'post';
           form.action = '/admin/books/' + bookId + '/delete';
-
           const csrfToken = document.querySelector('meta[name="_csrf"]');
           if (csrfToken) {
             const input = document.createElement('input');
@@ -135,7 +177,6 @@
             input.value = csrfToken.getAttribute('content');
             form.appendChild(input);
           }
-
           document.body.appendChild(form);
           form.submit();
         };
@@ -145,26 +186,6 @@
         } else if (confirm(message)) {
           submitDelete();
         }
-      });
-    });
-
-    // Category filter
-    document.querySelectorAll('.category-filter').forEach(btn => {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.category-filter').forEach(b => {
-          b.classList.remove('btn-accent', 'active');
-          b.classList.add('btn-outline-secondary');
-        });
-        this.classList.remove('btn-outline-secondary');
-        this.classList.add('btn-accent', 'active');
-        const cat = this.dataset.category;
-        document.querySelectorAll('.book-card').forEach(card => {
-          if (!cat || card.dataset.category === cat) {
-            card.style.display = '';
-          } else {
-            card.style.display = 'none';
-          }
-        });
       });
     });
   });
