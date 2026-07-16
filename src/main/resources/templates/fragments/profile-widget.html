@@ -7,7 +7,7 @@
     passwordAction - form action for password change
     roleLabel     - display role text
     panelId       - unique panel id
-    logoutMode    - super-admin | admin | student
+    logoutMode    - admin | student
 -->
 <div th:fragment="widget(photoAction, passwordAction, roleLabel, panelId, logoutMode)"
      class="page-header-profile-widget">
@@ -74,30 +74,8 @@
         <span class="profile-menu-hint">OTP verification required</span>
       </span>
     </a>
-    <a th:if="${logoutMode == 'super-admin'}"
-       th:href="@{/admin/account/password}"
-       class="profile-menu-action"
-       role="menuitem">
-      <span class="profile-menu-icon"><i class="bi bi-shield-lock"></i></span>
-      <span class="profile-menu-text">
-        <span class="profile-menu-label">Change Password</span>
-        <span class="profile-menu-hint">OTP verification required</span>
-      </span>
-    </a>
 
     <div class="profile-menu-divider" aria-hidden="true"></div>
-
-    <th:block th:if="${logoutMode == 'super-admin'}">
-      <form th:action="@{/super-admin/logout}" method="post" class="profile-logout m-0">
-        <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-        <button type="submit" class="profile-menu-action profile-logout" role="menuitem">
-          <span class="profile-menu-icon profile-menu-icon-danger"><i class="bi bi-box-arrow-right"></i></span>
-          <span class="profile-menu-text">
-            <span class="profile-menu-label">Logout</span>
-          </span>
-        </button>
-      </form>
-    </th:block>
     <th:block th:if="${logoutMode == 'admin'}">
       <button type="button" class="profile-menu-action profile-logout" onclick="showAdminLogoutModal()" role="menuitem">
         <span class="profile-menu-icon profile-menu-icon-danger"><i class="bi bi-box-arrow-right"></i></span>

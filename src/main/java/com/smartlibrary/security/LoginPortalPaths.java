@@ -16,8 +16,6 @@ public final class LoginPortalPaths {
     public static final String STUDENT_LOGIN = "/login";
     public static final String ADMIN_LOGIN = "/admin/login";
     public static final String ADMIN_PROCESS = "/admin/login/process";
-    public static final String SUPER_ADMIN_LOGIN = "/super-admin/login";
-    public static final String SUPER_ADMIN_PROCESS = "/super-admin/login/process";
 
     private LoginPortalPaths() {
     }
@@ -25,7 +23,6 @@ public final class LoginPortalPaths {
     public static String resolveLoginPath(HttpServletRequest request) {
         String portal = portalKey(request);
         return switch (portal) {
-            case "super-admin" -> SUPER_ADMIN_LOGIN;
             case "admin" -> ADMIN_LOGIN;
             default -> STUDENT_LOGIN;
         };
@@ -33,19 +30,12 @@ public final class LoginPortalPaths {
 
     public static String portalKey(HttpServletRequest request) {
         String path = normalizedPath(request);
-        if (path.startsWith(LoginPortalPaths.SUPER_ADMIN_PROCESS)
-                || path.startsWith("/super-admin/login")) {
-            return "super-admin";
-        }
         if (path.startsWith(LoginPortalPaths.ADMIN_PROCESS)
                 || path.startsWith("/admin/login")) {
             return "admin";
         }
 
         String formPortal = request.getParameter(FORM_PORTAL);
-        if ("super-admin".equals(formPortal)) {
-            return "super-admin";
-        }
         if ("admin".equals(formPortal)) {
             return "admin";
         }
@@ -53,9 +43,6 @@ public final class LoginPortalPaths {
         HttpSession session = request.getSession(false);
         if (session != null) {
             Object sessionPortal = session.getAttribute(SESSION_PORTAL);
-            if ("super-admin".equals(sessionPortal)) {
-                return "super-admin";
-            }
             if ("admin".equals(sessionPortal)) {
                 return "admin";
             }
@@ -65,9 +52,7 @@ public final class LoginPortalPaths {
     }
 
     public static String failureMessage(String portalKey) {
-        return "super-admin".equals(portalKey)
-                ? "Invalid Super Admin credentials."
-                : "Incorrect username or password.";
+        return "Incorrect username or password.";
     }
 
     private static String normalizedPath(HttpServletRequest request) {

@@ -1,7 +1,6 @@
 package com.smartlibrary.web.admin;
 
 import com.smartlibrary.entity.User;
-import com.smartlibrary.model.UserRole;
 import com.smartlibrary.repository.UserRepository;
 import com.smartlibrary.security.LibraryUserDetails;
 import com.smartlibrary.service.ProfilePhotoService;
@@ -38,7 +37,6 @@ public class AdminProfileController {
     @GetMapping
     public String form(@AuthenticationPrincipal LibraryUserDetails user, Model model) {
         User fresh = userRepository.findById(user.getUser().getId()).orElseThrow();
-        boolean superAdmin = fresh.getRole() == UserRole.SUPER_ADMIN;
 
         String displayName = (fresh.getFullName() != null && !fresh.getFullName().isBlank())
                 ? fresh.getFullName()
@@ -47,7 +45,7 @@ public class AdminProfileController {
         Map<String, String> profileDetails = new LinkedHashMap<>();
         profileDetails.put("Username", fresh.getUsername());
         profileDetails.put("Email", fresh.getEmail() != null ? fresh.getEmail() : "—");
-        profileDetails.put("Role", superAdmin ? "Super Admin" : "Administrator");
+        profileDetails.put("Role", "Administrator");
         profileDetails.put("Account Status", fresh.isEnabled() ? "Active" : "Disabled");
         profileDetails.put("Created At", fresh.getCreatedAt() != null
                 ? fresh.getCreatedAt().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"))
@@ -56,13 +54,13 @@ public class AdminProfileController {
         model.addAttribute("username", fresh.getUsername());
         model.addAttribute("displayName", displayName);
         model.addAttribute("profileCode", "ID: " + fresh.getId());
-        model.addAttribute("roleLabel", superAdmin ? "Super Admin" : "Administrator");
+        model.addAttribute("roleLabel", "Administrator");
         model.addAttribute("accountActive", fresh.isEnabled());
         model.addAttribute("memberSince", fresh.getCreatedAt() != null
                 ? fresh.getCreatedAt().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
                 : "—");
         model.addAttribute("profileDetails", profileDetails);
-        model.addAttribute("dashboardPath", superAdmin ? "/super-admin" : "/admin");
+        model.addAttribute("dashboardPath", "/admin");
         return "admin/profile";
     }
 

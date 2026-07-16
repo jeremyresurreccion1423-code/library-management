@@ -1,5 +1,5 @@
 /* EduLibrary Student Shell — premium UI overrides (functionality-safe)
-   Scoped with body:has(#studentSidebar) so admin/super-admin stay untouched. */
+   Scoped with body:has(#studentSidebar) so admin pages stay untouched. */
 
 body:has(#studentSidebar) {
   --stu-forest: #166534;

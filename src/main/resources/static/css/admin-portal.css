@@ -934,7 +934,7 @@ body.dashboard-body:has(#adminSidebar) .category-filter.btn-accent {
   border-color: var(--portal-primary) !important;
 }
 
-/* ========== Override super-admin-nav.css green (!important) ========== */
+/* ========== Override legacy nav green (!important) ========== */
 body.dashboard-body:has(#adminSidebar) .admin-sidebar .sidebar-group-btn:hover,
 body.dashboard-body:has(#adminSidebar) .admin-sidebar .sidebar-group.open > .sidebar-group-btn {
   background: var(--portal-primary-soft) !important;

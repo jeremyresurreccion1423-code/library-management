@@ -31,14 +31,12 @@ public class AdminPasswordController {
     @GetMapping("/password")
     public String form(@AuthenticationPrincipal LibraryUserDetails user, Model model, HttpSession session) {
         String accountEmail = resolveAccountEmail(user);
-        boolean superAdmin = user.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
 
         model.addAttribute("email", accountEmail);
         model.addAttribute("deliveryEmail", userAccountService.resolveOtpDeliveryEmail(accountEmail));
         model.addAttribute("username", user.getUsername());
         model.addAttribute("step", currentStep(session));
-        model.addAttribute("dashboardPath", superAdmin ? "/super-admin" : "/admin");
+        model.addAttribute("dashboardPath", "/admin");
         model.addAttribute("profilePath", "/admin/profile");
         return "admin/change-password";
     }
@@ -56,9 +54,7 @@ public class AdminPasswordController {
             HttpSession session) {
         try {
             String accountEmail = resolveAccountEmail(user);
-            boolean superAdmin = user.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));
-            String homePath = superAdmin ? "/super-admin" : "/admin";
+            String homePath = "/admin";
 
             // Legacy inline profile-widget flow
             if (confirmPassword != null && currentPassword != null && !"verified".equals(currentPassword)) {

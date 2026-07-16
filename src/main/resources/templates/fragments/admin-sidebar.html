@@ -3,8 +3,8 @@
 <body>
 <th:block th:fragment="sidebar">
 
-  <!-- Regular Admin navigation only — Super Admin uses /superadmin/* module -->
-  <th:block sec:authorize="hasRole('ADMIN') and !hasRole('SUPER_ADMIN')">
+  <!-- Admin navigation -->
+  <th:block sec:authorize="hasRole('ADMIN')">
     <div class="dashboard-header-bar">
       <div class="header-bar-left">
         <button type="button" class="header-bar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">

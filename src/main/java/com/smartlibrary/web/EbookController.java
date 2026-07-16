@@ -101,8 +101,7 @@ public class EbookController {
             return false;
         }
 
-        if (userDetails.getUser().getRole() == UserRole.ADMIN
-                || userDetails.getUser().getRole() == UserRole.SUPER_ADMIN) {
+        if (userDetails.getUser().getRole() == UserRole.ADMIN) {
             return bookService.ebookForBook(bookId).isPresent();
         }
 

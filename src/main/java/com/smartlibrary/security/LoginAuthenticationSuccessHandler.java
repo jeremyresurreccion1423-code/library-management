@@ -39,9 +39,7 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        String uri = request.getRequestURI() != null ? request.getRequestURI() : "";
         String portalKey = LoginPortalPaths.portalKey(request);
-        boolean isSuperAdminPortal = "super-admin".equals(portalKey);
         boolean isAdminPortal = "admin".equals(portalKey);
 
         User user = null;
@@ -53,22 +51,9 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
 
         if (user != null) {
             accountLockoutService.onSuccessfulLogin(user);
-            String portalLabel = isSuperAdminPortal ? "Super Admin portal login"
-                    : isAdminPortal ? "Admin portal login"
-                    : "User login";
+            String portalLabel = isAdminPortal ? "Admin portal login" : "User login";
             auditService.log(user, "LOGIN", "User", user.getId(),
                     portalLabel + " from " + AuditService.clientIp(request));
-        }
-
-        if (isSuperAdminPortal) {
-            if (user == null || user.getRole() != UserRole.SUPER_ADMIN) {
-                new SecurityContextLogoutHandler().logout(request, response, authentication);
-                request.getSession().setAttribute("AUTH_ERROR", "Invalid Super Admin credentials.");
-                response.sendRedirect("/super-admin/login");
-                return;
-            }
-            response.sendRedirect("/super-admin");
-            return;
         }
 
         if (isAdminPortal) {

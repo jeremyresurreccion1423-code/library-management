@@ -18,7 +18,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
-import org.springframework.security.web.util.matcher.OrRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -64,39 +63,6 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain superAdminChain(HttpSecurity http) throws Exception {
-        http.securityMatcher(new OrRequestMatcher(
-                new AntPathRequestMatcher("/super-admin/**"),
-                new AntPathRequestMatcher("/superadmin/**")));
-
-        http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/super-admin/login", "/super-admin/login/process", "/super-admin/sso")
-                        .permitAll()
-                        .anyRequest().hasRole("SUPER_ADMIN"))
-                .formLogin(form -> form
-                        .loginPage(LoginPortalPaths.SUPER_ADMIN_LOGIN)
-                        .loginProcessingUrl(LoginPortalPaths.SUPER_ADMIN_PROCESS)
-                        .successHandler(loginSuccessHandler)
-                        .failureHandler(loginFailureHandler)
-                        .permitAll())
-                .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/super-admin/login")))
-                .logout(logout -> logout
-                        .logoutUrl("/super-admin/logout")
-                        .addLogoutHandler(auditLogoutHandler)
-                        .invalidateHttpSession(true)
-                        .clearAuthentication(true)
-                        .deleteCookies("JSESSIONID")
-                        .logoutSuccessUrl("/super-admin/login?logout=true")
-                        .permitAll())
-                .headers(this::applySecurityHeaders);
-
-        return http.build();
-    }
-
-    @Bean
-    @Order(2)
     public SecurityFilterChain adminChain(HttpSecurity http) throws Exception {
         http.securityMatcher(new AntPathRequestMatcher("/admin/**"));
 
@@ -130,13 +96,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(3)
+    @Order(2)
     public SecurityFilterChain appChain(HttpSecurity http) throws Exception {
-        http.securityMatcher(new NegatedRequestMatcher(
-                new OrRequestMatcher(
-                        new AntPathRequestMatcher("/super-admin/**"),
-                        new AntPathRequestMatcher("/superadmin/**"),
-                        new AntPathRequestMatcher("/admin/**"))));
+        http.securityMatcher(new NegatedRequestMatcher(new AntPathRequestMatcher("/admin/**")));
 
         http
                 .authorizeHttpRequests(auth -> auth
