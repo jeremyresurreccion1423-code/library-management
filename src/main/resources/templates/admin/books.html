@@ -70,87 +70,18 @@
       </div>
     </div>
 
-    <div class="el-panel el-books-table-panel">
-      <div class="table-responsive">
-        <table class="el-books-table" id="booksTable">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Book Details</th>
-              <th>Category</th>
-              <th>Author</th>
-              <th>ISBN</th>
-              <th>Status</th>
-              <th>Copies</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-          <tr th:each="b, stat : ${books}">
-            <td class="el-books-num" th:text="${stat.count}">1</td>
-            <td>
-              <div class="el-book-detail">
-                <div class="el-book-thumb" th:text="${#strings.substring(b.title, 0, 1)}">B</div>
-                <div>
-                  <strong class="el-book-title" th:text="${b.title}">Title</strong>
-                  <div class="el-book-meta" th:if="${b.barcode != null and !b.barcode.isEmpty()}">
-                    <i class="bi bi-upc-scan"></i>
-                    <span th:text="${b.barcode}">BARCODE</span>
-                  </div>
-                  <div class="el-book-meta" th:if="${b.createdAt != null}">
-                    <i class="bi bi-calendar3"></i>
-                    <span th:text="${'Added ' + #temporals.format(b.createdAt, 'MMM d, yyyy')}">Added date</span>
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td>
-              <span class="el-tag el-tag--category"
-                    th:text="${b.category != null ? b.category.name : 'Uncategorized'}">Category</span>
-            </td>
-            <td th:text="${b.author != null ? b.author.name : '—'}">Author</td>
-            <td class="el-books-isbn" th:text="${b.isbn != null ? b.isbn : '—'}">ISBN</td>
-            <td>
-              <span class="el-badge el-badge--available"
-                    th:if="${b.availableCopies == b.totalCopies and b.totalCopies > 0}">Available</span>
-              <span class="el-badge el-badge--borrowed"
-                    th:if="${b.availableCopies > 0 and b.availableCopies < b.totalCopies}">Borrowed</span>
-              <span class="el-badge el-badge--borrowed"
-                    th:if="${b.availableCopies == 0 and b.totalCopies > 0}">Borrowed</span>
-              <span class="el-badge el-badge--maintenance"
-                    th:if="${b.totalCopies == 0}">Maintenance</span>
-            </td>
-            <td>
-              <span class="el-copies"
-                    th:classappend="${b.availableCopies == 0 ? ' el-copies--danger' : (b.availableCopies < b.totalCopies ? ' el-copies--warn' : '')}"
-                    th:text="${b.availableCopies + '/' + b.totalCopies}">0/0</span>
-            </td>
-            <td>
-              <div class="el-row-actions">
-                <a th:if="${b.ebook != null}" class="el-icon-btn" th:href="@{/ebook/read/{id}(id=${b.id})}"
-                   target="_blank" title="View PDF"><i class="bi bi-eye"></i></a>
-                <a class="el-icon-btn" th:href="@{/admin/books/{id}/edit(id=${b.id})}" title="Edit">
-                  <i class="bi bi-pencil"></i>
-                </a>
-                <button type="button" class="el-icon-btn el-icon-btn--danger delete-book-btn"
-                        title="Delete"
-                        th:attr="data-book-id=${b.id},data-book-title=${b.title}">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr th:if="${#lists.isEmpty(books)}">
-            <td colspan="8" class="el-books-empty">
-              <i class="bi bi-inbox"></i>
-              <p>No books found. Try adjusting your filters or add a new book.</p>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="el-table-footer" th:if="${!#lists.isEmpty(books)}">
+    <div class="el-panel el-books-grid-panel">
+      <div class="el-books-grid-head" th:if="${!#lists.isEmpty(books)}">
         <span th:text="${'Showing ' + bookCount + ' book' + (bookCount == 1 ? '' : 's')}">Showing 0 books</span>
+      </div>
+      <div class="sl-book-grid" th:if="${!#lists.isEmpty(books)}">
+        <th:block th:each="b : ${books}">
+          <div th:replace="~{fragments/book-card :: admin(${b})}"></div>
+        </th:block>
+      </div>
+      <div class="sl-book-grid-empty" th:if="${#lists.isEmpty(books)}">
+        <i class="bi bi-inbox"></i>
+        <p>No books found. Try adjusting your filters or add a new book.</p>
       </div>
     </div>
   </main>

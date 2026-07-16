@@ -23,6 +23,7 @@ public interface  BookRepository extends JpaRepository<Book, Long> {
             SELECT b FROM Book b
             LEFT JOIN FETCH b.category
             LEFT JOIN FETCH b.author
+            LEFT JOIN FETCH b.ebook
             WHERE (:q IS NULL OR :q = '' OR LOWER(b.title) LIKE LOWER(CONCAT('%', :q, '%'))
                 OR LOWER(b.isbn) LIKE LOWER(CONCAT('%', :q, '%')))
             AND (:categoryId IS NULL OR b.category.id = :categoryId)
@@ -45,6 +46,8 @@ public interface  BookRepository extends JpaRepository<Book, Long> {
             SELECT DISTINCT b FROM Book b
             JOIN b.ebook e
             JOIN BookIssue bi ON bi.book.id = b.id
+            LEFT JOIN FETCH b.author
+            LEFT JOIN FETCH b.category
             WHERE bi.student.id = :studentProfileId
             AND bi.status IN (com.smartlibrary.model.IssueStatus.BORROWED, com.smartlibrary.model.IssueStatus.OVERDUE)
             """)

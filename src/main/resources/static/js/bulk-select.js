@@ -58,15 +58,26 @@
       };
     });
 
+    function bulkRowElement(checkbox) {
+      return checkbox.closest('tr')
+        || checkbox.closest('.sl-book-card')
+        || checkbox.closest('[data-issue-id]');
+    }
+
     function rowCheckboxes() {
-      return Array.from(table.querySelectorAll('tbody input[type="checkbox"].bulk-row-check, tbody input[type="checkbox"].bulk-select-check.bulk-row-check'));
+      const tbodyBoxes = Array.from(table.querySelectorAll('tbody input[type="checkbox"].bulk-row-check, tbody input[type="checkbox"].bulk-select-check.bulk-row-check'));
+      if (tbodyBoxes.length) {
+        return tbodyBoxes;
+      }
+      return Array.from(table.querySelectorAll('input[type="checkbox"].bulk-row-check, input[type="checkbox"].bulk-select-check.bulk-row-check'));
     }
 
     function selectedCheckboxes(filterSelector) {
       return rowCheckboxes().filter(function (cb) {
         if (!cb.checked) return false;
         if (!filterSelector) return true;
-        return cb.closest('tr') && cb.closest('tr').matches(filterSelector);
+        const row = bulkRowElement(cb);
+        return row && row.matches(filterSelector);
       });
     }
 

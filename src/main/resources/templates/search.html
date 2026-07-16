@@ -85,9 +85,9 @@
         <p>No books found. Try adjusting your search or filters.</p>
       </div>
 
-      <div class="sl-search-grid" th:if="${!#lists.isEmpty(books)}">
+      <div class="sl-book-grid" th:if="${!#lists.isEmpty(books)}">
         <th:block th:each="b : ${books}">
-          <div th:replace="~{fragments/book-card-search :: card(${b})}"></div>
+          <div th:replace="~{fragments/book-card :: catalog(${b})}"></div>
         </th:block>
       </div>
     </div>
@@ -137,20 +137,8 @@
         No books found
       </div>
       <div class="books-grid" th:if="${!#lists.isEmpty(books)}">
-        <div class="book-card" th:each="b : ${books}">
-          <div class="book-card-header">
-            <div class="book-icon"><i class="bi bi-book"></i></div>
-            <div class="book-status" th:classappend="${b.availableCopies > 0 ? 'available' : 'unavailable'}"
-                 th:text="${b.availableCopies + '/' + b.totalCopies}"></div>
-          </div>
-          <div class="book-card-body">
-            <h5 class="book-title" th:text="${b.title}">Book Title</h5>
-          </div>
-          <div class="book-card-footer">
-            <a class="btn btn-sm btn-outline-primary" th:href="@{/books/{id}(id=${b.id})}">
-              <i class="bi bi-eye"></i> Details
-            </a>
-          </div>
+        <div th:each="b : ${books}">
+          <div th:replace="~{fragments/book-card :: catalog(${b})}"></div>
         </div>
       </div>
     </div>

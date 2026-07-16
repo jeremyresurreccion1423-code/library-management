@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Catalog card: search, browse, guest -->
+<th:block th:fragment="catalog(book)">
+  <article class="sl-book-card">
+    <div class="sl-book-card__inner">
+      <div class="sl-book-card__cover-wrap">
+        <div th:replace="~{fragments/book-cover :: cover(${book})}"></div>
+      </div>
+      <div class="sl-book-card__content">
+        <div class="sl-book-card__top">
+          <h3 class="sl-book-card__title" th:text="${book.title}">Book Title</h3>
+          <span class="sl-book-card__status"
+                th:classappend="${book.availableCopies > 0 ? ' is-available' : ' is-unavailable'}"
+                th:text="${book.availableCopies > 0 ? 'Available' : 'Unavailable'}">Available</span>
+        </div>
+        <p class="sl-book-card__meta-line" th:if="${book.author != null}">
+          <i class="bi bi-person"></i>
+          <span th:text="${book.author.name}">Author</span>
+        </p>
+        <p class="sl-book-card__meta-line" th:if="${book.category != null}">
+          <span class="sl-book-card__tag" th:text="${book.category.name}">Category</span>
+        </p>
+        <p class="sl-book-card__meta-line" th:if="${book.isbn != null && !book.isbn.isEmpty()}">
+          <i class="bi bi-upc"></i>
+          <span th:text="${book.isbn}">ISBN</span>
+        </p>
+        <p class="sl-book-card__meta-line">
+          <i class="bi bi-layers"></i>
+          <span th:text="${book.availableCopies + ' / ' + book.totalCopies + ' copies available'}">Copies</span>
+        </p>
+        <a class="sl-book-card__btn" th:href="@{/books/{id}(id=${book.id})}">
+          View Details <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </article>
+</th:block>
+
+<!-- Borrowed / issued book card -->
+<th:block th:fragment="borrowed(issue)">
+  <article class="sl-book-card sl-book-card--borrowed"
+           th:attr="data-returnable=${issue.status.toString() != 'RETURNED'},data-deletable=${issue.status.toString() == 'RETURNED'},data-issue-id=${issue.id}">
+    <div class="sl-book-card__inner">
+      <label class="sl-book-card__check" th:attr="for=${'issue-check-' + issue.id}">
+        <input type="checkbox"
+               th:id="${'issue-check-' + issue.id}"
+               class="bulk-select-check bulk-row-check"
+               th:value="${issue.id}"
+               th:attr="aria-label=${'Select ' + issue.book.title}">
+      </label>
+      <div class="sl-book-card__cover-wrap">
+        <div th:replace="~{fragments/book-cover :: cover(${issue.book})}"></div>
+      </div>
+      <div class="sl-book-card__content">
+        <div class="sl-book-card__top">
+          <h3 class="sl-book-card__title" th:text="${issue.book.title}">Book Title</h3>
+          <span class="sl-book-card__status"
+                th:classappend="${issue.status.toString() == 'RETURNED' ? ' is-returned' : (issue.status.toString() == 'OVERDUE' ? ' is-overdue' : ' is-borrowed')}"
+                th:text="${issue.status}">BORROWED</span>
+        </div>
+        <p class="sl-book-card__meta-line">
+          <i class="bi bi-calendar-plus"></i>
+          <span th:text="${'Borrowed ' + (issue.issuedAt != null ? issue.issuedAt.toString().substring(0, 10) : 'N/A')}">Borrowed</span>
+        </p>
+        <p class="sl-book-card__meta-line">
+          <i class="bi bi-calendar-event"></i>
+          <span th:text="${'Due ' + (issue.dueAt != null ? issue.dueAt.toString().substring(0, 10) : 'N/A')}">Due</span>
+        </p>
+        <p class="sl-book-card__meta-line" th:if="${issue.returnedAt != null}">
+          <i class="bi bi-check-circle"></i>
+          <span th:text="${'Returned ' + issue.returnedAt.toString().substring(0, 10)}">Returned</span>
+        </p>
+        <div class="sl-book-card__actions">
+          <a th:if="${issue.book.ebook != null and issue.status.toString() != 'RETURNED'}"
+             class="sl-book-card__btn sl-book-card__btn--primary"
+             th:href="@{/ebook/read/{id}(id=${issue.book.id})}">
+            <i class="bi bi-book-open"></i> Read
+          </a>
+          <button th:if="${issue.status.toString() != 'RETURNED'}"
+                  type="button"
+                  class="sl-book-card__btn return-btn"
+                  th:attr="data-issue-id=${issue.id}">
+            <i class="bi bi-arrow-return-left"></i> Return
+          </button>
+          <form th:if="${issue.status.toString() == 'RETURNED'}"
+                th:action="@{/student/issues/{id}/delete-history(id=${issue.id})}"
+                method="post"
+                class="confirm-delete d-inline"
+                data-confirm-message="Delete this borrow history record? This cannot be undone.">
+            <button type="submit" class="sl-book-card__btn sl-book-card__btn--danger">
+              <i class="bi bi-trash"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </article>
+</th:block>
+
+<!-- Digital library card -->
+<th:block th:fragment="digital(book)">
+  <article class="sl-book-card sl-book-card--digital">
+    <div class="sl-book-card__inner">
+      <div class="sl-book-card__cover-wrap">
+        <div th:replace="~{fragments/book-cover :: cover(${book})}"></div>
+      </div>
+      <div class="sl-book-card__content">
+        <div class="sl-book-card__top">
+          <h3 class="sl-book-card__title" th:text="${book.title}">Book Title</h3>
+          <span class="sl-book-card__status is-digital">PDF</span>
+        </div>
+        <p class="sl-book-card__meta-line" th:if="${book.author != null}">
+          <i class="bi bi-person"></i>
+          <span th:text="${book.author.name}">Author</span>
+        </p>
+        <a class="sl-book-card__btn sl-book-card__btn--primary" th:href="@{/ebook/read/{id}(id=${book.id})}">
+          <i class="bi bi-book-open"></i> Read Now
+        </a>
+      </div>
+    </div>
+  </article>
+</th:block>
+
+<!-- Admin catalog card -->
+<th:block th:fragment="admin(book)">
+  <article class="sl-book-card sl-book-card--admin">
+    <div class="sl-book-card__inner">
+      <div class="sl-book-card__cover-wrap">
+        <div th:replace="~{fragments/book-cover :: cover(${book})}"></div>
+      </div>
+      <div class="sl-book-card__content">
+        <div class="sl-book-card__top">
+          <h3 class="sl-book-card__title" th:text="${book.title}">Book Title</h3>
+          <span class="sl-book-card__status"
+                th:if="${book.availableCopies == book.totalCopies and book.totalCopies > 0}"
+                th:classappend="' is-available'"
+                th:text="'Available'">Available</span>
+          <span class="sl-book-card__status"
+                th:if="${book.availableCopies > 0 and book.availableCopies < book.totalCopies}"
+                th:classappend="' is-borrowed'"
+                th:text="'Borrowed'">Borrowed</span>
+          <span class="sl-book-card__status"
+                th:if="${book.availableCopies == 0 and book.totalCopies > 0}"
+                th:classappend="' is-borrowed'"
+                th:text="'Borrowed'">Borrowed</span>
+          <span class="sl-book-card__status"
+                th:if="${book.totalCopies == 0}"
+                th:classappend="' is-unavailable'"
+                th:text="'Maintenance'">Maintenance</span>
+        </div>
+        <p class="sl-book-card__meta-line" th:if="${book.author != null}">
+          <i class="bi bi-person"></i>
+          <span th:text="${book.author.name}">Author</span>
+        </p>
+        <p class="sl-book-card__meta-line" th:if="${book.category != null}">
+          <span class="sl-book-card__tag" th:text="${book.category.name}">Category</span>
+        </p>
+        <p class="sl-book-card__meta-line" th:if="${book.isbn != null && !book.isbn.isEmpty()}">
+          <i class="bi bi-upc"></i>
+          <span th:text="${book.isbn}">ISBN</span>
+        </p>
+        <p class="sl-book-card__meta-line">
+          <i class="bi bi-layers"></i>
+          <span th:text="${book.availableCopies + '/' + book.totalCopies + ' copies'}">Copies</span>
+        </p>
+        <div class="sl-book-card__actions sl-book-card__actions--admin">
+          <a class="sl-book-card__icon-btn" th:href="@{/books/{id}(id=${book.id})}" title="View details">
+            <i class="bi bi-eye"></i>
+          </a>
+          <a th:if="${book.ebook != null}" class="sl-book-card__icon-btn" th:href="@{/ebook/read/{id}(id=${book.id})}" target="_blank" title="View PDF">
+            <i class="bi bi-file-earmark-pdf"></i>
+          </a>
+          <a class="sl-book-card__icon-btn" th:href="@{/admin/books/{id}/edit(id=${book.id})}" title="Edit">
+            <i class="bi bi-pencil"></i>
+          </a>
+          <button type="button" class="sl-book-card__icon-btn sl-book-card__icon-btn--danger delete-book-btn"
+                  title="Delete"
+                  th:attr="data-book-id=${book.id},data-book-title=${book.title}">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </article>
+</th:block>
+
+</body>
+</html>

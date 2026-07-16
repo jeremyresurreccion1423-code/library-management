@@ -64,9 +64,13 @@
   <section class="card-lib bulk-section mb-4">
     <div class="bulk-section-head">
       <h2 class="h5">Issued books</h2>
-      <p class="bulk-hint">May checkbox sa unang column — piliin ang books, tapos gamitin ang bulk actions sa baba.</p>
+      <p class="bulk-hint">Select books using the checkboxes, then use bulk actions below.</p>
     </div>
     <div class="bulk-action-bar" th:if="${!#lists.isEmpty(issues)}">
+      <label class="bulk-select-label me-3" for="issuesSelectAll">
+        <input type="checkbox" id="issuesSelectAll" class="bulk-select-check bulk-row-check-all" aria-label="Select all issued books">
+        <span>Select all</span>
+      </label>
       <span class="bulk-action-label"><i class="bi bi-check2-square me-1"></i>Bulk actions</span>
       <button type="button" id="bulkReturnBtn" class="btn btn-sm btn-success">
         <i class="bi bi-arrow-return-left me-1"></i>Return Selected
@@ -75,55 +79,14 @@
         <i class="bi bi-trash me-1"></i>Delete Selected History
       </button>
     </div>
-    <div class="table-responsive">
-      <table class="table table-dark-lib mb-0" id="issuedBooksTable">
-        <thead>
-          <tr>
-            <th class="bulk-select-col">
-              <label class="bulk-select-label" for="issuesSelectAll">
-                <input type="checkbox" id="issuesSelectAll" class="bulk-select-check bulk-row-check-all" aria-label="Select all issued books">
-                <span>All</span>
-              </label>
-            </th>
-            <th>Book</th><th>Borrowed</th><th>Due</th><th>Fine/day</th><th>Returned</th><th>Status</th><th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-        <tr th:each="i : ${issues}"
-            th:attr="data-returnable=${i.status.toString() != 'RETURNED'},data-deletable=${i.status.toString() == 'RETURNED'}">
-          <td class="bulk-select-col">
-            <label class="bulk-select-label" th:attr="for=${'issue-check-' + i.id}">
-              <input type="checkbox"
-                     th:id="${'issue-check-' + i.id}"
-                     class="bulk-select-check bulk-row-check"
-                     th:value="${i.id}"
-                     th:attr="aria-label=${'Select ' + i.book.title}">
-              <span>Select</span>
-            </label>
-          </td>
-          <td th:text="${i.book.title}"></td>
-          <td th:text="${i.issuedAt != null ? i.issuedAt.toString().substring(0, 16) : 'N/A'}"></td>
-          <td th:text="${i.dueAt != null ? i.dueAt.toString().substring(0, 16) : 'N/A'}"></td>
-          <td>
-            <span th:if="${i.book.finePerDay != null}" th:text="${'₱' + i.book.finePerDay}"></span>
-            <span th:if="${i.book.finePerDay == null}" class="text-muted-lib" th:text="${'₱' + defaultFinePerDay + ' (default)'}"></span>
-          </td>
-          <td th:text="${i.returnedAt != null ? i.returnedAt.toString().substring(0, 16) : '—'}"></td>
-          <td th:text="${i.status}"></td>
-          <td>
-            <button th:if="${i.status.toString() != 'RETURNED'}" 
-                    th:attr="data-issue-id=${i.id}"
-                    class="btn btn-sm btn-outline-success return-btn">Return</button>
-            <form th:if="${i.status.toString() == 'RETURNED'}" th:action="@{/student/issues/{id}/delete-history(id=${i.id})}" method="post"
-                  class="confirm-delete d-inline"
-                  data-confirm-message="Delete this borrow history record? This cannot be undone.">
-              <button type="submit" class="btn btn-sm btn-outline-danger delete-history-btn">Delete</button>
-            </form>
-          </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(issues)}"><td colspan="8" class="text-center text-muted-lib py-3">No borrowed books yet.</td></tr>
-        </tbody>
-      </table>
+    <div id="issuedBooksGrid" class="sl-book-grid" th:if="${!#lists.isEmpty(issues)}">
+      <th:block th:each="i : ${issues}">
+        <div th:replace="~{fragments/book-card :: borrowed(${i})}"></div>
+      </th:block>
+    </div>
+    <div class="sl-book-grid-empty" th:if="${#lists.isEmpty(issues)}">
+      <i class="bi bi-journal-bookmark"></i>
+      <p>No borrowed books yet.</p>
     </div>
   </section>
 
@@ -198,25 +161,14 @@
   </section>
 
   <h2 class="h5 mb-3">Digital Library (PDF)</h2>
-  <div class="book-cards-grid" th:if="${!#lists.isEmpty(digitalBooks)}">
-    <div class="book-card-item" th:each="b : ${digitalBooks}">
-      <div class="book-card-title" th:text="${b.title}">Book Title</div>
-      <div class="book-card-meta">
-        <div class="book-card-meta-row">
-          <i class="bi bi-file-earmark-pdf"></i>
-          <span>PDF e-Book</span>
-        </div>
-      </div>
-      <div class="book-card-action">
-        <a class="btn btn-accent" th:href="@{/ebook/read/{id}(id=${b.id})}">
-          <i class="bi bi-book-open me-1"></i>Read Now
-        </a>
-      </div>
-    </div>
+  <div class="sl-book-grid" th:if="${!#lists.isEmpty(digitalBooks)}">
+    <th:block th:each="b : ${digitalBooks}">
+      <div th:replace="~{fragments/book-card :: digital(${b})}"></div>
+    </th:block>
   </div>
-  <div class="book-cards-empty" th:if="${#lists.isEmpty(digitalBooks)}">
+  <div class="sl-book-grid-empty" th:if="${#lists.isEmpty(digitalBooks)}">
     <i class="bi bi-file-earmark-pdf"></i>
-    <p>No e-books uploaded yet.</p>
+    <p>Borrow a book with a digital copy to read it here.</p>
   </div>
   </main>
 </div>
@@ -224,20 +176,20 @@
 <script th:inline="javascript">
   window.libraryBulkTables = [
     {
-      tableId: 'issuedBooksTable',
+      tableId: 'issuedBooksGrid',
       selectAllId: 'issuesSelectAll',
       bulkActions: [
         {
           buttonId: 'bulkReturnBtn',
           action: '/student/issues/bulk-return',
-          selector: 'tr[data-returnable="true"]',
+          selector: '.sl-book-card[data-returnable="true"]',
           message: 'Return all selected books?',
           confirmOptions: { type: 'warning', title: 'Return Books', okText: 'Yes, Return' }
         },
         {
           buttonId: 'bulkDeleteHistoryBtn',
           action: '/student/issues/bulk-delete-history',
-          selector: 'tr[data-deletable="true"]',
+          selector: '.sl-book-card[data-deletable="true"]',
           message: 'Delete all selected borrow history records? This cannot be undone.',
           confirmOptions: { type: 'danger', title: 'Delete History', okText: 'Delete' }
         }
@@ -266,7 +218,9 @@
     returnButtons.forEach(button => {
       button.addEventListener('click', function() {
         const issueId = this.getAttribute('data-issue-id');
-        const bookTitle = this.closest('tr').querySelectorAll('td')[1].textContent.trim();
+        const bookTitle = this.closest('.sl-book-card')?.querySelector('.sl-book-card__title')?.textContent?.trim()
+            || this.closest('tr')?.querySelectorAll('td')[1]?.textContent?.trim()
+            || 'this book';
 
         if (typeof confirmAction === 'function') {
           confirmAction(
@@ -314,7 +268,9 @@
     cancelButtons.forEach(button => {
       button.addEventListener('click', function() {
         const reservationId = this.getAttribute('data-reservation-id');
-        const bookTitle = this.closest('tr').querySelectorAll('td')[1].textContent.trim();
+        const bookTitle = this.closest('.sl-book-card')?.querySelector('.sl-book-card__title')?.textContent?.trim()
+            || this.closest('tr')?.querySelectorAll('td')[1]?.textContent?.trim()
+            || 'this book';
 
         if (typeof confirmAction === 'function') {
           confirmAction(

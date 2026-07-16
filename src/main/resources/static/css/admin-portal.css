@@ -174,10 +174,14 @@ body.dashboard-body:has(#adminSidebar) .sidebar-footer-quote p {
   font-style: italic;
 }
 
-body.dashboard-body:has(#adminSidebar) .sidebar-footer-quote cite {
-  font-size: 0.68rem;
-  color: var(--portal-muted);
-  font-style: normal;
+body.dashboard-body:has(#adminSidebar) .el-books-grid-head {
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+body.dashboard-body:has(#adminSidebar) .el-books-grid-panel {
+  padding: 20px;
 }
 
 /* ========== Profile widget ========== */

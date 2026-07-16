@@ -15,7 +15,13 @@ public interface BookIssueRepository extends JpaRepository<BookIssue, Long> {
 
     List<BookIssue> findByBook_Id(Long bookId);
 
-    @Query("SELECT bi FROM BookIssue bi JOIN FETCH bi.book WHERE bi.student.id = :studentId ORDER BY bi.issuedAt DESC")
+    @Query("""
+            SELECT bi FROM BookIssue bi
+            JOIN FETCH bi.book b
+            LEFT JOIN FETCH b.ebook
+            WHERE bi.student.id = :studentId
+            ORDER BY bi.issuedAt DESC
+            """)
     List<BookIssue> findByStudent_IdOrderByIssuedAtDesc(@Param("studentId") Long studentProfileId);
 
     @Query("SELECT bi FROM BookIssue bi JOIN FETCH bi.book JOIN FETCH bi.student WHERE bi.status = :status")

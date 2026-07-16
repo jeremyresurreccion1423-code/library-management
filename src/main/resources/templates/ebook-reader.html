@@ -8,23 +8,35 @@
 
   <main class="dashboard-main">
     <div class="dashboard-header">
-      <div class="d-flex justify-content-between align-items-center">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
           <h1 class="dashboard-title"><i class="bi bi-file-earmark-pdf me-2"></i>PDF Reader</h1>
           <p class="dashboard-subtitle" th:text="${filename}"></p>
         </div>
-        <a class="btn btn-outline-secondary" sec:authorize="hasRole('STUDENT')" th:href="@{/student}">
-          <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
-        </a>
-        <a class="btn btn-outline-secondary" sec:authorize="hasRole('ADMIN')" th:href="@{/books/{id}(id=${bookId})}">
-          <i class="bi bi-arrow-left me-1"></i>Back to Book
-        </a>
+        <div class="d-flex gap-2">
+          <a class="btn btn-accent" th:href="@{/ebook/file/{id}(id=${bookId})}" target="_blank" rel="noopener">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Open in New Tab
+          </a>
+          <a class="btn btn-outline-secondary" sec:authorize="hasRole('STUDENT')" th:href="@{/student}">
+            <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+          </a>
+          <a class="btn btn-outline-secondary" sec:authorize="hasRole('ADMIN')" th:href="@{/books/{id}(id=${bookId})}">
+            <i class="bi bi-arrow-left me-1"></i>Back to Book
+          </a>
+        </div>
       </div>
     </div>
 
+    <div id="ebookReaderError" class="alert alert-warning d-none" role="alert">
+      <i class="bi bi-exclamation-triangle me-1"></i>
+      The PDF could not load in the viewer. Use <strong>Open in New Tab</strong> above, or return to your dashboard and try again.
+    </div>
+
     <div class="card-lib p-3" style="background:#1a1a2e;border-radius:12px;">
-      <iframe th:src="@{/ebook/file/{id}(id=${bookId})}" title="PDF" class="w-100 border-0"
+      <iframe id="ebookFrame" th:src="@{/ebook/file/{id}(id=${bookId})}" title="PDF" class="w-100 border-0"
               style="min-height:80vh;background:#fff;border-radius:8px;"></iframe>
+      <embed id="ebookEmbed" th:src="@{/ebook/file/{id}(id=${bookId})}" type="application/pdf" class="w-100 d-none"
+             style="min-height:80vh;background:#fff;border-radius:8px;"/>
     </div>
   </main>
 </div>
@@ -32,5 +44,23 @@
 <div th:replace="~{fragments/layout :: scripts}"></div>
 <div sec:authorize="hasRole('ADMIN')" th:replace="~{fragments/admin-sidebar :: sidebar-script}"></div>
 <div sec:authorize="hasRole('STUDENT')" th:replace="~{fragments/student-sidebar :: sidebar-script}"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const frame = document.getElementById('ebookFrame');
+    const error = document.getElementById('ebookReaderError');
+    if (!frame || !error) return;
+
+    let loaded = false;
+    frame.addEventListener('load', function () {
+      loaded = true;
+    });
+
+    window.setTimeout(function () {
+      if (!loaded) {
+        error.classList.remove('d-none');
+      }
+    }, 5000);
+  });
+</script>
 </body>
 </html>

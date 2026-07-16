@@ -29,35 +29,12 @@
 
     
     <div id="booksGrid">
-      <div class="books-grid" th:if="${!#lists.isEmpty(books)}">
-        <div class="book-card book-item" th:each="b : ${books}" th:attr="data-category-id=${b.category != null ? b.category.id : ''}">
-          <div class="book-card-header">
-            <div class="book-icon"><i class="bi bi-book"></i></div>
-            <div class="book-status" th:classappend="${b.availableCopies > 0 ? 'available' : 'unavailable'}"
-                 th:text="${b.availableCopies + '/' + b.totalCopies}"></div>
-          </div>
-          <div class="book-card-body">
-            <h5 class="book-title" th:text="${b.title}">Book Title</h5>
-            <div class="book-details">
-              <p class="book-isbn" th:if="${b.isbn != null && !b.isbn.isEmpty()}">
-                <i class="bi bi-upc"></i><span th:text="${b.isbn}"></span>
-              </p>
-              <p class="book-category" th:if="${b.category != null}">
-                <i class="bi bi-folder"></i><span th:text="${b.category.name}"></span>
-              </p>
-              <p class="book-author" th:if="${b.author != null}">
-                <i class="bi bi-person"></i><span th:text="${b.author.name}"></span>
-              </p>
-            </div>
-          </div>
-          <div class="book-card-footer">
-            <a class="btn btn-sm btn-outline-primary w-100" th:href="@{/books/{id}(id=${b.id})}">
-              <i class="bi bi-eye"></i> Details
-            </a>
-          </div>
+      <div class="sl-book-grid" th:if="${!#lists.isEmpty(books)}">
+        <div th:each="b : ${books}" class="book-item" th:attr="data-category-id=${b.category != null ? b.category.id : ''}">
+          <div th:replace="~{fragments/book-card :: catalog(${b})}"></div>
         </div>
       </div>
-      <div class="empty-state" th:if="${#lists.isEmpty(books)}">
+      <div class="sl-book-grid-empty" th:if="${#lists.isEmpty(books)}">
         <i class="bi bi-inbox"></i>
         <p>No books available.</p>
       </div>
@@ -87,6 +64,7 @@
 
         // Filter books
         items.forEach(item => {
+          const card = item.querySelector('.sl-book-card') || item;
           if (!catId || item.dataset.categoryId == catId) {
             item.style.display = '';
           } else {

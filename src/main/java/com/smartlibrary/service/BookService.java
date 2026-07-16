@@ -32,6 +32,7 @@ public class  BookService {
     private final ReservationRepository reservationRepository;
     private final LibraryProperties libraryProperties;
     private final QrCodeService qrCodeService;
+    private final SampleEbookPdfService sampleEbookPdfService;
 
     public BookService(
             BookRepository bookRepository,
@@ -41,7 +42,8 @@ public class  BookService {
             BookIssueRepository bookIssueRepository,
             ReservationRepository reservationRepository,
             LibraryProperties libraryProperties,
-            QrCodeService qrCodeService) {
+            QrCodeService qrCodeService,
+            SampleEbookPdfService sampleEbookPdfService) {
         this.bookRepository = bookRepository;
         this.categoryRepository = categoryRepository;
         this.authorRepository = authorRepository;
@@ -50,6 +52,7 @@ public class  BookService {
         this.reservationRepository = reservationRepository;
         this.libraryProperties = libraryProperties;
         this.qrCodeService = qrCodeService;
+        this.sampleEbookPdfService = sampleEbookPdfService;
     }
 
     public List<Book> search(String q, Long categoryId, Long authorId, Boolean onlyAvailable) {
@@ -190,6 +193,34 @@ public class  BookService {
     }
 
     public Path resolveEbookPath(EbookAsset asset) {
-        return Path.of(asset.getStoredPath());
+        if (asset.getBook() == null || asset.getBook().getId() == null) {
+            throw new IllegalArgumentException("E-book asset is not linked to a book");
+        }
+        return ensureEbookFileOnDisk(asset.getBook().getId());
+    }
+
+    @Transactional
+    public Path ensureEbookFileOnDisk(Long bookId) {
+        EbookAsset asset = ebookAssetRepository.findByBook_Id(Objects.requireNonNull(bookId))
+                .orElseThrow(() -> new IllegalArgumentException("E-book asset not found for book: " + bookId));
+        Path path = Path.of(asset.getStoredPath());
+        if (Files.exists(path)) {
+            return path;
+        }
+
+        try {
+            Book book = bookRepository.findByIdWithDetails(bookId).orElseThrow();
+            Path dir = Path.of(libraryProperties.getUploadDir());
+            Files.createDirectories(dir);
+            String safeTitle = book.getTitle().replaceAll("[^a-zA-Z0-9]+", "_");
+            Path restored = dir.resolve("sample_" + book.getId() + "_" + safeTitle + ".pdf").toAbsolutePath();
+            sampleEbookPdfService.writeSamplePdf(restored, book);
+            asset.setStoredPath(restored.toString());
+            ebookAssetRepository.save(asset);
+            logger.info("Restored missing e-book file for book {} at {}", book.getId(), restored);
+            return restored;
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not restore e-book file for book " + bookId, e);
+        }
     }
 }
