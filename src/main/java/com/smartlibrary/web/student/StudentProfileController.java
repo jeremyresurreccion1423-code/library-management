@@ -1,12 +1,15 @@
 package com.smartlibrary.web.student;
 
+import com.smartlibrary.entity.User;
 import com.smartlibrary.security.LibraryUserDetails;
 import com.smartlibrary.service.ProfilePhotoService;
 import com.smartlibrary.service.SharedLibraryStudentProfileBridgeService;
 import com.smartlibrary.service.UserAccountService;
 import com.smartlibrary.web.SafeRedirects;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -52,12 +55,22 @@ public class StudentProfileController {
     @PostMapping("/edit")
     public String save(
             @AuthenticationPrincipal LibraryUserDetails user,
+            @RequestParam String username,
             @RequestParam String fullName,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String course,
             RedirectAttributes ra) {
         try {
-            userAccountService.updateStudentProfile(user.getUsername(), fullName, phone, course);
+            User updated = userAccountService.updateStudentProfile(
+                    user.getUsername(), username, fullName, phone, course);
+            if (!updated.getUsername().equals(user.getUsername())) {
+                LibraryUserDetails updatedDetails = new LibraryUserDetails(updated);
+                var authentication = new UsernamePasswordAuthenticationToken(
+                        updatedDetails,
+                        updatedDetails.getPassword(),
+                        updatedDetails.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
             ra.addFlashAttribute("success", "Profile updated successfully");
         } catch (IllegalArgumentException e) {
             ra.addFlashAttribute("error", e.getMessage());

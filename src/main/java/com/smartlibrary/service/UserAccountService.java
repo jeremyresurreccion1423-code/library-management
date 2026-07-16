@@ -187,21 +187,38 @@ public class UserAccountService {
     }
 
     @Transactional
-    public void updateStudentProfile(String username, String fullName, String phone, String course) {
-        User u = userRepository.findByUsername(username).orElseThrow();
+    public User updateStudentProfile(String currentUsername, String newUsername, String fullName, String phone, String course) {
+        User u = userRepository.findByUsername(currentUsername).orElseThrow();
         StudentProfile profile = studentProfileRepository.findByUserId(u.getId())
                 .orElseThrow(() -> new IllegalStateException("Not a student account"));
+
+        newUsername = newUsername == null ? "" : newUsername.trim();
         fullName = fullName == null ? "" : fullName.trim();
         phone = phone == null ? "" : phone.trim();
         course = course == null ? "" : course.trim();
+
+        if (newUsername.isBlank()) {
+            throw new IllegalArgumentException("Username is required");
+        }
+        if (!newUsername.matches("[A-Za-z0-9._-]{5,20}")) {
+            throw new IllegalArgumentException(
+                    "Username must be 5-20 characters and may include letters, numbers, dots, underscores, or hyphens");
+        }
+        if (!newUsername.equals(u.getUsername()) && userRepository.existsByUsername(newUsername)) {
+            throw new IllegalArgumentException("Username already taken");
+        }
+
         validateLettersOnlyField(fullName, "Full name");
         if (!course.isBlank()) {
             validateLettersOnlyField(course, "Course");
         }
+
+        u.setUsername(newUsername);
         profile.setFullName(fullName);
         profile.setPhone(phone);
         profile.setCourse(course);
         studentProfileRepository.save(profile);
+        return userRepository.save(u);
     }
 
     @Transactional

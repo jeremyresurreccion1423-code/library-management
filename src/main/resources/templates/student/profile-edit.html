@@ -51,6 +51,11 @@
             <div id="fullNameError" class="text-danger small mt-1 d-none">Full name must contain letters and spaces only (no numbers).</div>
           </div>
           <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input class="form-control" id="usernameInput" name="username" required th:value="${username}" pattern="[A-Za-z0-9._-]{5,20}" title="5–20 characters: letters, numbers, dots, underscores, or hyphens"/>
+            <div id="usernameError" class="text-danger small mt-1 d-none">Username must be 5–20 characters (letters, numbers, dots, underscores, or hyphens only).</div>
+          </div>
+          <div class="mb-3">
             <label class="form-label">Phone Number</label>
             <input class="form-control" name="phone" th:value="${profile.phone}" placeholder="Your phone number"/>
           </div>
@@ -90,6 +95,9 @@
 
     const fullNameInput = document.getElementById('fullNameInput');
     const fullNameError = document.getElementById('fullNameError');
+    const usernameInput = document.getElementById('usernameInput');
+    const usernameError = document.getElementById('usernameError');
+    const usernamePattern = /^[A-Za-z0-9._-]{5,20}$/;
     const courseInput = document.getElementById('courseInput');
     const courseError = document.getElementById('courseError');
     const form = document.getElementById('studentProfileEditForm');
@@ -104,6 +112,12 @@
           fullNameError.classList.remove('d-none');
           fullNameInput.classList.add('is-invalid');
           fullNameInput.focus();
+          valid = false;
+        }
+        if (!usernameInput || !usernamePattern.test(usernameInput.value.trim())) {
+          usernameError.classList.remove('d-none');
+          usernameInput.classList.add('is-invalid');
+          if (valid) usernameInput.focus();
           valid = false;
         }
         const courseVal = courseInput ? courseInput.value.trim() : '';
