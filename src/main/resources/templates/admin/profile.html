@@ -5,93 +5,202 @@
 <div class="dashboard-wrapper">
   <div th:replace="~{fragments/admin-sidebar :: sidebar}"></div>
   <main class="dashboard-main">
-    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div class="pd-page">
 
-    <div class="profile-topbar">
-      <h2 class="profile-topbar-title">Profile Dashboard</h2>
-      <div class="profile-topbar-actions">
-        <div th:replace="~{fragments/profile-widget :: widget(photoAction=@{/admin/profile/photo}, passwordAction=@{/admin/account/password}, roleLabel=${roleLabel}, panelId='admin-profile-widget', logoutMode=${logoutMode})}"></div>
-      </div>
-    </div>
+      <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+      <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <div class="profile-dashboard-grid profile-dashboard-grid-single">
-      <section class="profile-main-column">
-        <div class="profile-main-header ams-card">
-          <h2>My Profile</h2>
-          <small th:text="${roleName + ' INFORMATION'}">USER INFORMATION</small>
+      <!-- Hero -->
+      <section class="pd-hero">
+        <div class="pd-hero__avatar">
+          <img th:if="${profilePhotoUrl != null}"
+               th:src="${profilePhotoUrl}"
+               alt="Profile photo"
+               width="88"
+               height="88"/>
+          <span th:unless="${profilePhotoUrl != null}" th:text="${profileInitial ?: 'U'}">U</span>
         </div>
-
-        <div class="profile-hero ams-card">
-          <div class="profile-hero-avatar">
-            <img th:if="${profilePhotoUrl != null}" th:src="${profilePhotoUrl}" alt="Profile photo"/>
-            <span th:unless="${profilePhotoUrl != null}" th:text="${profileInitial ?: 'U'}">U</span>
-          </div>
-          <h3 th:text="${displayName}">User Name</h3>
-          <span class="profile-badge" th:text="${profileCode}">CODE</span>
-        </div>
-
-        <div class="ams-card">
-          <h3>Personal Details</h3>
-          <table class="ams-profile-table">
-            <tbody>
-              <tr th:each="entry : ${profileDetails}">
-                <th th:text="${entry.key}">Label</th>
-                <td th:text="${entry.value}">Value</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="ams-card">
-          <h3>Profile Settings</h3>
-          <div class="ams-form-row">
-            <div>
-              <h4 class="ams-settings-heading">Upload Photo</h4>
-              <form th:action="@{/admin/profile/photo}" method="post" enctype="multipart/form-data">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <div class="form-group mb-2">
-                  <input type="file" name="photo" class="form-control" accept="image/*" required>
-                </div>
-                <button type="submit" class="btn btn-ams-primary">Upload</button>
-              </form>
-            </div>
-            <div>
-              <h4 class="ams-settings-heading">Change Password</h4>
-              <form th:action="@{/admin/account/password}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <div class="form-group mb-2">
-                  <input type="password" name="currentPassword" class="form-control" placeholder="Current Password" required>
-                </div>
-                <div class="form-group mb-2">
-                  <input type="password" name="newPassword" class="form-control" placeholder="New Password" required>
-                </div>
-                <div class="form-group mb-2">
-                  <input type="password" name="confirmPassword" class="form-control" placeholder="Confirm Password" required>
-                </div>
-                <button type="submit" class="btn btn-ams-primary">Save Password</button>
-              </form>
-              <p class="mt-2 mb-0">
-                <a th:href="@{/forgot-password}">Forgot password? Verify via OTP</a>
-              </p>
-            </div>
-            <div>
-              <h4 class="ams-settings-heading">Update Username</h4>
-              <form th:action="@{/admin/profile}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <div class="form-group mb-2">
-                  <input type="text" class="form-control" name="username"
-                         th:value="${username}" required
-                         pattern="[A-Za-z0-9_-]+"
-                         placeholder="Username"
-                         title="Only letters, numbers, underscore, and hyphen allowed."/>
-                </div>
-                <button type="submit" class="btn btn-ams-primary">Save Username</button>
-              </form>
-            </div>
+        <div class="pd-hero__body">
+          <h1 th:text="${displayName}">Admin Name</h1>
+          <div class="pd-hero__meta">
+            <span class="pd-badge pd-badge--role">
+              <i th:class="${roleName == 'SUPER_ADMIN' ? 'bi bi-shield-check' : 'bi bi-person-badge'}"></i>
+              <span th:text="${roleLabel}">Administrator</span>
+            </span>
+            <span th:if="${accountActive}" class="pd-badge pd-badge--active"><i class="bi bi-check-circle"></i> Active</span>
+            <span th:unless="${accountActive}" class="pd-badge pd-badge--inactive"><i class="bi bi-x-circle"></i> Inactive</span>
+            <span class="pd-badge pd-badge--id" th:text="${profileCode}">ID 1</span>
           </div>
         </div>
       </section>
+
+      <!-- Statistics -->
+      <section class="pd-stats">
+        <div class="pd-stat">
+          <div class="pd-stat__icon pd-stat__icon--blue"><i class="bi bi-bookshelf"></i></div>
+          <span class="pd-stat__label">Books Managed</span>
+          <span class="pd-stat__value" th:text="${statBooks}">0</span>
+        </div>
+        <div class="pd-stat">
+          <div class="pd-stat__icon pd-stat__icon--green"><i class="bi bi-journal-arrow-up"></i></div>
+          <span class="pd-stat__label">Active Loans</span>
+          <span class="pd-stat__value" th:text="${statActiveLoans}">0</span>
+        </div>
+        <div class="pd-stat">
+          <div class="pd-stat__icon pd-stat__icon--red"><i class="bi bi-exclamation-circle"></i></div>
+          <span class="pd-stat__label">Overdue</span>
+          <span class="pd-stat__value" th:text="${statOverdue}">0</span>
+        </div>
+        <div class="pd-stat">
+          <div class="pd-stat__icon pd-stat__icon--amber"><i class="bi bi-clock-history"></i></div>
+          <span class="pd-stat__label">Reservations</span>
+          <span class="pd-stat__value" th:text="${statReservations}">0</span>
+        </div>
+      </section>
+
+      <div class="pd-layout">
+        <div class="pd-stack">
+
+          <!-- Personal Information -->
+          <section>
+            <div class="pd-info-grid">
+              <div class="pd-info-card">
+                <div class="pd-info-card__icon"><i class="bi bi-at"></i></div>
+                <div>
+                  <span class="pd-info-card__label">Username</span>
+                  <span class="pd-info-card__value" th:text="${username}">—</span>
+                </div>
+              </div>
+              <div class="pd-info-card">
+                <div class="pd-info-card__icon"><i class="bi bi-person"></i></div>
+                <div>
+                  <span class="pd-info-card__label">Full Name</span>
+                  <span class="pd-info-card__value" th:text="${fullName != null && !fullName.isBlank() ? fullName : '—'}">—</span>
+                </div>
+              </div>
+              <div class="pd-info-card">
+                <div class="pd-info-card__icon"><i class="bi bi-envelope"></i></div>
+                <div>
+                  <span class="pd-info-card__label">Email</span>
+                  <span class="pd-info-card__value" th:text="${email != null ? email : '—'}">—</span>
+                </div>
+              </div>
+              <div class="pd-info-card">
+                <div class="pd-info-card__icon"><i class="bi bi-person-badge"></i></div>
+                <div>
+                  <span class="pd-info-card__label">Role</span>
+                  <span class="pd-info-card__value" th:text="${roleLabel}">—</span>
+                </div>
+              </div>
+              <div class="pd-info-card">
+                <div class="pd-info-card__icon"><i class="bi bi-toggle-on"></i></div>
+                <div>
+                  <span class="pd-info-card__label">Account Status</span>
+                  <span class="pd-info-card__value" th:text="${accountActive ? 'Active' : 'Disabled'}">Active</span>
+                </div>
+              </div>
+              <div class="pd-info-card" th:each="entry : ${profileDetails}" th:if="${entry.key == 'Created At'}">
+                <div class="pd-info-card__icon"><i class="bi bi-calendar3"></i></div>
+                <div>
+                  <span class="pd-info-card__label" th:text="${entry.key}">Created At</span>
+                  <span class="pd-info-card__value" th:text="${entry.value}">—</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Profile Photo -->
+          <section class="pd-card">
+            <div class="pd-card__head">
+              <i class="bi bi-camera"></i>
+              <h3>Profile Photo</h3>
+            </div>
+            <form th:action="@{/admin/profile/photo}" method="post" enctype="multipart/form-data">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <div class="mb-3">
+                <label class="form-label">Upload a new photo</label>
+                <input type="file" name="photo" class="form-control" accept="image/*" required>
+                <div class="form-text text-muted">JPG, PNG, GIF, or WebP. Max 5MB.</div>
+              </div>
+              <button type="submit" class="pd-btn pd-btn--primary">
+                <i class="bi bi-upload"></i> Upload Photo
+              </button>
+            </form>
+          </section>
+
+          <!-- Account Settings -->
+          <section class="pd-card">
+            <div class="pd-card__head">
+              <i class="bi bi-person-gear"></i>
+              <h3>Account Settings</h3>
+            </div>
+            <form th:action="@{/admin/profile}" method="post">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control" name="username"
+                       th:value="${username}" required
+                       pattern="[A-Za-z0-9_-]+"
+                       placeholder="Username"
+                       title="Only letters, numbers, underscore, and hyphen allowed."/>
+                <div class="form-text text-muted">Letters, numbers, underscore, and hyphen only.</div>
+              </div>
+              <button type="submit" class="pd-btn pd-btn--primary">
+                <i class="bi bi-check-lg"></i> Save Username
+              </button>
+            </form>
+          </section>
+
+          <!-- Security Settings -->
+          <section class="pd-card">
+            <div class="pd-card__head">
+              <i class="bi bi-shield-lock"></i>
+              <h3>Security Settings</h3>
+            </div>
+            <form th:action="@{/admin/account/password}" method="post">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <div class="mb-3">
+                <label class="form-label">Current Password</label>
+                <input type="password" name="currentPassword" class="form-control" placeholder="Current password" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">New Password</label>
+                <input type="password" name="newPassword" class="form-control" placeholder="New password" required>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" name="confirmPassword" class="form-control" placeholder="Confirm new password" required>
+              </div>
+              <button type="submit" class="pd-btn pd-btn--primary">
+                <i class="bi bi-key"></i> Save Password
+              </button>
+            </form>
+            <p class="mt-3 mb-0" style="font-size:0.85rem;">
+              <a th:href="@{/forgot-password}">Forgot password? Verify via OTP</a>
+            </p>
+          </section>
+        </div>
+
+        <!-- Recent Activity -->
+        <aside class="pd-activity" th:if="${recentActivities != null && !recentActivities.isEmpty()}">
+          <h3><i class="bi bi-activity me-2"></i>Recent Activity</h3>
+          <ul class="pd-activity-list">
+            <li class="pd-activity-item" th:each="item : ${recentActivities}">
+              <div th:class="'pd-activity-item__icon pd-activity-item__icon--' + ${item.tone}">
+                <i th:class="'bi ' + ${item.icon}"></i>
+              </div>
+              <div class="pd-activity-item__text">
+                <strong th:text="${item.title}">Book title</strong>
+                <span th:text="${item.subtitle != null ? item.subtitle + ' · ' + item.when : item.type + ' · ' + item.when}">Student · Today</span>
+              </div>
+            </li>
+          </ul>
+        </aside>
+        <aside class="pd-activity" th:if="${recentActivities == null || recentActivities.isEmpty()}">
+          <h3><i class="bi bi-activity me-2"></i>Recent Activity</h3>
+          <p class="text-muted mb-0" style="font-size:0.88rem;">No recent library activity to display.</p>
+        </aside>
+      </div>
     </div>
   </main>
 </div>

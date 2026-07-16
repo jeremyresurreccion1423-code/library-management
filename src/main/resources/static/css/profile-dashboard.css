@@ -1,0 +1,442 @@
+/* EduLibrary — Profile Dashboard (student + admin) */
+
+.pd-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.pd-hero {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 24px 28px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+  flex-wrap: wrap;
+}
+
+.pd-hero__avatar {
+  width: 88px;
+  height: 88px;
+  border-radius: 20px;
+  display: grid;
+  place-items: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+}
+
+.pd-hero__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pd-hero__body {
+  flex: 1;
+  min-width: 200px;
+}
+
+.pd-hero__body h1 {
+  margin: 0 0 8px;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-weight: 700;
+  color: #14231a;
+}
+
+.pd-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.pd-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.pd-badge--role {
+  background: #ecfdf3;
+  color: #166534;
+}
+
+.pd-badge--active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.pd-badge--inactive {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.pd-badge--id {
+  background: #f1f5f9;
+  color: #475569;
+  font-family: ui-monospace, monospace;
+}
+
+.pd-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.pd-stat {
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pd-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.pd-stat__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.pd-stat__label {
+  display: block;
+  font-size: 0.78rem;
+  color: #66756c;
+  margin-bottom: 4px;
+}
+
+.pd-stat__value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #14231a;
+  line-height: 1.2;
+}
+
+.pd-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 18px;
+  align-items: start;
+}
+
+.pd-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.pd-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pd-info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.07);
+}
+
+.pd-info-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  display: grid;
+  place-items: center;
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.pd-info-card__label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #66756c;
+  margin-bottom: 4px;
+}
+
+.pd-info-card__value {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #14231a;
+  word-break: break-word;
+}
+
+.pd-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pd-card {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+
+.pd-card__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.pd-card__head i {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1rem;
+}
+
+.pd-card__head h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #14231a;
+}
+
+.pd-card .form-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.pd-card .form-control {
+  border-radius: 10px;
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.pd-card .form-control:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.12);
+}
+
+.pd-card .form-text {
+  font-size: 0.78rem;
+}
+
+.pd-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.pd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.pd-btn:hover {
+  transform: translateY(-1px);
+}
+
+.pd-btn--primary {
+  background: linear-gradient(135deg, #16a34a 0%, #166534 100%);
+  color: #fff;
+  box-shadow: 0 8px 18px rgba(22, 101, 52, 0.22);
+}
+
+.pd-btn--ghost {
+  background: #f8faf9;
+  color: #166534;
+  border: 1px solid rgba(22, 101, 52, 0.16);
+}
+
+.pd-activity {
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+
+.pd-activity h3 {
+  margin: 0 0 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #14231a;
+}
+
+.pd-activity-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pd-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.05);
+}
+
+.pd-activity-item__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.pd-activity-item__icon--green { background: #dcfce7; color: #16a34a; }
+.pd-activity-item__icon--blue { background: #dbeafe; color: #2563eb; }
+.pd-activity-item__icon--red { background: #fee2e2; color: #dc2626; }
+.pd-activity-item__icon--amber { background: #fef3c7; color: #d97706; }
+
+.pd-activity-item__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.pd-activity-item__text strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #14231a;
+  margin-bottom: 2px;
+}
+
+.pd-activity-item__text span {
+  font-size: 0.78rem;
+  color: #66756c;
+}
+
+/* Student theme */
+body:has(#studentSidebar) .pd-hero__avatar {
+  background: linear-gradient(145deg, #166534, #22c55e);
+}
+
+body:has(#studentSidebar) .pd-badge--role {
+  background: #ecfdf3;
+  color: #166534;
+}
+
+body:has(#studentSidebar) .pd-info-card__icon,
+body:has(#studentSidebar) .pd-card__head i {
+  background: #ecfdf3;
+  color: #166534;
+}
+
+body:has(#studentSidebar) .pd-stat__icon--green { background: #dcfce7; color: #16a34a; }
+body:has(#studentSidebar) .pd-stat__icon--amber { background: #fef3c7; color: #d97706; }
+body:has(#studentSidebar) .pd-stat__icon--blue { background: #dbeafe; color: #2563eb; }
+body:has(#studentSidebar) .pd-stat__icon--red { background: #fee2e2; color: #dc2626; }
+
+body:has(#studentSidebar) .pd-card .form-control:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.12);
+}
+
+body:has(#studentSidebar) .pd-btn--primary {
+  background: linear-gradient(135deg, #16a34a 0%, #166534 100%);
+  box-shadow: 0 8px 18px rgba(22, 101, 52, 0.22);
+}
+
+body:has(#studentSidebar) .pd-btn--ghost {
+  color: #166534;
+  border-color: rgba(22, 101, 52, 0.16);
+}
+
+/* Admin theme */
+body:has(#adminSidebar) .pd-hero__avatar {
+  background: linear-gradient(145deg, #1d4ed8, #3b82f6);
+}
+
+body:has(#adminSidebar) .pd-badge--role {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+body:has(#adminSidebar) .pd-info-card__icon,
+body:has(#adminSidebar) .pd-card__head i {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+body:has(#adminSidebar) .pd-stat__icon--green { background: #dbeafe; color: #2563eb; }
+body:has(#adminSidebar) .pd-stat__icon--amber { background: #fef3c7; color: #d97706; }
+body:has(#adminSidebar) .pd-stat__icon--blue { background: #e0e7ff; color: #4338ca; }
+body:has(#adminSidebar) .pd-stat__icon--red { background: #fee2e2; color: #dc2626; }
+
+body:has(#adminSidebar) .pd-card .form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+body:has(#adminSidebar) .pd-btn--primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+}
+
+body:has(#adminSidebar) .pd-btn--ghost {
+  color: #1d4ed8;
+  border-color: rgba(37, 99, 235, 0.16);
+}
+
+@media (max-width: 992px) {
+  .pd-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .pd-hero {
+    padding: 18px;
+  }
+  .pd-hero__avatar {
+    width: 72px;
+    height: 72px;
+  }
+}
