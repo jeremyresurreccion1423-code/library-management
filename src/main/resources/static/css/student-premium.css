@@ -9,9 +9,9 @@ body:has(#studentSidebar) {
   --stu-sage: #86a789;
   --stu-sage-soft: #c5d5c8;
   --stu-beige: #e8dfd2;
-  --stu-ivory: #fcfaf6;
-  --stu-cream: #f7f3ec;
-  --stu-warm: #f0ebe3;
+  --stu-ivory: #fefefe;
+  --stu-cream: #faf9f6;
+  --stu-warm: #f5f3ef;
   --stu-white: #ffffff;
   --stu-gray: #f4f2ee;
   --stu-text: #14231a;
@@ -68,7 +68,7 @@ body.dashboard-body:has(#studentSidebar)::before {
   background:
     radial-gradient(circle at 40% 40%, rgba(255, 252, 247, 0.8), transparent 58%),
     radial-gradient(circle at 55% 50%, rgba(134, 167, 137, 0.22), transparent 55%);
-  opacity: 0.9;
+  opacity: 1;
 }
 
 body.dashboard-body:has(#studentSidebar)::after {
@@ -79,7 +79,13 @@ body.dashboard-body:has(#studentSidebar)::after {
   background:
     radial-gradient(circle at 50% 45%, rgba(255, 250, 244, 0.7), transparent 55%),
     radial-gradient(circle at 60% 55%, rgba(22, 101, 52, 0.1), transparent 52%);
-  opacity: 0.85;
+  opacity: 1;
+}
+
+/* Lighter modal overlay — avoids heavy dimming on logout confirm */
+body:has(#studentSidebar) .modal-backdrop.show {
+  opacity: 0.18 !important;
+  background-color: #334155;
 }
 
 body:has(#studentSidebar) .dashboard-wrapper {
@@ -121,9 +127,7 @@ body:has(#studentSidebar) .sidebar-nav::-webkit-scrollbar-track {
 body:has(#studentSidebar) .dashboard-header-bar {
   height: 60px;
   background:
-    linear-gradient(135deg, rgba(22, 101, 52, 0.97) 0%, rgba(20, 83, 45, 0.98) 55%, rgba(5, 150, 105, 0.92) 100%);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+    linear-gradient(135deg, #166534 0%, #14532d 55%, #059669 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 8px 28px rgba(22, 101, 52, 0.22);
   padding: 0 18px;
@@ -159,10 +163,7 @@ body:has(#studentSidebar) .admin-sidebar {
   width: 268px;
   top: 60px;
   height: calc(100vh - 60px);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(252, 250, 246, 0.96) 100%);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: #ffffff;
   border-right: 1px solid var(--stu-border);
   box-shadow: 8px 0 32px rgba(22, 101, 52, 0.06);
 }

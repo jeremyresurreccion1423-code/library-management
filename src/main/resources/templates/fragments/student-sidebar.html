@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <th:block th:fragment="sidebar">
-<link rel="stylesheet" th:href="@{/css/student-premium.css(v=2)}">
+<link rel="stylesheet" th:href="@{/css/student-premium.css(v=3)}">
 
 <div class="dashboard-header-bar">
   <div class="header-bar-left">
@@ -120,6 +120,7 @@
 
   // Logout modal
   function showStudentLogoutModal() {
+    window.closeAllProfileMenus();
     const modal = new bootstrap.Modal(document.getElementById('studentLogoutModal'));
     modal.show();
   }

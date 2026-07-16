@@ -949,6 +949,12 @@ body.dashboard-body:has(#adminSidebar) .admin-sidebar .sidebar-group-panel .side
   color: #ffffff !important;
 }
 
+/* Lighter modal overlay on logout confirm */
+body.dashboard-body:has(#adminSidebar) .modal-backdrop.show {
+  opacity: 0.18 !important;
+  background-color: #334155;
+}
+
 @media (max-width: 1100px) {
   body.dashboard-body:has(#adminSidebar) .el-filter-row {
     grid-template-columns: 1fr 1fr;

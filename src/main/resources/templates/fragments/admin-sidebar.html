@@ -245,6 +245,7 @@
   });
 
   window.showAdminLogoutModal = function () {
+    window.closeAllProfileMenus();
     const modal = new bootstrap.Modal(document.getElementById('adminLogoutModal'));
     modal.show();
   };
