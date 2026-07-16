@@ -19,6 +19,8 @@ public interface BookIssueRepository extends JpaRepository<BookIssue, Long> {
             SELECT bi FROM BookIssue bi
             JOIN FETCH bi.book b
             LEFT JOIN FETCH b.ebook
+            LEFT JOIN FETCH b.category
+            LEFT JOIN FETCH b.author
             WHERE bi.student.id = :studentId
             ORDER BY bi.issuedAt DESC
             """)

@@ -36,7 +36,7 @@ public interface  BookRepository extends JpaRepository<Book, Long> {
             @Param("authorId") Long authorId,
             @Param("onlyAvailable") Boolean onlyAvailable);
 
-    @Query("SELECT b FROM Book b LEFT JOIN FETCH b.category LEFT JOIN FETCH b.author WHERE b.isbn = :isbn")
+    @Query("SELECT b FROM Book b LEFT JOIN FETCH b.category LEFT JOIN FETCH b.author LEFT JOIN FETCH b.ebook WHERE b.isbn = :isbn")
     List<Book> findAllByIsbnExact(@Param("isbn") String isbn);
 
     @Query("SELECT DISTINCT b FROM Book b JOIN b.ebook e")
@@ -44,12 +44,14 @@ public interface  BookRepository extends JpaRepository<Book, Long> {
 
     @Query("""
             SELECT DISTINCT b FROM Book b
-            JOIN b.ebook e
-            JOIN BookIssue bi ON bi.book.id = b.id
+            JOIN FETCH b.ebook
             LEFT JOIN FETCH b.author
             LEFT JOIN FETCH b.category
-            WHERE bi.student.id = :studentProfileId
-            AND bi.status IN (com.smartlibrary.model.IssueStatus.BORROWED, com.smartlibrary.model.IssueStatus.OVERDUE)
+            WHERE b.id IN (
+                SELECT bi.book.id FROM BookIssue bi
+                WHERE bi.student.id = :studentProfileId
+                AND bi.status IN (com.smartlibrary.model.IssueStatus.BORROWED, com.smartlibrary.model.IssueStatus.OVERDUE)
+            )
             """)
     List<Book> findDigitalBooksBorrowedByStudent(@Param("studentProfileId") Long studentProfileId);
 
