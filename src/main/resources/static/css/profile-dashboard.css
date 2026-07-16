@@ -835,7 +835,7 @@ body:has(#adminSidebar) .pd-badge--role {
   margin-bottom: 2px;
 }
 
-.cp-security__list span {
+.cp-security__list li > div span {
   display: block;
   font-size: 0.76rem;
   color: #64748b;
