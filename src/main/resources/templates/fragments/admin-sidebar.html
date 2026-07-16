@@ -114,48 +114,50 @@
           <span>EDULIBRARY</span>
         </a>
       </div>
-      <nav class="sidebar-nav">
-        <a class="sidebar-link" data-nav-prefix="/admin" data-nav-exact="true" th:href="@{/admin}">
-          <i class="bi bi-speedometer2"></i>
-          <span>Dashboard</span>
-        </a>
-        <a class="sidebar-link" data-nav-prefix="/admin/categories" th:href="@{/admin/categories}">
-          <i class="bi bi-folder"></i>
-          <span>Categories</span>
-        </a>
-        <a class="sidebar-link" data-nav-prefix="/admin/authors" th:href="@{/admin/authors}">
-          <i class="bi bi-person-badge"></i>
-          <span>Authors</span>
-        </a>
-        <a class="sidebar-link" data-nav-prefix="/admin/books" th:href="@{/admin/books}">
-          <i class="bi bi-book"></i>
-          <span>Books</span>
-        </a>
-        <a class="sidebar-link" data-nav-prefix="/admin/scan-issue" th:href="@{/admin/scan-issue}">
-          <i class="bi bi-qr-code-scan"></i>
-          <span>Scan &amp; Issue</span>
-        </a>
-        <a class="sidebar-link" data-nav-prefix="/admin/issues" data-nav-exclude="/admin/issues/reservations" th:href="@{/admin/issues}">
-          <i class="bi bi-journal-arrow-up"></i>
-          <span>Issue / Return</span>
-        </a>
-        <a class="sidebar-link" data-nav-prefix="/admin/issues/reservations" th:href="@{/admin/issues/reservations}">
-          <i class="bi bi-calendar-check"></i>
-          <span>Reservations</span>
-        </a>
-        <a class="sidebar-link" data-nav-prefix="/admin/students" th:href="@{/admin/students}">
-          <i class="bi bi-people"></i>
-          <span>Students</span>
-        </a>
-        <a class="sidebar-link" data-nav-prefix="/admin/analytics" th:href="@{/admin/analytics}">
-          <i class="bi bi-graph-up"></i>
-          <span>Analytics</span>
-        </a>
-        <a class="sidebar-link" data-nav-prefix="/admin/admins" th:href="@{/admin/admins}">
-          <i class="bi bi-person-plus"></i>
-          <span>Admins</span>
-        </a>
-      </nav>
+      <div class="sidebar-scroll">
+        <nav class="sidebar-nav">
+          <a class="sidebar-link" data-nav-prefix="/admin" data-nav-exact="true" th:href="@{/admin}">
+            <i class="bi bi-speedometer2"></i>
+            <span>Dashboard</span>
+          </a>
+          <a class="sidebar-link" data-nav-prefix="/admin/categories" th:href="@{/admin/categories}">
+            <i class="bi bi-folder"></i>
+            <span>Categories</span>
+          </a>
+          <a class="sidebar-link" data-nav-prefix="/admin/authors" th:href="@{/admin/authors}">
+            <i class="bi bi-person-badge"></i>
+            <span>Authors</span>
+          </a>
+          <a class="sidebar-link" data-nav-prefix="/admin/books" th:href="@{/admin/books}">
+            <i class="bi bi-book"></i>
+            <span>Books</span>
+          </a>
+          <a class="sidebar-link" data-nav-prefix="/admin/scan-issue" th:href="@{/admin/scan-issue}">
+            <i class="bi bi-qr-code-scan"></i>
+            <span>Scan &amp; Issue</span>
+          </a>
+          <a class="sidebar-link" data-nav-prefix="/admin/issues" data-nav-exclude="/admin/issues/reservations" th:href="@{/admin/issues}">
+            <i class="bi bi-journal-arrow-up"></i>
+            <span>Issue / Return</span>
+          </a>
+          <a class="sidebar-link" data-nav-prefix="/admin/issues/reservations" th:href="@{/admin/issues/reservations}">
+            <i class="bi bi-calendar-check"></i>
+            <span>Reservations</span>
+          </a>
+          <a class="sidebar-link" data-nav-prefix="/admin/students" th:href="@{/admin/students}">
+            <i class="bi bi-people"></i>
+            <span>Students</span>
+          </a>
+          <a class="sidebar-link" data-nav-prefix="/admin/analytics" th:href="@{/admin/analytics}">
+            <i class="bi bi-graph-up"></i>
+            <span>Analytics</span>
+          </a>
+          <a class="sidebar-link" data-nav-prefix="/admin/admins" th:href="@{/admin/admins}">
+            <i class="bi bi-person-plus"></i>
+            <span>Admins</span>
+          </a>
+        </nav>
+      </div>
       <div class="sidebar-footer-quote">
         <div class="quote-icon"><i class="bi bi-book"></i></div>
         <p>"A book is a dream that you hold in your hands."</p>

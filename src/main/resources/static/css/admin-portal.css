@@ -77,10 +77,19 @@ body.dashboard-body:has(#adminSidebar) .sidebar-header {
   flex-shrink: 0;
 }
 
+body.dashboard-body:has(#adminSidebar) .sidebar-scroll {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
 body.dashboard-body:has(#adminSidebar) .sidebar-nav {
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 body.dashboard-body:has(#adminSidebar) .admin-sidebar.collapsed {
@@ -157,7 +166,7 @@ body.dashboard-body:has(#adminSidebar) .sidebar-sublink:hover {
 
 body.dashboard-body:has(#adminSidebar) .sidebar-footer-quote {
   flex-shrink: 0;
-  margin: auto 12px 16px;
+  margin: 0 12px 16px;
   padding: 16px;
   border-radius: var(--portal-radius);
   background: linear-gradient(145deg, #EFF6FF, #DBEAFE);
