@@ -1,27 +1,27 @@
-/* EduLibrary — Admin portal (amber theme, scoped to #adminSidebar) */
+/* EduLibrary — Admin portal (blue theme, scoped to #adminSidebar) */
 
 body.dashboard-body:has(#adminSidebar) {
-  --portal-primary: #D97706;
-  --portal-primary-dark: #B45309;
-  --portal-primary-mid: #D97706;
-  --portal-primary-soft: #FFF8F1;
-  --portal-primary-border: #F3C78A;
-  --portal-accent: #FED7AA;
-  --portal-bg: #FFF8F1;
+  --portal-primary: #2563EB;
+  --portal-primary-dark: #1D4ED8;
+  --portal-primary-mid: #2563EB;
+  --portal-primary-soft: #EFF6FF;
+  --portal-primary-border: #BFDBFE;
+  --portal-accent: #DBEAFE;
+  --portal-bg: #EFF6FF;
   --portal-card: #ffffff;
-  --portal-text: #1c1917;
-  --portal-muted: #78716c;
-  --portal-border: rgba(217, 119, 6, 0.14);
-  --portal-shadow: 0 4px 14px rgba(217, 119, 6, 0.08);
-  --portal-shadow-lg: 0 12px 32px rgba(217, 119, 6, 0.12);
+  --portal-text: #1e293b;
+  --portal-muted: #64748b;
+  --portal-border: rgba(37, 99, 235, 0.14);
+  --portal-shadow: 0 4px 14px rgba(37, 99, 235, 0.08);
+  --portal-shadow-lg: 0 12px 32px rgba(37, 99, 235, 0.12);
   --portal-radius: 14px;
   --portal-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --portal-table-head-bg: #FFF3E0;
-  --portal-table-head-text: #92400E;
-  --portal-table-head-border: #F59E0B;
-  --portal-row-hover: #FFF7ED;
-  --portal-row-selected: #FEF3C7;
-  --portal-focus-ring: 0 0 0 3px rgba(217, 119, 6, 0.18);
+  --portal-table-head-bg: #EFF6FF;
+  --portal-table-head-text: #1E40AF;
+  --portal-table-head-border: #3B82F6;
+  --portal-row-hover: #F0F9FF;
+  --portal-row-selected: #DBEAFE;
+  --portal-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.18);
 
   --sl-primary: var(--portal-primary);
   --sl-primary-700: var(--portal-primary-dark);
@@ -30,19 +30,19 @@ body.dashboard-body:has(#adminSidebar) {
 }
 
 body.dashboard-body:has(#adminSidebar) {
-  background: linear-gradient(160deg, #FFFCF8 0%, #FFF8F1 45%, #FFF1E6 100%);
+  background: linear-gradient(160deg, #F8FAFC 0%, #EFF6FF 45%, #E0ECFF 100%);
 }
 
 /* ========== Top navbar ========== */
 body.dashboard-body:has(#adminSidebar) .dashboard-header-bar {
   height: 60px;
-  background: linear-gradient(135deg, #92400E 0%, #B45309 45%, #D97706 100%);
-  box-shadow: 0 8px 28px rgba(180, 83, 9, 0.28);
+  background: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 45%, #2563EB 100%);
+  box-shadow: 0 8px 28px rgba(29, 78, 216, 0.28);
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 body.dashboard-body:has(#adminSidebar) .header-bar-brand i {
-  color: #FED7AA;
+  color: #DBEAFE;
 }
 
 body.dashboard-body:has(#adminSidebar) .header-bar-brand-sub {
@@ -66,7 +66,7 @@ body.dashboard-body:has(#adminSidebar) .admin-sidebar {
   height: calc(100vh - 60px);
   background: #ffffff;
   border-right: 1px solid var(--portal-primary-border);
-  box-shadow: 4px 0 24px rgba(217, 119, 6, 0.06);
+  box-shadow: 4px 0 24px rgba(37, 99, 235, 0.06);
   display: flex;
   flex-direction: column;
 }
@@ -90,7 +90,7 @@ body.dashboard-body:has(#adminSidebar) .sidebar-portal-label {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #92400E;
+  color: #1E40AF;
 }
 
 body.dashboard-body:has(#adminSidebar) .sidebar-portal-label i {
@@ -124,9 +124,9 @@ body.dashboard-body:has(#adminSidebar) .sidebar-group-btn:hover .sidebar-group-l
 
 body.dashboard-body:has(#adminSidebar) .sidebar-link.active,
 body.dashboard-body:has(#adminSidebar) .sidebar-sublink.active {
-  background: linear-gradient(135deg, #D97706 0%, #B45309 100%) !important;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
   color: #fff !important;
-  box-shadow: 0 8px 20px rgba(217, 119, 6, 0.28) !important;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28) !important;
 }
 
 body.dashboard-body:has(#adminSidebar) .sidebar-link.active i,
@@ -143,7 +143,7 @@ body.dashboard-body:has(#adminSidebar) .sidebar-footer-quote {
   margin: auto 12px 16px;
   padding: 16px;
   border-radius: var(--portal-radius);
-  background: linear-gradient(145deg, #FFF8F1, #FED7AA);
+  background: linear-gradient(145deg, #EFF6FF, #DBEAFE);
   border: 1px solid var(--portal-primary-border);
 }
 
@@ -196,16 +196,16 @@ body.dashboard-body:has(#adminSidebar) .page-header-profile-widget .profile-menu
 body.dashboard-body:has(#adminSidebar) .btn-ams-primary,
 body.dashboard-body:has(#adminSidebar) .btn-accent,
 body.dashboard-body:has(#adminSidebar) .btn-primary {
-  background: linear-gradient(135deg, #D97706 0%, #B45309 100%) !important;
-  border-color: #B45309 !important;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+  border-color: #1D4ED8 !important;
   color: #fff !important;
-  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.28) !important;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28) !important;
 }
 
 body.dashboard-body:has(#adminSidebar) .btn-ams-primary:hover,
 body.dashboard-body:has(#adminSidebar) .btn-accent:hover,
 body.dashboard-body:has(#adminSidebar) .btn-primary:hover {
-  background: linear-gradient(135deg, #B45309 0%, #92400E 100%) !important;
+  background: linear-gradient(135deg, #1D4ED8 0%, #1E3A8A 100%) !important;
   color: #fff !important;
 }
 
@@ -266,7 +266,7 @@ body.dashboard-body:has(#adminSidebar) .dashboard-main a:not(.btn):not(.sidebar-
 }
 
 body.dashboard-body:has(#adminSidebar) .dashboard-main a:not(.btn):not(.sidebar-link):hover {
-  color: #92400E;
+  color: #1E40AF;
 }
 
 /* ========== Tables (all admin tables) ========== */
@@ -314,7 +314,7 @@ body.dashboard-body:has(#adminSidebar) .pagination .page-link:hover {
 
 /* ========== Progress bars ========== */
 body.dashboard-body:has(#adminSidebar) .progress-bar {
-  background: linear-gradient(90deg, #D97706, #B45309) !important;
+  background: linear-gradient(90deg, #2563EB, #1D4ED8) !important;
 }
 
 /* ========== Badges (admin accent — status success stays green) ========== */
@@ -335,7 +335,7 @@ body.dashboard-body:has(#adminSidebar) .spinner-border {
 /* ========== Profile / analytics legacy greens ========== */
 body.dashboard-body:has(#adminSidebar) .profile-topbar,
 body.dashboard-body:has(#adminSidebar) .profile-main-header {
-  background: linear-gradient(135deg, #B45309 0%, #D97706 100%) !important;
+  background: linear-gradient(135deg, #1D4ED8 0%, #2563EB 100%) !important;
 }
 
 body.dashboard-body:has(#adminSidebar) .header-bar-dropdown .dropdown-item:hover {
@@ -410,10 +410,10 @@ body.dashboard-body:has(#adminSidebar) .el-stat-icon {
   flex-shrink: 0;
 }
 
-body.dashboard-body:has(#adminSidebar) .el-stat-icon--blue { background: #FED7AA; color: #B45309; }
-body.dashboard-body:has(#adminSidebar) .el-stat-icon--purple { background: #fde68a; color: #92400E; }
+body.dashboard-body:has(#adminSidebar) .el-stat-icon--blue { background: #DBEAFE; color: #1D4ED8; }
+body.dashboard-body:has(#adminSidebar) .el-stat-icon--purple { background: #E0E7FF; color: #4338CA; }
 body.dashboard-body:has(#adminSidebar) .el-stat-icon--green { background: #dcfce7; color: #16a34a; }
-body.dashboard-body:has(#adminSidebar) .el-stat-icon--orange { background: #ffedd5; color: #D97706; }
+body.dashboard-body:has(#adminSidebar) .el-stat-icon--orange { background: #BFDBFE; color: #2563EB; }
 
 body.dashboard-body:has(#adminSidebar) .el-portal-row {
   display: grid;
@@ -462,7 +462,7 @@ body.dashboard-body:has(#adminSidebar) .el-activity-item {
   align-items: flex-start;
   gap: 12px;
   padding-bottom: 12px;
-  border-bottom: 1px solid #fef3c7;
+  border-bottom: 1px solid #DBEAFE;
 }
 
 body.dashboard-body:has(#adminSidebar) .el-activity-item:last-child {
@@ -481,9 +481,9 @@ body.dashboard-body:has(#adminSidebar) .el-activity-icon {
 }
 
 body.dashboard-body:has(#adminSidebar) .el-activity-icon--green { background: #dcfce7; color: #16a34a; }
-body.dashboard-body:has(#adminSidebar) .el-activity-icon--blue { background: #FED7AA; color: #B45309; }
+body.dashboard-body:has(#adminSidebar) .el-activity-icon--blue { background: #DBEAFE; color: #1D4ED8; }
 body.dashboard-body:has(#adminSidebar) .el-activity-icon--red { background: #fee2e2; color: #dc2626; }
-body.dashboard-body:has(#adminSidebar) .el-activity-icon--orange { background: #ffedd5; color: #D97706; }
+body.dashboard-body:has(#adminSidebar) .el-activity-icon--orange { background: #BFDBFE; color: #2563EB; }
 
 body.dashboard-body:has(#adminSidebar) .el-activity-body strong {
   display: block;
@@ -551,7 +551,7 @@ body.dashboard-body:has(#adminSidebar) .el-overdue-item {
   align-items: center;
   gap: 12px;
   padding: 10px 0;
-  border-bottom: 1px solid #fef3c7;
+  border-bottom: 1px solid #DBEAFE;
 }
 
 body.dashboard-body:has(#adminSidebar) .el-rank-num {
@@ -605,19 +605,19 @@ body.dashboard-body:has(#adminSidebar) .el-btn-primary {
   padding: 10px 18px;
   border-radius: 10px;
   border: 0;
-  background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
   color: #fff !important;
   font-weight: 600;
   font-size: 0.9rem;
   text-decoration: none;
-  box-shadow: 0 6px 16px rgba(217, 119, 6, 0.28);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
   transition: transform 0.2s var(--portal-ease), box-shadow 0.2s var(--portal-ease);
 }
 
 body.dashboard-body:has(#adminSidebar) .el-btn-primary:hover {
   transform: translateY(-1px);
-  background: linear-gradient(135deg, #B45309 0%, #92400E 100%);
-  box-shadow: 0 10px 22px rgba(217, 119, 6, 0.34);
+  background: linear-gradient(135deg, #1D4ED8 0%, #1E3A8A 100%);
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.34);
   color: #fff !important;
 }
 
@@ -741,7 +741,7 @@ body.dashboard-body:has(#adminSidebar) .el-pill.active {
 }
 
 body.dashboard-body:has(#adminSidebar) .el-pill--available.active { background: #16a34a; border-color: #16a34a; }
-body.dashboard-body:has(#adminSidebar) .el-pill--borrowed.active { background: #D97706; border-color: #D97706; }
+body.dashboard-body:has(#adminSidebar) .el-pill--borrowed.active { background: #2563EB; border-color: #2563EB; }
 body.dashboard-body:has(#adminSidebar) .el-pill--maintenance.active { background: #dc2626; border-color: #dc2626; }
 
 body.dashboard-body:has(#adminSidebar) .el-books-table-panel {
@@ -757,7 +757,7 @@ body.dashboard-body:has(#adminSidebar) .el-books-table {
 
 body.dashboard-body:has(#adminSidebar) .el-books-table tbody td {
   padding: 14px 16px;
-  border-bottom: 1px solid #fef3c7;
+  border-bottom: 1px solid #DBEAFE;
   vertical-align: middle;
   color: #44403c;
 }
@@ -779,14 +779,14 @@ body.dashboard-body:has(#adminSidebar) .el-book-thumb {
   width: 44px;
   height: 56px;
   border-radius: 8px;
-  background: linear-gradient(145deg, #FED7AA, #F3C78A);
+  background: linear-gradient(145deg, #DBEAFE, #BFDBFE);
   color: var(--portal-primary-dark);
   font-weight: 700;
   font-size: 1.1rem;
   display: grid;
   place-items: center;
   flex-shrink: 0;
-  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.12);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.12);
 }
 
 body.dashboard-body:has(#adminSidebar) .el-book-title {
@@ -813,8 +813,8 @@ body.dashboard-body:has(#adminSidebar) .el-tag {
 }
 
 body.dashboard-body:has(#adminSidebar) .el-tag--category {
-  background: #FED7AA;
-  color: #92400E;
+  background: #DBEAFE;
+  color: #1E40AF;
 }
 
 body.dashboard-body:has(#adminSidebar) .el-books-isbn {
@@ -832,7 +832,7 @@ body.dashboard-body:has(#adminSidebar) .el-badge {
 }
 
 body.dashboard-body:has(#adminSidebar) .el-badge--available { background: #dcfce7; color: #16a34a; }
-body.dashboard-body:has(#adminSidebar) .el-badge--borrowed { background: #ffedd5; color: #B45309; }
+body.dashboard-body:has(#adminSidebar) .el-badge--borrowed { background: #DBEAFE; color: #1D4ED8; }
 body.dashboard-body:has(#adminSidebar) .el-badge--maintenance { background: #fee2e2; color: #dc2626; }
 
 body.dashboard-body:has(#adminSidebar) .el-copies {
@@ -840,7 +840,7 @@ body.dashboard-body:has(#adminSidebar) .el-copies {
   color: #16a34a;
 }
 
-body.dashboard-body:has(#adminSidebar) .el-copies--warn { color: #D97706; }
+body.dashboard-body:has(#adminSidebar) .el-copies--warn { color: #2563EB; }
 body.dashboard-body:has(#adminSidebar) .el-copies--danger { color: #dc2626; }
 
 body.dashboard-body:has(#adminSidebar) .el-row-actions {
@@ -907,8 +907,8 @@ body.dashboard-body:has(#adminSidebar) .book-card {
 }
 
 body.dashboard-body:has(#adminSidebar) .book-icon {
-  background: linear-gradient(135deg, #D97706 0%, #B45309 100%) !important;
-  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.28) !important;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28) !important;
 }
 
 body.dashboard-body:has(#adminSidebar) .book-status.available {
@@ -945,7 +945,7 @@ body.dashboard-body:has(#adminSidebar) .admin-sidebar .sidebar-group-panel .side
 }
 
 body.dashboard-body:has(#adminSidebar) .admin-sidebar .sidebar-group-panel .sidebar-sublink.active {
-  background: linear-gradient(135deg, #D97706 0%, #B45309 100%) !important;
+  background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
   color: #ffffff !important;
 }
 
