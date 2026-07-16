@@ -36,7 +36,7 @@
           <td th:text="${#temporals.format(r.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
           <td class="sa-table__actions">
             <form th:if="${r.status.name() == 'WAITING'}"
-                  th:action="@{/superadmin/library/issues/reservations/{id}/issue(id=${r.id})}" method="post">
+                  th:action="@{/superadmin/library/reservations/{id}/issue(id=${r.id})}" method="post">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
               <button type="submit" class="sa-btn sa-btn--primary sa-btn--sm">
                 <i class="bi bi-send"></i> Issue Now
