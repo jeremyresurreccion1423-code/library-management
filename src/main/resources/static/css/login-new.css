@@ -245,7 +245,27 @@ body::after {
 }
 
 .auth-brand-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   animation: authRise 0.55s var(--el-ease) both;
+}
+
+.auth-portal-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 14px;
+  border-radius: var(--el-radius-pill);
+  background: linear-gradient(135deg, var(--el-primary), var(--el-primary-mid));
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: var(--el-shadow-sm);
+  white-space: nowrap;
 }
 
 .auth-brand-logo {
