@@ -284,7 +284,7 @@
             labels: ['Borrowed', 'Returned', 'Overdue'],
             datasets: [{
               data: [borrowed, returned, overdue],
-              backgroundColor: ['#3b82f6', '#22c55e', '#ef4444'],
+              backgroundColor: ['#D97706', '#16a34a', '#ef4444'],
               borderWidth: 0,
               hoverOffset: 6
             }]
@@ -320,7 +320,7 @@
       const weekdayCanvas = document.getElementById('weekdayChart');
       if (weekdayCanvas && typeof Chart !== 'undefined' && weekdayLabels.length) {
         const weekdayColors = weekdayLabels.map(function(day) {
-          return day === busiestWeekday ? '#16a34a' : '#86efac';
+          return day === busiestWeekday ? '#D97706' : '#FED7AA';
         });
         new Chart(weekdayCanvas, {
           type: 'bar',
@@ -368,12 +368,12 @@
             datasets: [{
               label: 'Books borrowed',
               data: dailyCounts,
-              borderColor: '#2563eb',
-              backgroundColor: 'rgba(37, 99, 235, 0.12)',
+              borderColor: '#D97706',
+              backgroundColor: 'rgba(217, 119, 6, 0.12)',
               fill: true,
               tension: 0.35,
               pointRadius: 4,
-              pointBackgroundColor: '#2563eb',
+              pointBackgroundColor: '#D97706',
               pointBorderWidth: 0
             }]
           },
