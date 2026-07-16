@@ -7,26 +7,12 @@
 
   <main class="dashboard-main">
     <div class="sl-search-page" sec:authorize="hasRole('STUDENT')">
-      <link rel="stylesheet" th:href="@{/css/student-search.css(v=1)}"/>
+      <link rel="stylesheet" th:href="@{/css/student-search.css(v=2)}"/>
 
       <div class="sl-search-hero">
         <div>
           <h1>Search Books</h1>
           <p>Find books in the library collection</p>
-        </div>
-        <div class="sl-search-stats" th:if="${studentBorrowedCount != null}">
-          <div class="sl-search-stat sl-search-stat--borrowed">
-            <i class="bi bi-journal-arrow-up"></i>
-            <span><span th:text="${studentBorrowedCount}">0</span> Borrowed</span>
-          </div>
-          <div class="sl-search-stat sl-search-stat--due">
-            <i class="bi bi-clock-history"></i>
-            <span><span th:text="${studentOverdueCount}">0</span> Due Soon</span>
-          </div>
-          <div class="sl-search-stat sl-search-stat--read">
-            <i class="bi bi-bookmark-check"></i>
-            <span><span th:text="${studentReturnedCount}">0</span> Read</span>
-          </div>
         </div>
       </div>
 

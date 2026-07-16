@@ -51,21 +51,6 @@
       <span>Scan Book</span>
     </a>
   </nav>
-  <div class="sidebar-reading-stats" th:if="${studentBorrowedCount != null}">
-    <h4>My Reading</h4>
-    <div class="stat-row">
-      <span><i class="bi bi-journal-arrow-up me-1"></i> Borrowed</span>
-      <span class="stat-value" th:text="${studentBorrowedCount}">0</span>
-    </div>
-    <div class="stat-row">
-      <span><i class="bi bi-exclamation-circle me-1"></i> Overdue</span>
-      <span class="stat-value" th:text="${studentOverdueCount}">0</span>
-    </div>
-    <div class="stat-row">
-      <span><i class="bi bi-bookmark-check me-1"></i> Returned</span>
-      <span class="stat-value" th:text="${studentReturnedCount}">0</span>
-    </div>
-  </div>
 </aside>
 
 
