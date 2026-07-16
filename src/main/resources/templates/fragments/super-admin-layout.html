@@ -41,7 +41,28 @@
           <span>Security Center</span>
         </a>
 
-        <p class="sa-sidebar__label">Library Module</p>
+        <p class="sa-sidebar__label">Modules</p>
+
+        <div class="sa-nav-group" id="saGroupAttendance">
+          <button type="button" class="sa-nav-group__btn" onclick="saToggleGroup('saGroupAttendance')" aria-expanded="false">
+            <span class="sa-nav-group__label">
+              <i data-lucide="calendar-check"></i>
+              <span>Attendance</span>
+            </span>
+            <i data-lucide="chevron-down" class="sa-nav-group__chevron"></i>
+          </button>
+          <ul class="sa-nav-group__panel">
+            <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/dashboard')}">Dashboard</a></li>
+            <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/departments')}">Departments</a></li>
+            <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/create')}">Create / Add</a></li>
+            <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/students')}">Students</a></li>
+            <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/teachers')}">Teachers</a></li>
+            <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/subjects')}">Subjects</a></li>
+            <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/sections')}">Sections</a></li>
+            <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/reports')}">Reports</a></li>
+            <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/trends')}">Trends</a></li>
+          </ul>
+        </div>
 
         <div class="sa-nav-group" th:classappend="${navLibOpen} ? ' sa-nav-group--open'" id="saGroupLibrary">
           <button type="button" class="sa-nav-group__btn" onclick="saToggleGroup('saGroupLibrary')"
@@ -71,7 +92,7 @@
     <div class="sa-sidebar__footer">
       <div class="sa-sidebar__status">
         <i data-lucide="activity"></i>
-        <span>Library Control Center</span>
+        <span>University Control Center</span>
       </div>
     </div>
   </aside>

@@ -1,5 +1,6 @@
 package com.smartlibrary.web.superadmin;
 
+import com.smartlibrary.config.LibraryProperties;
 import com.smartlibrary.model.UserRole;
 import com.smartlibrary.repository.UserRepository;
 import com.smartlibrary.security.SsoTokenService;
@@ -17,27 +18,49 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
-/** Super Admin SSO handoff (inbound token login). */
+/**
+ * Bridges Super Admin sessions between this app and the Attendance Management System so a
+ * Super Admin who is already authenticated on one system is transparently signed into the
+ * other system's Super Admin portal when navigating cross-system links.
+ */
 @Controller
 public class SuperAdminSsoController {
 
     private final SsoTokenService ssoTokenService;
     private final UserRepository userRepository;
     private final UserDetailsService userDetailsService;
+    private final LibraryProperties libraryProperties;
     private final SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
 
     public SuperAdminSsoController(
             SsoTokenService ssoTokenService,
             UserRepository userRepository,
-            UserDetailsService userDetailsService) {
+            UserDetailsService userDetailsService,
+            LibraryProperties libraryProperties) {
         this.ssoTokenService = ssoTokenService;
         this.userRepository = userRepository;
         this.userDetailsService = userDetailsService;
+        this.libraryProperties = libraryProperties;
     }
 
-    /** Inbound: consume a handoff token and sign the Super Admin into this app. */
+    /** Outbound: generate a fresh handoff token and send the Super Admin into Attendance's portal. */
+    @GetMapping("/super-admin/bridge/attendance")
+    public String bridgeToAttendance(@RequestParam(defaultValue = "/super-admin") String path, Authentication auth) {
+        String token = ssoTokenService.generateToken(auth.getName());
+        String base = com.smartlibrary.service.SuperAdminDashboardService.normalizeBaseUrl(
+                libraryProperties.getAttendanceAppUrl());
+        if (base == null) {
+            return "redirect:/super-admin?error=attendance-url";
+        }
+        String next = URLEncoder.encode(path, StandardCharsets.UTF_8);
+        return "redirect:" + base + "/super-admin/sso?token=" + token + "&next=" + next;
+    }
+
+    /** Inbound: consume a handoff token issued by Attendance and sign the Super Admin into this app. */
     @GetMapping("/super-admin/sso")
     public String receiveSso(@RequestParam String token,
                              @RequestParam(defaultValue = "/super-admin") String next,
