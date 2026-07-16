@@ -39,7 +39,7 @@
                   th:action="@{/superadmin/library/issues/reservations/{id}/issue(id=${r.id})}" method="post">
               <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
               <button type="submit" class="sa-btn sa-btn--primary sa-btn--sm">
-                <i data-lucide="send"></i> Issue Now
+                <i class="bi bi-send"></i> Issue Now
               </button>
             </form>
             <span th:if="${r.status.name() != 'WAITING'}" class="sa-muted-inline">—</span>

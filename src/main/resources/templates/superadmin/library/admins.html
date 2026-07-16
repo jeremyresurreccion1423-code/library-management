@@ -5,7 +5,7 @@
   <div class="sa-toolbar">
     <p class="sa-lead" style="margin:0;">Library administrators who can manage books, circulation, and students.</p>
     <a class="sa-btn sa-btn--primary" th:href="@{/superadmin/library/admins/new}">
-      <i data-lucide="plus"></i> New Admin
+      <i class="bi bi-plus-lg"></i> New Admin
     </a>
   </div>
 
@@ -38,7 +38,7 @@
                     th:if="${a.username != currentUsername}"
                     th:attr="data-admin-id=${a.id},data-admin-user=${a.username}"
                     th:disabled="${adminCount <= 1}">
-              <i data-lucide="trash-2"></i>
+              <i class="bi bi-trash"></i>
             </button>
             <span th:if="${a.username == currentUsername}" class="sa-muted-inline">—</span>
           </td>

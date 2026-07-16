@@ -1,56 +1,56 @@
 <html xmlns:th="http://www.thymeleaf.org">
-<body th:replace="~{fragments/superadmin-page-shell :: shell('Library Dashboard — System Control Center', 'Library Dashboard', 'Overview of books, loans, and circulation activity', ~{::content})}">
+<body th:replace="~{fragments/superadmin-page-shell :: shell('Library Dashboard — System Control Center', '', '', ~{::content})}">
 <th:block th:fragment="content">
 
-  <section class="sa-welcome sa-glass">
+  <section class="sa-portal-greeting">
     <div>
       <p class="sa-welcome__eyebrow">Library Management</p>
-      <h2 class="sa-welcome__title">Good morning, <span th:text="${adminDisplayName}">Super Admin</span>!</h2>
-      <p class="sa-welcome__text">Here's what's happening in the library today.</p>
+      <h1>Good morning, <span th:text="${adminDisplayName}">Super Admin</span>!</h1>
+      <p>Here's what's happening in the library today.</p>
     </div>
     <div class="sa-welcome__badge">
-      <i data-lucide="book-open"></i>
+      <i class="bi bi-book-half"></i>
       <span>Library Overview</span>
     </div>
   </section>
 
   <div class="sa-stats">
-    <article class="sa-stat sa-stat--glass">
+    <article class="sa-stat">
       <div class="sa-stat__head">
-        <div class="sa-stat__icon sa-stat__icon--sky"><i data-lucide="book-open"></i></div>
+        <div class="sa-stat__icon sa-stat__icon--sky"><i class="bi bi-book-half"></i></div>
         <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
       </div>
-      <div class="sa-stat__value" th:text="${bookCount}">0</div>
       <div class="sa-stat__label">Total Books</div>
+      <div class="sa-stat__value" th:text="${bookCount}">0</div>
     </article>
-    <article class="sa-stat sa-stat--glass">
+    <article class="sa-stat">
       <div class="sa-stat__head">
-        <div class="sa-stat__icon"><i data-lucide="users"></i></div>
+        <div class="sa-stat__icon"><i class="bi bi-people"></i></div>
         <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
       </div>
-      <div class="sa-stat__value" th:text="${studentCount}">0</div>
       <div class="sa-stat__label">Total Students</div>
+      <div class="sa-stat__value" th:text="${studentCount}">0</div>
     </article>
-    <article class="sa-stat sa-stat--glass">
+    <article class="sa-stat">
       <div class="sa-stat__head">
-        <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="arrow-left-right"></i></div>
+        <div class="sa-stat__icon sa-stat__icon--emerald"><i class="bi bi-arrow-left-right"></i></div>
         <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
       </div>
-      <div class="sa-stat__value" th:text="${activeLoans}">0</div>
       <div class="sa-stat__label">Books Issued</div>
+      <div class="sa-stat__value" th:text="${activeLoans}">0</div>
     </article>
-    <article class="sa-stat sa-stat--glass">
+    <article class="sa-stat">
       <div class="sa-stat__head">
-        <div class="sa-stat__icon sa-stat__icon--amber"><i data-lucide="bookmark"></i></div>
+        <div class="sa-stat__icon sa-stat__icon--amber"><i class="bi bi-bookmark"></i></div>
         <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
       </div>
-      <div class="sa-stat__value" th:text="${reservationCount}">0</div>
       <div class="sa-stat__label">Reservations</div>
+      <div class="sa-stat__value" th:text="${reservationCount}">0</div>
     </article>
   </div>
 
-  <div class="sa-grid-2">
-    <section class="sa-card sa-glass">
+  <div class="sa-portal-row">
+    <section class="sa-panel">
       <div class="sa-card__head">
         <h2>Library Overview</h2>
         <span class="sa-pill sa-pill--lib">14-day trend</span>
@@ -60,15 +60,13 @@
       </div>
     </section>
 
-    <section class="sa-card sa-glass">
-      <div class="sa-card__head">
-        <h2>Recent Activities</h2>
-      </div>
+    <section class="sa-panel">
+      <div class="sa-card__head"><h2>Recent Activities</h2></div>
       <ul class="sa-activity-list" th:if="${!#lists.isEmpty(recentActivities)}">
         <li th:each="act : ${recentActivities}" class="sa-activity-item">
           <span class="sa-activity-item__icon"
                 th:classappend="${' sa-activity-item__icon--' + act.tone}">
-            <i data-lucide="activity"></i>
+            <i class="bi bi-activity"></i>
           </span>
           <div class="sa-activity-item__body">
             <strong th:text="${act.type + ': ' + act.bookTitle}">Activity</strong>
@@ -81,40 +79,38 @@
     </section>
   </div>
 
-  <section class="sa-card sa-glass">
-    <div class="sa-card__head">
-      <h2>Quick Actions</h2>
-    </div>
+  <section class="sa-panel">
+    <div class="sa-card__head"><h2>Quick Actions</h2></div>
     <div class="sa-actions">
       <a th:href="@{/superadmin/library/scan-issue}" class="sa-action">
-        <span class="sa-action__icon"><i data-lucide="scan-line"></i></span>
+        <span class="sa-action__icon"><i class="bi bi-qr-code-scan"></i></span>
         <span><strong>Scan &amp; Issue</strong><span>Issue books via scanner</span></span>
       </a>
       <a th:href="@{/superadmin/library/issues}" class="sa-action">
-        <span class="sa-action__icon"><i data-lucide="undo-2"></i></span>
+        <span class="sa-action__icon"><i class="bi bi-arrow-return-left"></i></span>
         <span><strong>Return Book</strong><span>Process returns and fines</span></span>
       </a>
       <a th:href="@{/superadmin/library/reservations}" class="sa-action">
-        <span class="sa-action__icon"><i data-lucide="calendar-plus"></i></span>
+        <span class="sa-action__icon"><i class="bi bi-calendar-plus"></i></span>
         <span><strong>Reservations</strong><span>Manage waiting lists</span></span>
       </a>
       <a th:href="@{/superadmin/library/students}" class="sa-action">
-        <span class="sa-action__icon"><i data-lucide="user-plus"></i></span>
+        <span class="sa-action__icon"><i class="bi bi-person-plus"></i></span>
         <span><strong>Students</strong><span>Search and manage students</span></span>
       </a>
       <a th:href="@{/superadmin/library/books/new}" class="sa-action">
-        <span class="sa-action__icon"><i data-lucide="book-plus"></i></span>
+        <span class="sa-action__icon"><i class="bi bi-book-half"></i></span>
         <span><strong>Add Book</strong><span>Expand the collection</span></span>
       </a>
       <a th:href="@{/superadmin/library/analytics}" class="sa-action">
-        <span class="sa-action__icon"><i data-lucide="bar-chart-3"></i></span>
+        <span class="sa-action__icon"><i class="bi bi-graph-up"></i></span>
         <span><strong>Analytics</strong><span>Usage insights &amp; reports</span></span>
       </a>
     </div>
   </section>
 
-  <div class="sa-grid-2">
-    <section class="sa-card sa-glass">
+  <div class="sa-bottom-row">
+    <section class="sa-panel">
       <div class="sa-card__head"><h2>Top Borrowed Books</h2></div>
       <div class="sa-rank-list" th:if="${!#lists.isEmpty(topBooks)}">
         <div th:each="book, stat : ${topBooks}" class="sa-rank-item">
@@ -128,7 +124,7 @@
       <p th:if="${#lists.isEmpty(topBooks)}" class="sa-empty">No borrow data yet.</p>
     </section>
 
-    <section class="sa-card sa-glass">
+    <section class="sa-panel">
       <div class="sa-card__head"><h2>Overdue Books</h2></div>
       <div th:each="issue : ${overdueBooks}" class="sa-overdue-item">
         <div>

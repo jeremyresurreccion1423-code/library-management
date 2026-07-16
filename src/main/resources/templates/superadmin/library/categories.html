@@ -11,7 +11,7 @@
         <input class="sa-input" id="categoryName" name="name" placeholder="New category" required/>
       </div>
       <button class="sa-btn sa-btn--primary" type="submit">
-        <i data-lucide="plus"></i> Add
+        <i class="bi bi-plus-lg"></i> Add
       </button>
     </form>
   </section>
@@ -35,7 +35,7 @@
           <td class="sa-table__actions">
             <button class="sa-btn sa-btn--outline-danger sa-btn--sm delete-category-btn" type="button"
                     th:attr="data-category-id=${c.id},data-category-name=${c.name}">
-              <i data-lucide="trash-2"></i> Delete
+              <i class="bi bi-trash"></i> Delete
             </button>
           </td>
         </tr>

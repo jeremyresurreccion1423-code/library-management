@@ -7,7 +7,7 @@
        th:text="${'Showing ' + bookCount + ' book' + (bookCount == 1 ? '' : 's')}">Showing 0 books</p>
     <p class="sa-lead" style="margin:0;" th:if="${#lists.isEmpty(books)}">Search and filter the library collection.</p>
     <a class="sa-btn sa-btn--primary" th:href="@{/superadmin/library/books/new}">
-      <i data-lucide="plus"></i> Add Book
+      <i class="bi bi-plus-lg"></i> Add Book
     </a>
   </div>
 
@@ -36,15 +36,15 @@
         </select>
       </div>
       <button type="submit" class="sa-btn sa-btn--primary sa-btn--sm">
-        <i data-lucide="search"></i> Search
+        <i class="bi bi-search"></i> Search
       </button>
       <a th:href="@{/superadmin/library/books}" class="sa-btn sa-btn--ghost sa-btn--sm">
-        <i data-lucide="rotate-ccw"></i> Reset
+        <i class="bi bi-arrow-counterclockwise"></i> Reset
       </a>
     </form>
 
     <div class="sa-pills">
-      <span class="sa-muted-inline"><i data-lucide="filter"></i> Quick filters:</span>
+      <span class="sa-muted-inline"><i class="bi bi-funnel"></i> Quick filters:</span>
       <a th:href="@{/superadmin/library/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='all')}"
          class="sa-pill-link" th:classappend="${statusFilter == 'all'} ? ' sa-pill-link--active'">All</a>
       <a th:href="@{/superadmin/library/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='available')}"
@@ -89,20 +89,20 @@
           </td>
           <td class="sa-table__actions">
             <a class="sa-btn sa-btn--ghost sa-btn--sm" th:href="@{/books/{id}(id=${b.id})}" title="View">
-              <i data-lucide="eye"></i>
+              <i class="bi bi-eye"></i>
             </a>
             <a th:if="${b.ebook != null}" class="sa-btn sa-btn--ghost sa-btn--sm"
                th:href="@{/ebook/read/{id}(id=${b.id})}" target="_blank" title="View PDF">
-              <i data-lucide="file-text"></i>
+              <i class="bi bi-file-text"></i>
             </a>
             <a class="sa-btn sa-btn--ghost sa-btn--sm"
                th:href="@{/superadmin/library/books/{id}/edit(id=${b.id})}" title="Edit">
-              <i data-lucide="pencil"></i>
+              <i class="bi bi-pencil"></i>
             </a>
             <button type="button" class="sa-btn sa-btn--outline-danger sa-btn--sm delete-book-btn"
                     title="Delete"
                     th:attr="data-book-id=${b.id},data-book-title=${b.title}">
-              <i data-lucide="trash-2"></i>
+              <i class="bi bi-trash"></i>
             </button>
           </td>
         </tr>
@@ -110,7 +110,7 @@
       </table>
     </div>
     <p th:if="${#lists.isEmpty(books)}" class="sa-empty">
-      <i data-lucide="inbox"></i><br/>
+      <i class="bi bi-inbox"></i><br/>
       No books found. Try adjusting your filters or add a new book.
     </p>
   </section>

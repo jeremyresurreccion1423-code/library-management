@@ -1,146 +1,127 @@
-<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layouts/superadmin-layout :: head('Security Center — System Control Center')}"></head>
-<body class="sa-portal" data-session-minutes="20">
-<div class="sa-shell">
-  <div th:replace="~{fragments/superadmin-sidebar :: sidebar}"></div>
-  <div class="sa-main-wrap">
-    <header th:replace="~{fragments/superadmin-navbar :: navbar('Security Center', 'Audit trail, lockouts, and login activity')}"></header>
+<body th:replace="~{fragments/superadmin-page-shell :: shell('Security Center — System Control Center', 'Security Center', 'Audit trail, lockouts, and login activity', ~{::content})}">
+<th:block th:fragment="content">
 
-    <main class="sa-main">
-      <div th:if="${success}" class="sa-alert sa-alert--success" th:text="${success}"></div>
-      <div th:if="${error}" class="sa-alert sa-alert--danger" th:text="${error}"></div>
-
-      <div class="sa-stats">
-        <article class="sa-stat sa-stat--glass">
-          <div class="sa-stat__head">
-            <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="log-in"></i></div>
-          </div>
-          <div class="sa-stat__value" th:text="${sec.todayLogins}">0</div>
-          <div class="sa-stat__label">Today's Logins</div>
-        </article>
-        <article class="sa-stat sa-stat--glass">
-          <div class="sa-stat__head">
-            <div class="sa-stat__icon sa-stat__icon--rose"><i data-lucide="x-circle"></i></div>
-          </div>
-          <div class="sa-stat__value sa-stat__value--danger" th:text="${sec.todayFailedLogins}">0</div>
-          <div class="sa-stat__label">Failed Logins Today</div>
-        </article>
-        <article class="sa-stat sa-stat--glass">
-          <div class="sa-stat__head">
-            <div class="sa-stat__icon sa-stat__icon--amber"><i data-lucide="lock"></i></div>
-          </div>
-          <div class="sa-stat__value" th:text="${sec.todayLockouts}">0</div>
-          <div class="sa-stat__label">Lockouts Today</div>
-        </article>
-        <article class="sa-stat sa-stat--glass">
-          <div class="sa-stat__head">
-            <div class="sa-stat__icon"><i data-lucide="shield-alert"></i></div>
-          </div>
-          <div class="sa-stat__value" th:text="${sec.lockedAccountsCount}">0</div>
-          <div class="sa-stat__label">Currently Locked</div>
-        </article>
+  <div class="sa-stats">
+    <article class="sa-stat">
+      <div class="sa-stat__head">
+        <div class="sa-stat__icon sa-stat__icon--emerald"><i class="bi bi-box-arrow-in-right"></i></div>
       </div>
-
-      <section class="sa-card sa-glass">
-        <div class="sa-card__head">
-          <h2>Locked Accounts</h2>
-        </div>
-        <div class="sa-table-wrap" th:if="${!#lists.isEmpty(sec.lockedAccounts)}">
-          <table class="sa-table">
-            <thead>
-            <tr>
-              <th>Username</th>
-              <th>Role</th>
-              <th>Failed Attempts</th>
-              <th>Locked Until</th>
-              <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="u : ${sec.lockedAccounts}">
-              <td th:text="${u.username}">user</td>
-              <td th:text="${u.role}">ADMIN</td>
-              <td th:text="${u.failedLoginAttempts}">5</td>
-              <td th:text="${u.lockedUntil}">-</td>
-              <td>
-                <form th:action="@{|/super-admin/security/unlock/${u.id}|}" method="post" class="d-inline">
-                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                  <button type="submit" class="sa-btn sa-btn--primary sa-btn--sm">Unlock</button>
-                </form>
-              </td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-        <p th:if="${#lists.isEmpty(sec.lockedAccounts)}" class="sa-empty">No accounts are locked right now.</p>
-      </section>
-
-      <section class="sa-card sa-glass">
-        <div class="sa-card__head">
-          <h2>Recent Failed Logins</h2>
-        </div>
-        <div class="sa-table-wrap">
-          <table class="sa-table">
-            <thead>
-            <tr>
-              <th>Time</th>
-              <th>User</th>
-              <th>Details</th>
-              <th>IP</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="log : ${sec.recentFailedLogins}">
-              <td th:text="${log.createdAt}">-</td>
-              <td th:text="${log.user != null ? log.user.username : 'unknown'}">-</td>
-              <td th:text="${log.details}">-</td>
-              <td th:text="${log.ipAddress}">-</td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(sec.recentFailedLogins)}">
-              <td colspan="4" class="sa-empty">No failed logins in the last 7 days.</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section class="sa-card sa-glass">
-        <div class="sa-card__head">
-          <h2>Audit Trail <span class="sa-muted-inline">(latest 100)</span></h2>
-        </div>
-        <div class="sa-table-wrap">
-          <table class="sa-table">
-            <thead>
-            <tr>
-              <th>Time</th>
-              <th>Action</th>
-              <th>User</th>
-              <th>Details</th>
-              <th>IP</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="log : ${sec.recentAuditLogs}">
-              <td th:text="${log.createdAt}">-</td>
-              <td th:text="${log.action}">LOGIN</td>
-              <td th:text="${log.user != null ? log.user.username : '-'}">-</td>
-              <td th:text="${log.details}">-</td>
-              <td th:text="${log.ipAddress}">-</td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(sec.recentAuditLogs)}">
-              <td colspan="5" class="sa-empty">No audit logs yet. Run database/security_features.sql if needed.</td>
-            </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-
-    <footer th:replace="~{layouts/superadmin-layout :: footer}"></footer>
+      <div class="sa-stat__label">Today's Logins</div>
+      <div class="sa-stat__value" th:text="${sec.todayLogins}">0</div>
+    </article>
+    <article class="sa-stat">
+      <div class="sa-stat__head">
+        <div class="sa-stat__icon sa-stat__icon--rose"><i class="bi bi-x-circle"></i></div>
+      </div>
+      <div class="sa-stat__label">Failed Logins Today</div>
+      <div class="sa-stat__value sa-stat__value--danger" th:text="${sec.todayFailedLogins}">0</div>
+    </article>
+    <article class="sa-stat">
+      <div class="sa-stat__head">
+        <div class="sa-stat__icon sa-stat__icon--amber"><i class="bi bi-lock"></i></div>
+      </div>
+      <div class="sa-stat__label">Lockouts Today</div>
+      <div class="sa-stat__value" th:text="${sec.todayLockouts}">0</div>
+    </article>
+    <article class="sa-stat">
+      <div class="sa-stat__head">
+        <div class="sa-stat__icon"><i class="bi bi-shield-exclamation"></i></div>
+      </div>
+      <div class="sa-stat__label">Currently Locked</div>
+      <div class="sa-stat__value" th:text="${sec.lockedAccountsCount}">0</div>
+    </article>
   </div>
-</div>
 
-<div th:replace="~{layouts/superadmin-layout :: scripts}"></div>
+  <section class="sa-panel">
+    <div class="sa-card__head"><h2>Locked Accounts</h2></div>
+    <div class="sa-table-wrap" th:if="${!#lists.isEmpty(sec.lockedAccounts)}">
+      <table class="sa-table">
+        <thead>
+        <tr>
+          <th>Username</th>
+          <th>Role</th>
+          <th>Failed Attempts</th>
+          <th>Locked Until</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="u : ${sec.lockedAccounts}">
+          <td th:text="${u.username}">user</td>
+          <td th:text="${u.role}">ADMIN</td>
+          <td th:text="${u.failedLoginAttempts}">5</td>
+          <td th:text="${u.lockedUntil}">-</td>
+          <td>
+            <form th:action="@{|/super-admin/security/unlock/${u.id}|}" method="post" class="d-inline">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <button type="submit" class="sa-btn sa-btn--primary sa-btn--sm">Unlock</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p th:if="${#lists.isEmpty(sec.lockedAccounts)}" class="sa-empty">No accounts are locked right now.</p>
+  </section>
+
+  <section class="sa-panel">
+    <div class="sa-card__head"><h2>Recent Failed Logins</h2></div>
+    <div class="sa-table-wrap">
+      <table class="sa-table">
+        <thead>
+        <tr>
+          <th>Time</th>
+          <th>User</th>
+          <th>Details</th>
+          <th>IP</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="log : ${sec.recentFailedLogins}">
+          <td th:text="${log.createdAt}">-</td>
+          <td th:text="${log.user != null ? log.user.username : 'unknown'}">-</td>
+          <td th:text="${log.details}">-</td>
+          <td th:text="${log.ipAddress}">-</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(sec.recentFailedLogins)}">
+          <td colspan="4" class="sa-empty">No failed logins in the last 7 days.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="sa-panel">
+    <div class="sa-card__head">
+      <h2>Audit Trail <span class="sa-muted-inline">(latest 100)</span></h2>
+    </div>
+    <div class="sa-table-wrap">
+      <table class="sa-table">
+        <thead>
+        <tr>
+          <th>Time</th>
+          <th>Action</th>
+          <th>User</th>
+          <th>Details</th>
+          <th>IP</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="log : ${sec.recentAuditLogs}">
+          <td th:text="${log.createdAt}">-</td>
+          <td th:text="${log.action}">LOGIN</td>
+          <td th:text="${log.user != null ? log.user.username : '-'}">-</td>
+          <td th:text="${log.details}">-</td>
+          <td th:text="${log.ipAddress}">-</td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(sec.recentAuditLogs)}">
+          <td colspan="5" class="sa-empty">No audit logs yet. Run database/security_features.sql if needed.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</th:block>
 </body>
 </html>

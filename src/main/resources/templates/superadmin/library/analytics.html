@@ -5,28 +5,28 @@
   <div class="sa-stats">
     <article class="sa-stat sa-stat--glass">
       <div class="sa-stat__head">
-        <div class="sa-stat__icon"><i data-lucide="book-open"></i></div>
+        <div class="sa-stat__icon"><i class="bi bi-book-half"></i></div>
       </div>
       <div class="sa-stat__value" th:text="${totalIssues}">0</div>
       <div class="sa-stat__label">Total Issues</div>
     </article>
     <article class="sa-stat sa-stat--glass">
       <div class="sa-stat__head">
-        <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="bookmark"></i></div>
+        <div class="sa-stat__icon sa-stat__icon--emerald"><i class="bi bi-bookmark"></i></div>
       </div>
       <div class="sa-stat__value" style="color:#059669;" th:text="${statusCounts['borrowed']}">0</div>
       <div class="sa-stat__label">Currently Borrowed</div>
     </article>
     <article class="sa-stat sa-stat--glass">
       <div class="sa-stat__head">
-        <div class="sa-stat__icon sa-stat__icon--sky"><i data-lucide="check-circle"></i></div>
+        <div class="sa-stat__icon sa-stat__icon--sky"><i class="bi bi-check-circle"></i></div>
       </div>
       <div class="sa-stat__value" th:text="${statusCounts['returned']}">0</div>
       <div class="sa-stat__label">Returned</div>
     </article>
     <article class="sa-stat sa-stat--glass">
       <div class="sa-stat__head">
-        <div class="sa-stat__icon sa-stat__icon--rose"><i data-lucide="alert-triangle"></i></div>
+        <div class="sa-stat__icon sa-stat__icon--rose"><i class="bi bi-exclamation-triangle"></i></div>
       </div>
       <div class="sa-stat__value sa-stat__value--danger" th:text="${overdueRate + '%'}">0%</div>
       <div class="sa-stat__label">Overdue Rate</div>
@@ -34,7 +34,7 @@
   </div>
 
   <div class="sa-section-title">
-    <i data-lucide="calendar"></i>
+    <i class="bi bi-calendar3"></i>
     When Do Students Borrow Most?
   </div>
 
@@ -98,7 +98,7 @@
   </div>
 
   <div class="sa-section-title">
-    <i data-lucide="users"></i>
+    <i class="bi bi-people"></i>
     Student Reading History
   </div>
 
@@ -110,7 +110,7 @@
                th:value="${query}"/>
       </div>
       <button class="sa-btn sa-btn--primary" type="submit">
-        <i data-lucide="search"></i> View History
+        <i class="bi bi-search"></i> View History
       </button>
     </form>
   </section>
@@ -187,7 +187,7 @@
                     class="sa-btn sa-btn--warning sa-btn--sm analytics-remind-btn"
                     th:if="${row.status.name() == 'BORROWED' or row.status.name() == 'OVERDUE'}"
                     th:attr="data-issue-id=${row.id},data-student-id=${selectedStudentId}">
-              <i data-lucide="mail"></i> Remind
+              <i class="bi bi-envelope"></i> Remind
             </button>
             <span th:if="${row.status.name() != 'BORROWED' and row.status.name() != 'OVERDUE'}"
                   class="sa-muted-inline">—</span>

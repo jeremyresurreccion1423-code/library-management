@@ -21,7 +21,7 @@
       <div style="font-size:0.84rem;opacity:0.88;" th:text="${profileCode}">ID: 1</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;">
-      <div class="sa-scan-card__icon" style="background:rgba(255,255,255,0.18);color:#fff;"><i data-lucide="calendar"></i></div>
+      <div class="sa-scan-card__icon" style="background:rgba(255,255,255,0.18);color:#fff;"><i class="bi bi-calendar3"></i></div>
       <div>
         <span style="display:block;font-size:0.72rem;opacity:0.82;">Member Since</span>
         <strong style="font-size:0.92rem;" th:text="${memberSince}">20 Jun 2026</strong>
@@ -33,22 +33,22 @@
     <div class="sa-card__head"><h2>Personal Information</h2></div>
     <ul class="sa-info-list">
       <li class="sa-info-row">
-        <div class="sa-info-row__icon"><i data-lucide="user"></i></div>
+        <div class="sa-info-row__icon"><i class="bi bi-person"></i></div>
         <span class="sa-info-row__label">Username</span>
         <span class="sa-info-row__value" th:text="${profileDetails['Username']}">superadmin</span>
       </li>
       <li class="sa-info-row">
-        <div class="sa-info-row__icon"><i data-lucide="mail"></i></div>
+        <div class="sa-info-row__icon"><i class="bi bi-envelope"></i></div>
         <span class="sa-info-row__label">Email</span>
         <span class="sa-info-row__value" th:text="${profileDetails['Email']}">email</span>
       </li>
       <li class="sa-info-row">
-        <div class="sa-info-row__icon"><i data-lucide="shield"></i></div>
+        <div class="sa-info-row__icon"><i class="bi bi-shield-check"></i></div>
         <span class="sa-info-row__label">Role</span>
         <span class="sa-info-row__value" th:text="${profileDetails['Role']}">Super Admin</span>
       </li>
       <li class="sa-info-row">
-        <div class="sa-info-row__icon"><i data-lucide="check-circle"></i></div>
+        <div class="sa-info-row__icon"><i class="bi bi-check-circle"></i></div>
         <span class="sa-info-row__label">Account Status</span>
         <span class="sa-info-row__value">
           <span th:if="${accountActive}" class="sa-badge sa-badge--success">Active</span>
@@ -56,7 +56,7 @@
         </span>
       </li>
       <li class="sa-info-row">
-        <div class="sa-info-row__icon"><i data-lucide="calendar"></i></div>
+        <div class="sa-info-row__icon"><i class="bi bi-calendar3"></i></div>
         <span class="sa-info-row__label">Created At</span>
         <span class="sa-info-row__value" th:text="${profileDetails['Created At']}">—</span>
       </li>
@@ -73,7 +73,7 @@
         <div class="sa-form-row">
           <input type="file" id="photo" name="photo" accept="image/*" class="sa-input" required/>
           <button type="submit" class="sa-btn sa-btn--primary">
-            <i data-lucide="upload"></i> Upload
+            <i class="bi bi-upload"></i> Upload
           </button>
         </div>
         <small class="sa-form-hint">JPG, PNG, GIF, or WebP. Max 5MB.</small>
@@ -91,10 +91,10 @@
       </div>
       <div class="sa-form-actions">
         <button type="submit" class="sa-btn sa-btn--primary">
-          <i data-lucide="save"></i> Save Username
+          <i class="bi bi-floppy"></i> Save Username
         </button>
         <a class="sa-btn sa-btn--ghost" th:href="${dashboardPath != null ? dashboardPath : '/super-admin'}">
-          <i data-lucide="arrow-left"></i> Back
+          <i class="bi bi-arrow-left"></i> Back
         </a>
       </div>
     </form>

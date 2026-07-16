@@ -19,7 +19,7 @@
         <input class="sa-input" id="studentId" name="studentId" required placeholder="STU2026..."/>
       </div>
       <button class="sa-btn sa-btn--primary" type="submit">
-        <i data-lucide="send"></i> Issue
+        <i class="bi bi-send"></i> Issue
       </button>
     </form>
   </section>
@@ -50,7 +50,7 @@
           <td class="sa-table__actions">
             <button th:attr="data-issue-id=${i.id}, data-book-title=${i.book.title}"
                     class="sa-btn sa-btn--primary sa-btn--sm admin-return-btn">
-              <i data-lucide="undo-2"></i> Return
+              <i class="bi bi-arrow-return-left"></i> Return
             </button>
           </td>
         </tr>
@@ -64,7 +64,7 @@
           <td class="sa-table__actions">
             <button th:attr="data-issue-id=${i.id}, data-book-title=${i.book.title}"
                     class="sa-btn sa-btn--warning sa-btn--sm admin-return-fine-btn">
-              <i data-lucide="alert-triangle"></i> Return + fine
+              <i class="bi bi-exclamation-triangle"></i> Return + fine
             </button>
           </td>
         </tr>

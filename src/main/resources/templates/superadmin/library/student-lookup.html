@@ -9,10 +9,10 @@
         <input class="sa-input" id="query" name="query" placeholder="Search by ID, name, email, or phone..." th:value="${query}"/>
       </div>
       <button class="sa-btn sa-btn--primary" type="submit">
-        <i data-lucide="search"></i> Search
+        <i class="bi bi-search"></i> Search
       </button>
       <a th:if="${isSearch}" th:href="@{/superadmin/library/students}" class="sa-btn sa-btn--ghost">
-        <i data-lucide="x"></i> Clear
+        <i class="bi bi-x-lg"></i> Clear
       </a>
     </form>
   </section>
@@ -48,7 +48,7 @@
           </td>
           <td class="sa-table__actions">
             <button type="button" class="sa-btn sa-btn--ghost sa-btn--sm view-student-btn">
-              <i data-lucide="eye"></i> View
+              <i class="bi bi-eye"></i> View
             </button>
             <form th:if="${!student.archived}"
                   th:action="@{/superadmin/library/students/{id}/archive(id=${student.id})}" method="post" class="confirm-action"
@@ -90,7 +90,7 @@
         </div>
         <div class="modal-body">
           <div class="sa-scan-card">
-            <div class="sa-scan-card__icon"><i data-lucide="user"></i></div>
+            <div class="sa-scan-card__icon"><i class="bi bi-person"></i></div>
             <div>
               <h5 style="margin:0;font-weight:700;" id="modalStudentName">-</h5>
               <p class="sa-muted-inline" style="margin:0;" id="modalStudentId">-</p>

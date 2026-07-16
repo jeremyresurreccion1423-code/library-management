@@ -5,19 +5,19 @@
   <div id="flash" class="sa-alert sa-hidden"></div>
 
   <div id="bookCard" class="sa-scan-card sa-hidden">
-    <div class="sa-scan-card__icon"><i data-lucide="book-open"></i></div>
+    <div class="sa-scan-card__icon"><i class="bi bi-book-half"></i></div>
     <div style="flex:1;">
       <h3 style="margin:0 0 4px;font-size:1rem;" id="bookCardTitle">Book Title</h3>
       <p class="sa-muted-inline" style="margin:0 0 6px;" id="bookCardAuthor">Author</p>
       <span class="sa-badge sa-badge--success" id="bookCardStatus">Available</span>
     </div>
     <a th:href="@{/books/0}" id="bookCardLink" class="sa-btn sa-btn--ghost sa-btn--sm">
-      <i data-lucide="eye"></i> View
+      <i class="bi bi-eye"></i> View
     </a>
   </div>
 
   <div id="studentCard" class="sa-scan-card sa-hidden">
-    <div class="sa-scan-card__icon sa-scan-card__icon--success"><i data-lucide="user"></i></div>
+    <div class="sa-scan-card__icon sa-scan-card__icon--success"><i class="bi bi-person"></i></div>
     <div style="flex:1;">
       <h3 style="margin:0 0 4px;font-size:1rem;">Student</h3>
       <p class="sa-muted-inline" style="margin:0;" id="studentCardId">ID</p>
@@ -29,7 +29,7 @@
       <div class="sa-card__head">
         <h2>Camera</h2>
         <button type="button" class="sa-btn sa-btn--ghost sa-btn--sm" id="btnReset">
-          <i data-lucide="rotate-ccw"></i> Reset
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
         </button>
       </div>
       <div id="reader" class="sa-scan-reader"></div>
@@ -38,7 +38,7 @@
 
     <section class="sa-card sa-glass">
       <div class="sa-card__head">
-        <h2><i data-lucide="edit-3"></i> Manual Entry</h2>
+        <h2><i class="bi bi-pencil-square"></i> Manual Entry</h2>
       </div>
       <p class="sa-lead">Enter book barcode and student ID manually, then click <strong>Issue Now</strong>.</p>
 
@@ -50,7 +50,7 @@
         <input class="sa-input" id="manualBarcode" placeholder="Barcode or BOOK:ID"/>
       </div>
       <button type="button" class="sa-btn sa-btn--ghost" id="btnSearchBarcode" style="width:100%;margin-bottom:16px;">
-        <i data-lucide="search"></i> Search Book
+        <i class="bi bi-search"></i> Search Book
       </button>
 
       <div class="sa-form-field">
@@ -59,7 +59,7 @@
       </div>
 
       <button class="sa-btn sa-btn--primary" id="btnIssueManual" type="button" disabled style="width:100%;">
-        <i data-lucide="check-circle"></i> Issue Now
+        <i class="bi bi-check-circle"></i> Issue Now
       </button>
     </section>
   </div>
@@ -68,7 +68,7 @@
     <div class="modal-dialog modal-dialog-centered modal-sm">
       <div class="modal-content" style="border:none;border-radius:16px;">
         <div class="modal-body text-center" style="padding:28px;">
-          <div style="color:#059669;margin-bottom:12px;"><i data-lucide="check-circle" style="width:48px;height:48px;"></i></div>
+          <div style="color:#059669;margin-bottom:12px;"><i class="bi bi-check-circle" style="width:48px;height:48px;"></i></div>
           <h5 style="margin:0 0 8px;font-weight:700;">Issued Successfully!</h5>
           <p class="sa-muted-inline" style="margin:0;">The book has been issued to the student.</p>
         </div>

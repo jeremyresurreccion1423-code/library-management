@@ -1,51 +1,28 @@
-<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{layouts/superadmin-layout :: head('Users — System Control Center')}"></head>
-<body class="sa-portal">
-<div class="sa-shell">
-  <div th:replace="~{fragments/superadmin-sidebar :: sidebar}"></div>
-  <div class="sa-main-wrap">
-    <header th:replace="~{fragments/superadmin-navbar :: navbar('User Management', 'Centralized access for administrators across both systems')}"></header>
+<body th:replace="~{fragments/superadmin-page-shell :: shell('Users — System Control Center', 'User Management', 'Centralized access for administrators across both systems', ~{::content})}">
+<th:block th:fragment="content">
 
-    <main class="sa-main">
-      <section class="sa-card sa-glass">
-        <div class="sa-card__head">
-          <h2>Cross-System User Access</h2>
-        </div>
-        <p class="sa-lead">
-          Manage administrators through each system's dedicated admin module. Use the sidebar to open
-          Attendance or Library admin tools with your Super Admin session.
-        </p>
-        <div class="sa-actions">
-          <a th:href="@{/superadmin/library/admins}" class="sa-action">
-            <span class="sa-action__icon"><i data-lucide="book-open"></i></span>
-            <span>
-              <strong>Library Admins</strong>
-              <span>Manage library administrator accounts</span>
-            </span>
-          </a>
-          <a th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/teachers')}" class="sa-action">
-            <span class="sa-action__icon"><i data-lucide="calendar-check"></i></span>
-            <span>
-              <strong>Attendance Users</strong>
-              <span>Teachers, students &amp; admin accounts</span>
-            </span>
-          </a>
-          <a th:href="@{/super-admin/security}" class="sa-action">
-            <span class="sa-action__icon"><i data-lucide="shield"></i></span>
-            <span>
-              <strong>Security Center</strong>
-              <span>Lockouts, audit trail &amp; alerts</span>
-            </span>
-          </a>
-        </div>
-      </section>
-    </main>
-
-    <footer th:replace="~{layouts/superadmin-layout :: footer}"></footer>
-  </div>
-</div>
-
-<div th:replace="~{layouts/superadmin-layout :: scripts}"></div>
+  <section class="sa-panel">
+    <div class="sa-card__head"><h2>Cross-System User Access</h2></div>
+    <p class="sa-lead">
+      Manage administrators through each system's dedicated admin module. Use the sidebar to open
+      Attendance or Library admin tools with your Super Admin session.
+    </p>
+    <div class="sa-actions">
+      <a th:href="@{/superadmin/library/admins}" class="sa-action">
+        <span class="sa-action__icon"><i class="bi bi-book-half"></i></span>
+        <span><strong>Library Admins</strong><span>Manage library administrator accounts</span></span>
+      </a>
+      <a th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/teachers')}" class="sa-action">
+        <span class="sa-action__icon"><i class="bi bi-calendar2-check"></i></span>
+        <span><strong>Attendance Users</strong><span>Teachers, students &amp; admin accounts</span></span>
+      </a>
+      <a th:href="@{/super-admin/security}" class="sa-action">
+        <span class="sa-action__icon"><i class="bi bi-shield-check"></i></span>
+        <span><strong>Security Center</strong><span>Lockouts, audit trail &amp; alerts</span></span>
+      </a>
+    </div>
+  </section>
+</th:block>
 </body>
 </html>

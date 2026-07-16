@@ -1,53 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
-<header class="sa-topbar" th:fragment="navbar(title, subtitle)">
-  <div class="sa-topbar__left">
-    <button type="button" class="sa-topbar__toggle" onclick="saToggleSidebar()" aria-label="Toggle menu">
-      <i data-lucide="menu"></i>
+<!--
+  Legacy navbar fragment — superseded by fragments/superadmin-sidebar :: chrome (header bar + sidebar).
+  Kept for module independence; not referenced by current Super Admin templates.
+-->
+<header class="sa-header-bar" th:fragment="navbar(title, subtitle)">
+  <div class="sa-header-bar-left">
+    <button type="button" class="sa-header-bar-toggle" onclick="saToggleSidebar()" aria-label="Toggle sidebar">
+      <i class="bi bi-list"></i>
     </button>
-    <div class="sa-topbar__titles">
-      <h1 class="sa-topbar__title" th:text="${title}">Dashboard</h1>
-      <p class="sa-topbar__subtitle" th:if="${subtitle != null}" th:text="${subtitle}">Overview</p>
+    <div class="sa-header-bar-brand">
+      <span>
+        <span th:text="${title}">Page</span>
+        <small class="sa-header-bar-brand-sub" th:if="${subtitle != null}" th:text="${subtitle}">Subtitle</small>
+      </span>
     </div>
   </div>
-  <div class="sa-topbar__right">
-    <div class="sa-navbar-profile">
-      <button type="button" class="sa-navbar-profile__trigger" onclick="saToggleProfileMenu(this)" aria-haspopup="true" aria-label="My Profile">
-        <span class="sa-navbar-profile__avatar">
-          <img th:if="${profilePhotoUrl != null}" th:src="${profilePhotoUrl}" alt="Profile photo"/>
-          <span th:unless="${profilePhotoUrl != null}" th:text="${profileInitial ?: 'SA'}">SA</span>
+  <div class="sa-header-bar-right">
+    <div class="sa-profile-widget">
+      <button type="button" class="sa-profile-trigger" onclick="saToggleProfileMenu(this)" aria-haspopup="true" aria-label="My Profile">
+        <span class="sa-profile-trigger-avatar">
+          <img th:if="${profilePhotoUrl != null}" th:src="${profilePhotoUrl}" alt=""/>
+          <span th:unless="${profilePhotoUrl != null}" class="sa-profile-trigger-initial" th:text="${profileInitial ?: 'SA'}">SA</span>
         </span>
-        <span class="sa-navbar-profile__meta">
-          <strong sec:authentication="name">Super Admin</strong>
-          <small>Super Admin</small>
-        </span>
-        <i data-lucide="chevron-down" class="sa-navbar-profile__caret"></i>
+        <i class="bi bi-chevron-down sa-profile-caret"></i>
       </button>
-      <div class="sa-navbar-profile__menu" role="menu">
-        <a th:href="@{/superadmin/profile}" class="sa-navbar-profile__item" role="menuitem">
-          <i data-lucide="user"></i>
-          <span>
-            <strong>My Profile</strong>
-            <small>View account details</small>
-          </span>
-        </a>
-        <a th:href="@{/superadmin/account/password}" class="sa-navbar-profile__item" role="menuitem">
-          <i data-lucide="key-round"></i>
-          <span>
-            <strong>Change Password</strong>
-            <small>OTP verification required</small>
-          </span>
-        </a>
-        <div class="sa-navbar-profile__divider"></div>
-        <form th:action="@{/super-admin/logout}" method="post" class="m-0">
-          <input th:if="${_csrf != null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-          <button type="submit" class="sa-navbar-profile__item sa-navbar-profile__item--danger" role="menuitem">
-            <i data-lucide="log-out"></i>
-            <span><strong>Logout</strong></span>
-          </button>
-        </form>
-      </div>
     </div>
   </div>
 </header>
