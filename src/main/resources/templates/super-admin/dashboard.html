@@ -5,39 +5,28 @@
 <div class="sa-shell">
   <div th:replace="~{fragments/super-admin-layout :: sidebar}"></div>
   <div class="sa-main-wrap">
-    <header th:replace="~{fragments/super-admin-layout :: topbar('Executive Dashboard', 'Combined overview of Attendance and Library systems')}"></header>
+    <header th:replace="~{fragments/super-admin-layout :: topbar('Executive Dashboard', 'Library system overview and control')}"></header>
 
     <main class="sa-main">
       <div th:if="${success}" class="sa-alert sa-alert--success" th:text="${success}"></div>
       <div th:if="${error}" class="sa-alert sa-alert--danger" th:text="${error}"></div>
-      <div th:if="${attendanceAvailable == false}" class="sa-alert sa-alert--warning">
-        Attendance stats are temporarily unavailable. Library data below is still current.
-      </div>
 
       <section class="sa-welcome">
         <div>
-          <p class="sa-welcome__eyebrow">University System Control Center</p>
+          <p class="sa-welcome__eyebrow">Library System Control Center</p>
           <h2 class="sa-welcome__title">Welcome back, <span sec:authentication="name">Super Admin</span></h2>
-          <p class="sa-welcome__text">Monitor system performance, manage users, and ensure platform security across Laguna University services.</p>
+          <p class="sa-welcome__text">Monitor library performance, manage users, and ensure platform security for Laguna University.</p>
         </div>
         <div class="sa-welcome__badge">
           <i data-lucide="sparkles"></i>
-          <span>Executive Overview</span>
+          <span>Library Overview</span>
         </div>
       </section>
 
       <div class="sa-stats">
         <article class="sa-stat">
           <div class="sa-stat__head">
-            <div class="sa-stat__icon"><i data-lucide="users"></i></div>
-            <span class="sa-stat__tag sa-stat__tag--att">Attendance</span>
-          </div>
-          <div class="sa-stat__value" th:text="${attTotalStudents}">0</div>
-          <div class="sa-stat__label">Total Students</div>
-        </article>
-        <article class="sa-stat">
-          <div class="sa-stat__head">
-            <div class="sa-stat__icon sa-stat__icon--sky"><i data-lucide="book-open"></i></div>
+            <div class="sa-stat__icon"><i data-lucide="library"></i></div>
             <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
           </div>
           <div class="sa-stat__value" th:text="${libBookCount}">0</div>
@@ -45,30 +34,38 @@
         </article>
         <article class="sa-stat">
           <div class="sa-stat__head">
-            <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="clipboard-check"></i></div>
-            <span class="sa-stat__tag sa-stat__tag--att">Attendance</span>
+            <div class="sa-stat__icon sa-stat__icon--sky"><i data-lucide="graduation-cap"></i></div>
+            <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
           </div>
-          <div class="sa-stat__value" th:text="${attTodayAttendance}">0</div>
-          <div class="sa-stat__label">Today's Attendance</div>
+          <div class="sa-stat__value" th:text="${libStudentCount}">0</div>
+          <div class="sa-stat__label">Registered Students</div>
         </article>
         <article class="sa-stat">
           <div class="sa-stat__head">
-            <div class="sa-stat__icon sa-stat__icon--amber"><i data-lucide="arrow-left-right"></i></div>
+            <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="book-marked"></i></div>
             <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
           </div>
           <div class="sa-stat__value" th:text="${libActiveLoans}">0</div>
           <div class="sa-stat__label">Active Loans</div>
+        </article>
+        <article class="sa-stat">
+          <div class="sa-stat__head">
+            <div class="sa-stat__icon sa-stat__icon--rose"><i data-lucide="clock"></i></div>
+            <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
+          </div>
+          <div class="sa-stat__value" th:classappend="${libOverdueLoans > 0} ? ' sa-stat__value--danger'" th:text="${libOverdueLoans}">0</div>
+          <div class="sa-stat__label">Overdue Loans</div>
         </article>
       </div>
 
       <div class="sa-grid-2">
         <section class="sa-card">
           <div class="sa-card__head">
-            <h2>System Analytics</h2>
+            <h2>Library Analytics</h2>
             <span class="sa-pill sa-pill--lib">Live Data</span>
           </div>
           <div class="sa-chart-wrap">
-            <canvas id="saOverviewChart" aria-label="System overview chart"></canvas>
+            <canvas id="saOverviewChart" aria-label="Library overview chart"></canvas>
           </div>
         </section>
 
@@ -77,13 +74,6 @@
             <h2>System Status</h2>
           </div>
           <div class="sa-status-list">
-            <div class="sa-status-item" th:classappend="${attendanceAvailable} ? ' sa-status-item--ok' : ' sa-status-item--warn'">
-              <i data-lucide="calendar-check"></i>
-              <div>
-                <strong>Attendance Management</strong>
-                <span th:text="${attendanceAvailable} ? 'Connected and reporting live stats' : 'Temporarily unavailable'">Status</span>
-              </div>
-            </div>
             <div class="sa-status-item sa-status-item--ok">
               <i data-lucide="book-open"></i>
               <div>
@@ -91,97 +81,30 @@
                 <span>Operational — all library metrics current</span>
               </div>
             </div>
-            <div class="sa-status-item" th:classappend="${attLowAttendanceCount > 0} ? ' sa-status-item--warn' : ' sa-status-item--ok'">
-              <i data-lucide="alert-triangle"></i>
-              <div>
-                <strong>Low Attendance Alerts</strong>
-                <span th:text="${attLowAttendanceCount} + ' alert(s) require review'">0 alerts</span>
-              </div>
-            </div>
             <div class="sa-status-item" th:classappend="${libOverdueLoans > 0} ? ' sa-status-item--warn' : ' sa-status-item--ok'">
               <i data-lucide="clock"></i>
               <div>
-                <strong>Overdue Library Loans</strong>
-                <span th:text="${libOverdueLoans} + ' overdue item(s)'">0 overdue</span>
+                <strong>Overdue Loans</strong>
+                <span th:text="${libOverdueLoans} + ' overdue item(s) need attention'">0 overdue</span>
+              </div>
+            </div>
+            <div class="sa-status-item sa-status-item--ok">
+              <i data-lucide="users"></i>
+              <div>
+                <strong>Student Accounts</strong>
+                <span th:text="${libStudentCount} + ' student profile(s) registered'">0 students</span>
+              </div>
+            </div>
+            <div class="sa-status-item sa-status-item--ok">
+              <i data-lucide="shield-check"></i>
+              <div>
+                <strong>Security Center</strong>
+                <span>Audit trail and account lockouts available</span>
               </div>
             </div>
           </div>
         </section>
       </div>
-
-      <section class="sa-card">
-        <div class="sa-card__head">
-          <h2>Attendance Management System</h2>
-          <span class="sa-pill sa-pill--att">Attendance</span>
-        </div>
-        <div class="sa-stats">
-          <article class="sa-stat">
-            <div class="sa-stat__head">
-              <div class="sa-stat__icon sa-stat__icon--sky"><i data-lucide="users"></i></div>
-            </div>
-            <div class="sa-stat__value" th:text="${attTotalStudents}">0</div>
-            <div class="sa-stat__label">Total Students</div>
-          </article>
-          <article class="sa-stat">
-            <div class="sa-stat__head">
-              <div class="sa-stat__icon"><i data-lucide="layers"></i></div>
-            </div>
-            <div class="sa-stat__value" th:text="${attTotalSubjects}">0</div>
-            <div class="sa-stat__label">Total Subjects</div>
-          </article>
-          <article class="sa-stat">
-            <div class="sa-stat__head">
-              <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="user-check"></i></div>
-            </div>
-            <div class="sa-stat__value" th:text="${attTodayAttendance}">0</div>
-            <div class="sa-stat__label">Today's Attendance</div>
-          </article>
-          <article class="sa-stat" th:if="${attLowAttendanceCount > 0}">
-            <div class="sa-stat__head">
-              <div class="sa-stat__icon sa-stat__icon--rose"><i data-lucide="alert-circle"></i></div>
-            </div>
-            <div class="sa-stat__value sa-stat__value--danger" th:text="${attLowAttendanceCount}">0</div>
-            <div class="sa-stat__label">Low Attendance Alerts</div>
-          </article>
-        </div>
-      </section>
-
-      <section class="sa-card">
-        <div class="sa-card__head">
-          <h2>Library Management System</h2>
-          <span class="sa-pill sa-pill--lib">Library</span>
-        </div>
-        <div class="sa-stats">
-          <article class="sa-stat">
-            <div class="sa-stat__head">
-              <div class="sa-stat__icon"><i data-lucide="library"></i></div>
-            </div>
-            <div class="sa-stat__value" th:text="${libBookCount}">0</div>
-            <div class="sa-stat__label">Books</div>
-          </article>
-          <article class="sa-stat">
-            <div class="sa-stat__head">
-              <div class="sa-stat__icon sa-stat__icon--sky"><i data-lucide="graduation-cap"></i></div>
-            </div>
-            <div class="sa-stat__value" th:text="${libStudentCount}">0</div>
-            <div class="sa-stat__label">Students</div>
-          </article>
-          <article class="sa-stat">
-            <div class="sa-stat__head">
-              <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="book-marked"></i></div>
-            </div>
-            <div class="sa-stat__value" th:text="${libActiveLoans}">0</div>
-            <div class="sa-stat__label">Active Loans</div>
-          </article>
-          <article class="sa-stat">
-            <div class="sa-stat__head">
-              <div class="sa-stat__icon sa-stat__icon--rose"><i data-lucide="clock"></i></div>
-            </div>
-            <div class="sa-stat__value" th:classappend="${libOverdueLoans > 0} ? ' sa-stat__value--danger'" th:text="${libOverdueLoans}">0</div>
-            <div class="sa-stat__label">Overdue Loans</div>
-          </article>
-        </div>
-      </section>
 
       <section class="sa-card">
         <div class="sa-card__head">
@@ -202,11 +125,11 @@
               <span>Manage books &amp; circulation</span>
             </span>
           </a>
-          <a th:href="@{/super-admin/bridge/attendance(path='/super-admin')}" class="sa-action">
-            <span class="sa-action__icon"><i data-lucide="calendar-check"></i></span>
+          <a th:href="@{/admin/books}" class="sa-action">
+            <span class="sa-action__icon"><i data-lucide="library"></i></span>
             <span>
-              <strong>Attendance Admin</strong>
-              <span>Departments, reports &amp; trends</span>
+              <strong>Manage Books</strong>
+              <span>Catalog &amp; inventory</span>
             </span>
           </a>
           <a th:href="@{/admin/analytics}" class="sa-action">
@@ -229,27 +152,23 @@
     const canvas = document.getElementById('saOverviewChart');
     if (!canvas || typeof Chart === 'undefined') return;
 
-    const attStudents = /*[[${attTotalStudents}]]*/ 0;
-    const attSubjects = /*[[${attTotalSubjects}]]*/ 0;
-    const attToday = /*[[${attTodayAttendance}]]*/ 0;
     const libBooks = /*[[${libBookCount}]]*/ 0;
     const libStudents = /*[[${libStudentCount}]]*/ 0;
     const libLoans = /*[[${libActiveLoans}]]*/ 0;
+    const libOverdue = /*[[${libOverdueLoans}]]*/ 0;
 
     new Chart(canvas, {
       type: 'bar',
       data: {
-        labels: ['Students (Att.)', 'Subjects', 'Today Att.', 'Books', 'Students (Lib.)', 'Active Loans'],
+        labels: ['Books', 'Students', 'Active Loans', 'Overdue'],
         datasets: [{
-          label: 'System Metrics',
-          data: [attStudents, attSubjects, attToday, libBooks, libStudents, libLoans],
+          label: 'Library Metrics',
+          data: [libBooks, libStudents, libLoans, libOverdue],
           backgroundColor: [
-            'rgba(59, 130, 246, 0.75)',
-            'rgba(96, 165, 250, 0.75)',
-            'rgba(37, 99, 235, 0.85)',
             'rgba(124, 58, 237, 0.75)',
             'rgba(147, 51, 234, 0.75)',
-            'rgba(109, 40, 217, 0.85)'
+            'rgba(109, 40, 217, 0.85)',
+            'rgba(220, 38, 38, 0.75)'
           ],
           borderRadius: 10,
           borderSkipped: false
