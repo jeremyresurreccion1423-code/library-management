@@ -20,11 +20,16 @@ public class AdminAuthController {
                         @RequestParam(required = false) String logout,
                         @RequestParam(required = false) String error,
                         Model model) {
-        if (user != null) {
-            if (user.getUser().getRole() == UserRole.ADMIN) {
+        if (user != null && logout == null) {
+            UserRole role = user.getUser().getRole();
+            if (role == UserRole.ADMIN) {
                 return "redirect:/admin";
             }
-            return "redirect:/student";
+            if (role == UserRole.SUPER_ADMIN) {
+                return "redirect:/super-admin";
+            }
+            model.addAttribute("infoMessage",
+                    "You are signed in as a student. Enter admin credentials below to continue.");
         }
         if ("session".equals(error)) {
             model.addAttribute("errorMessage", "Your session has expired. Please log in again.");
@@ -33,6 +38,8 @@ public class AdminAuthController {
         if (authError instanceof String errorMessage && !errorMessage.isBlank()) {
             model.addAttribute("errorMessage", errorMessage);
             session.removeAttribute("AUTH_ERROR");
+        } else if (error != null) {
+            model.addAttribute("errorMessage", "Incorrect username or password.");
         }
         if (logout != null) {
             model.addAttribute("success", "You have been logged out successfully.");

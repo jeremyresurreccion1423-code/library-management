@@ -65,6 +65,7 @@
         <span class="auth-shield" aria-hidden="true"><i class="bi bi-shield-lock"></i></span>
       </div>
 
+      <div th:if="${infoMessage}" class="alert alert-info" role="status" aria-live="polite" th:text="${infoMessage}"></div>
       <div th:if="${errorMessage}" class="alert alert-danger" role="alert" aria-live="polite" th:text="${errorMessage}"></div>
       <div th:if="${success}" class="alert alert-success" role="status" aria-live="polite" th:text="${success}"></div>
 

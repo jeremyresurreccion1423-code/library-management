@@ -26,30 +26,36 @@ public class LoginAuthenticationFailureHandler extends SimpleUrlAuthenticationFa
                                         HttpServletResponse response,
                                         AuthenticationException exception) throws IOException, ServletException {
         String username = request.getParameter("username");
-        String uri = request.getRequestURI() != null ? request.getRequestURI() : "";
-        String loginPath = uri.startsWith("/super-admin") ? "/super-admin/login"
-                : uri.startsWith("/admin") ? "/admin/login"
+        String servletPath = request.getServletPath();
+        if (servletPath == null || servletPath.isBlank()) {
+            servletPath = request.getRequestURI() != null ? request.getRequestURI() : "";
+        }
+
+        boolean isSuperAdminPortal = servletPath.startsWith("/super-admin");
+        boolean isAdminPortal = servletPath.startsWith("/admin");
+        String loginPath = isSuperAdminPortal ? "/super-admin/login"
+                : isAdminPortal ? "/admin/login"
                 : "/login";
 
         if (exception instanceof LockedException) {
             request.getSession().setAttribute("AUTH_ERROR",
                     "Account locked due to too many failed login attempts. Try again in "
                             + AccountLockoutService.LOCK_MINUTES + " minutes or contact an administrator.");
-            getRedirectStrategy().sendRedirect(request, response, loginPath);
+            getRedirectStrategy().sendRedirect(request, response, loginPath + "?error=true");
             return;
         }
         if (exception instanceof DisabledException) {
             request.getSession().setAttribute("AUTH_ERROR", "This account has been disabled.");
-            getRedirectStrategy().sendRedirect(request, response, loginPath);
+            getRedirectStrategy().sendRedirect(request, response, loginPath + "?error=true");
             return;
         }
 
         accountLockoutService.onFailedLogin(username);
 
-        String message = uri.startsWith("/super-admin")
+        String message = isSuperAdminPortal
                 ? "Invalid Super Admin credentials."
-                : "Invalid username or password.";
+                : "Incorrect username or password.";
         request.getSession().setAttribute("AUTH_ERROR", message);
-        getRedirectStrategy().sendRedirect(request, response, loginPath);
+        getRedirectStrategy().sendRedirect(request, response, loginPath + "?error=true");
     }
 }

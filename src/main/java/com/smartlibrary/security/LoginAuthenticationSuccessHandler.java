@@ -73,8 +73,8 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
         if (isAdminPortal) {
             if (user == null || user.getRole() != UserRole.ADMIN) {
                 new SecurityContextLogoutHandler().logout(request, response, authentication);
-                request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password.");
-                response.sendRedirect("/admin/login");
+                request.getSession().setAttribute("AUTH_ERROR", "Incorrect username or password.");
+                response.sendRedirect("/admin/login?error=true");
                 return;
             }
             response.sendRedirect("/admin");
