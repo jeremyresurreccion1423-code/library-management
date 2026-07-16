@@ -25,7 +25,9 @@ public class AdminPasswordController {
 
     @GetMapping("/password")
     public String form(@AuthenticationPrincipal LibraryUserDetails user, Model model) {
-        model.addAttribute("email", user.getUser().getEmail());
+        model.addAttribute("email", user.getUser().getEmail() != null && !user.getUser().getEmail().isBlank()
+                ? user.getUser().getEmail()
+                : "resurreccionjeremy9@gmail.com");
         model.addAttribute("username", user.getUsername());
         boolean superAdmin = user.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_SUPER_ADMIN"));

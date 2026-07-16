@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Edit Profile')}"></head>
+<body class="dashboard-body">
+<div class="dashboard-wrapper">
+  <div th:replace="~{fragments/student-sidebar :: sidebar}"></div>
+  <main class="dashboard-main">
+    <div class="pd-page pd-page--edit">
+
+      <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+      <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+      <header class="pd-page-header">
+        <h1>Edit Profile</h1>
+        <p>Update your photo and personal details.</p>
+        <nav class="cp-breadcrumb" aria-label="Breadcrumb">
+          <a th:href="@{/student/profile}">My Profile</a>
+          <span aria-hidden="true">›</span>
+          <span>Edit Profile</span>
+        </nav>
+      </header>
+
+      <section class="pd-card pd-card--edit">
+        <div class="pd-photo-row">
+          <div class="pd-photo-row__avatar">
+            <img th:if="${profilePhotoUrl != null}"
+                 th:src="${profilePhotoUrl}"
+                 alt="Profile photo"
+                 width="72"
+                 height="72"/>
+            <span th:if="${profilePhotoUrl == null}" th:text="${profileInitial ?: 'U'}">U</span>
+          </div>
+          <form th:action="@{/student/profile/photo}" method="post" enctype="multipart/form-data" class="pd-photo-row__form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <label class="form-label">Profile Photo</label>
+            <div class="pd-photo-row__inputs">
+              <input type="file" name="photo" accept="image/*" class="form-control" required>
+              <button type="submit" class="pd-btn pd-btn--primary"><i class="bi bi-upload"></i> Upload</button>
+            </div>
+            <div class="form-text text-muted">JPG, PNG, GIF, or WebP. Max 5MB.</div>
+          </form>
+        </div>
+
+        <hr class="pd-divider"/>
+
+        <form th:action="@{/student/profile/edit}" method="post">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+          <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input class="form-control" id="fullNameInput" name="fullName" required th:value="${profile.fullName}" pattern="[A-Za-z\s]+" title="Name must contain letters and spaces only"/>
+            <div id="fullNameError" class="text-danger small mt-1 d-none">Name must contain letters and spaces only.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Phone Number</label>
+            <input class="form-control" name="phone" th:value="${profile.phone}" placeholder="Your phone number"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Course</label>
+            <input class="form-control" name="course" th:value="${profile.course}" placeholder="Your course"/>
+          </div>
+          <div class="pd-actions">
+            <button type="submit" class="pd-btn pd-btn--primary"><i class="bi bi-check-lg"></i> Save Changes</button>
+            <a class="pd-btn pd-btn--ghost" th:href="@{/student/profile}"><i class="bi bi-arrow-left"></i> Back to Profile</a>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+</div>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const fullNameInput = document.getElementById('fullNameInput');
+    const fullNameError = document.getElementById('fullNameError');
+    if (fullNameInput) {
+      fullNameInput.addEventListener('input', function() {
+        const val = this.value;
+        if (!/^[A-Za-z\s]*$/.test(val)) {
+          fullNameError.classList.remove('d-none');
+          this.classList.add('is-invalid');
+        } else {
+          fullNameError.classList.add('d-none');
+          this.classList.remove('is-invalid');
+        }
+      });
+      fullNameInput.closest('form').addEventListener('submit', function(e) {
+        if (!/^[A-Za-z\s]+$/.test(fullNameInput.value.trim())) {
+          e.preventDefault();
+          fullNameError.classList.remove('d-none');
+          fullNameInput.classList.add('is-invalid');
+          fullNameInput.focus();
+        }
+      });
+    }
+  });
+</script>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+<div th:replace="~{fragments/student-sidebar :: sidebar-script}"></div>
+</body>
+</html>

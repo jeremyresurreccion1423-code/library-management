@@ -81,6 +81,9 @@ public class AdminProfileController {
         }
 
         User currentUser = userRepository.findById(user.getUser().getId()).orElseThrow();
+        if (currentUser.getEmail() == null || currentUser.getEmail().isBlank()) {
+            currentUser.setEmail("resurreccionjeremy9@gmail.com");
+        }
         if (!trimmedUsername.equals(currentUser.getUsername())
                 && userRepository.existsByUsername(trimmedUsername)) {
             ra.addFlashAttribute("error", "Username '" + trimmedUsername + "' is already taken.");
@@ -88,16 +91,20 @@ public class AdminProfileController {
         }
 
         currentUser.setUsername(trimmedUsername);
-        User saved = userRepository.save(currentUser);
+        try {
+            User saved = userRepository.save(currentUser);
 
-        LibraryUserDetails updatedDetails = new LibraryUserDetails(saved);
-        var authentication = new UsernamePasswordAuthenticationToken(
-                updatedDetails,
-                updatedDetails.getPassword(),
-                updatedDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+            LibraryUserDetails updatedDetails = new LibraryUserDetails(saved);
+            var authentication = new UsernamePasswordAuthenticationToken(
+                    updatedDetails,
+                    updatedDetails.getPassword(),
+                    updatedDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        ra.addFlashAttribute("success", "Username updated to \"" + trimmedUsername + "\".");
+            ra.addFlashAttribute("success", "Username updated to \"" + trimmedUsername + "\".");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Unable to update username. Please try again.");
+        }
         return "redirect:/admin/profile";
     }
 

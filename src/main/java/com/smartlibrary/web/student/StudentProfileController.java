@@ -39,6 +39,50 @@ public class StudentProfileController {
 
     @GetMapping
     public String form(@AuthenticationPrincipal LibraryUserDetails user, Model model) {
+        populateProfileModel(user, model);
+        return "student/profile";
+    }
+
+    @GetMapping("/edit")
+    public String editForm(@AuthenticationPrincipal LibraryUserDetails user, Model model) {
+        populateProfileModel(user, model);
+        return "student/profile-edit";
+    }
+
+    @PostMapping("/edit")
+    public String save(
+            @AuthenticationPrincipal LibraryUserDetails user,
+            @RequestParam String fullName,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String course,
+            RedirectAttributes ra) {
+        try {
+            userAccountService.updateStudentProfile(user.getUsername(), fullName, phone, course);
+            ra.addFlashAttribute("success", "Profile updated successfully");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/student/profile/edit";
+    }
+
+    @PostMapping("/photo")
+    public String uploadPhoto(
+            @AuthenticationPrincipal LibraryUserDetails user,
+            @RequestParam("photo") MultipartFile photo,
+            RedirectAttributes ra,
+            HttpServletRequest request) {
+        try {
+            profilePhotoService.saveProfilePhoto(user.getUsername(), photo);
+            ra.addFlashAttribute("success", "Profile photo updated successfully.");
+        } catch (IllegalArgumentException e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Unable to upload profile photo.");
+        }
+        return SafeRedirects.toRefererOr(request, "/student/profile/edit");
+    }
+
+    private void populateProfileModel(LibraryUserDetails user, Model model) {
         var profile = sharedLibraryStudentProfileBridgeService.ensureLibraryStudentProfile(user.getUser()).orElseThrow();
         var accountUser = user.getUser();
 
@@ -66,39 +110,5 @@ public class StudentProfileController {
                 : "—");
         model.addAttribute("profileDetails", profileDetails);
         model.addAttribute("dashboardPath", "/student");
-        return "student/profile";
-    }
-
-    @PostMapping
-    public String save(
-            @AuthenticationPrincipal LibraryUserDetails user,
-            @RequestParam String fullName,
-            @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String course,
-            RedirectAttributes ra) {
-        try {
-            userAccountService.updateStudentProfile(user.getUsername(), fullName, phone, course);
-            ra.addFlashAttribute("success", "Profile updated successfully");
-        } catch (IllegalArgumentException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        }
-        return "redirect:/student/profile";
-    }
-
-    @PostMapping("/photo")
-    public String uploadPhoto(
-            @AuthenticationPrincipal LibraryUserDetails user,
-            @RequestParam("photo") MultipartFile photo,
-            RedirectAttributes ra,
-            HttpServletRequest request) {
-        try {
-            profilePhotoService.saveProfilePhoto(user.getUsername(), photo);
-            ra.addFlashAttribute("success", "Profile photo updated successfully.");
-        } catch (IllegalArgumentException e) {
-            ra.addFlashAttribute("error", e.getMessage());
-        } catch (Exception e) {
-            ra.addFlashAttribute("error", "Unable to upload profile photo.");
-        }
-        return SafeRedirects.toRefererOr(request, "/student/profile");
     }
 }

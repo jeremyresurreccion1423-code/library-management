@@ -31,7 +31,17 @@
       <span class="profile-menu-icon"><i class="bi bi-person"></i></span>
       <span class="profile-menu-text">
         <span class="profile-menu-label">My Profile</span>
-        <span class="profile-menu-hint">View &amp; edit details</span>
+        <span class="profile-menu-hint">View your details</span>
+      </span>
+    </a>
+    <a th:if="${logoutMode == 'student'}"
+       th:href="@{/student/profile/edit}"
+       class="profile-menu-action"
+       role="menuitem">
+      <span class="profile-menu-icon"><i class="bi bi-pencil-square"></i></span>
+      <span class="profile-menu-text">
+        <span class="profile-menu-label">Edit Profile</span>
+        <span class="profile-menu-hint">Update name, phone &amp; course</span>
       </span>
     </a>
     <a th:unless="${logoutMode == 'student'}"
@@ -41,10 +51,9 @@
       <span class="profile-menu-icon"><i class="bi bi-person"></i></span>
       <span class="profile-menu-text">
         <span class="profile-menu-label">My Profile</span>
-        <span class="profile-menu-hint">View &amp; edit details</span>
+        <span class="profile-menu-hint">View your details</span>
       </span>
     </a>
-
     <a th:if="${logoutMode == 'student'}"
        th:href="@{/student/account/password}"
        class="profile-menu-action"
