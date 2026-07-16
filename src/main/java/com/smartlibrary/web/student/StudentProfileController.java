@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @Controller
 @RequestMapping("/student/profile")
 public class StudentProfileController {
@@ -36,7 +40,32 @@ public class StudentProfileController {
     @GetMapping
     public String form(@AuthenticationPrincipal LibraryUserDetails user, Model model) {
         var profile = sharedLibraryStudentProfileBridgeService.ensureLibraryStudentProfile(user.getUser()).orElseThrow();
+        var accountUser = user.getUser();
+
+        Map<String, String> profileDetails = new LinkedHashMap<>();
+        profileDetails.put("Full Name", profile.getFullName());
+        profileDetails.put("Username", user.getUsername());
+        profileDetails.put("Email", accountUser.getEmail() != null ? accountUser.getEmail() : "—");
+        profileDetails.put("Student ID", profile.getStudentId());
+        profileDetails.put("Phone", profile.getPhone() != null && !profile.getPhone().isBlank() ? profile.getPhone() : "—");
+        profileDetails.put("Course", profile.getCourse() != null && !profile.getCourse().isBlank() ? profile.getCourse() : "—");
+        profileDetails.put("Role", "Student");
+        profileDetails.put("Account Status", accountUser.isEnabled() ? "Active" : "Disabled");
+        profileDetails.put("Created At", profile.getCreatedAt() != null
+                ? profile.getCreatedAt().format(DateTimeFormatter.ofPattern("dd MMM yyyy, hh:mm a"))
+                : "—");
+
         model.addAttribute("profile", profile);
+        model.addAttribute("username", user.getUsername());
+        model.addAttribute("displayName", profile.getFullName());
+        model.addAttribute("profileCode", "ID: " + profile.getStudentId());
+        model.addAttribute("roleLabel", "Student");
+        model.addAttribute("accountActive", accountUser.isEnabled());
+        model.addAttribute("memberSince", profile.getCreatedAt() != null
+                ? profile.getCreatedAt().format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
+                : "—");
+        model.addAttribute("profileDetails", profileDetails);
+        model.addAttribute("dashboardPath", "/student");
         return "student/profile";
     }
 
