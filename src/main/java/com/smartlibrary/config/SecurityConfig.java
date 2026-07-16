@@ -112,21 +112,15 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
                         .anyRequest().authenticated())
-                .formLogin(form -> form
-                        .loginPage(LoginPortalPaths.ADMIN_LOGIN)
-                        .loginProcessingUrl(LoginPortalPaths.ADMIN_PROCESS)
-                        .successHandler(loginSuccessHandler)
-                        .failureHandler(loginFailureHandler)
-                        .permitAll())
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/admin/login")))
+                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
                 .logout(logout -> logout
                         .logoutUrl("/admin/logout")
                         .addLogoutHandler(auditLogoutHandler)
                         .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
-                        .logoutSuccessUrl("/admin/login?logout=true")
+                        .logoutSuccessUrl("/login?logout=true")
                         .permitAll())
                 .headers(this::applySecurityHeaders);
 

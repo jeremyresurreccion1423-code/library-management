@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="card(book)">
+  <article class="sl-search-card">
+    <div class="sl-search-card__inner">
+      <div class="sl-search-card__cover-wrap">
+        <div th:replace="~{fragments/book-cover :: cover(${book})}"></div>
+      </div>
+      <div class="sl-search-card__content">
+        <div class="sl-search-card__top">
+          <h3 class="sl-search-card__title" th:text="${book.title}">Book Title</h3>
+          <span class="sl-search-card__status"
+                th:classappend="${book.availableCopies > 0 ? ' is-available' : ' is-unavailable'}"
+                th:text="${book.availableCopies > 0 ? 'Available' : 'Unavailable'}">Available</span>
+        </div>
+        <p class="sl-search-card__author" th:if="${book.author != null}">
+          <i class="bi bi-person"></i>
+          <span th:text="${book.author.name}">Author</span>
+        </p>
+        <p class="sl-search-card__meta" th:if="${book.category != null}">
+          <span class="sl-search-card__tag" th:text="${book.category.name}">Category</span>
+        </p>
+        <p class="sl-search-card__isbn" th:if="${book.isbn != null && !book.isbn.isEmpty()}">
+          <i class="bi bi-upc"></i>
+          <span th:text="${book.isbn}">ISBN</span>
+        </p>
+        <p class="sl-search-card__copies">
+          <i class="bi bi-layers"></i>
+          <span th:text="${book.availableCopies + ' / ' + book.totalCopies + ' copies available'}">Copies</span>
+        </p>
+        <a class="sl-search-card__btn" th:href="@{/books/{id}(id=${book.id})}">
+          View Details <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </article>
+</th:block>
+</body>
+</html>

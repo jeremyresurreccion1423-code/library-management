@@ -280,9 +280,7 @@
             const remaining = expiry - Date.now();
             if (remaining <= 0) {
                 showSessionToast("Your session has expired. Redirecting to login...", true);
-                const loginPath = document.querySelector("#logoutForm")?.action?.includes("/admin")
-                    ? "/admin/login?error=session"
-                    : "/login?error=session";
+                const loginPath = "/login?error=session";
                 setTimeout(() => { window.location.href = loginPath; }, 2500);
             } else if (remaining <= warningMs && !warned) {
                 warned = true;

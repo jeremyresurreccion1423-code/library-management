@@ -75,19 +75,13 @@ public class LoginAuthenticationSuccessHandler implements AuthenticationSuccessH
             if (user == null || user.getRole() != UserRole.ADMIN) {
                 new SecurityContextLogoutHandler().logout(request, response, authentication);
                 request.getSession().setAttribute("AUTH_ERROR", "Incorrect username or password.");
-                response.sendRedirect("/admin/login?error=true");
+                response.sendRedirect("/login?error=true");
                 return;
             }
             response.sendRedirect("/admin");
             return;
         }
 
-        if (user != null && (user.getRole() == UserRole.ADMIN || user.getRole() == UserRole.SUPER_ADMIN)) {
-            new SecurityContextLogoutHandler().logout(request, response, authentication);
-            request.getSession().setAttribute("AUTH_ERROR", "Invalid username or password.");
-            response.sendRedirect("/login");
-            return;
-        }
         if (user != null && user.getRole() == UserRole.TEACHER) {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
             request.getSession().setAttribute("AUTH_ERROR",

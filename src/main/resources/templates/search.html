@@ -6,78 +6,151 @@
   <div sec:authorize="hasRole('STUDENT')" th:replace="~{fragments/student-sidebar :: sidebar}"></div>
 
   <main class="dashboard-main">
-    <div class="dashboard-header">
-      <h1 class="dashboard-title">Search Books</h1>
-      <p class="dashboard-subtitle">Find books in the library collection</p>
-    </div>
+    <div class="sl-search-page" sec:authorize="hasRole('STUDENT')">
+      <link rel="stylesheet" th:href="@{/css/student-search.css(v=1)}"/>
 
-    <div class="card-lib p-4 mb-4">
-      <form method="get" th:action="@{/search}">
-        <div class="row g-3">
-          <div class="col-md-4">
-            <label class="form-label">Keyword</label>
-            <input class="form-control" name="q" th:value="${q}" placeholder="Search books..."/>
+      <div class="sl-search-hero">
+        <div>
+          <h1>Search Books</h1>
+          <p>Find books in the library collection</p>
+        </div>
+        <div class="sl-search-stats" th:if="${studentBorrowedCount != null}">
+          <div class="sl-search-stat sl-search-stat--borrowed">
+            <i class="bi bi-journal-arrow-up"></i>
+            <span><span th:text="${studentBorrowedCount}">0</span> Borrowed</span>
           </div>
-          <div class="col-md-3">
-            <label class="form-label">ISBN (exact)</label>
-            <input class="form-control" name="isbn" th:value="${isbn}" placeholder="978..."/>
+          <div class="sl-search-stat sl-search-stat--due">
+            <i class="bi bi-clock-history"></i>
+            <span><span th:text="${studentOverdueCount}">0</span> Due Soon</span>
           </div>
-          <div class="col-md-3">
-            <label class="form-label">Author</label>
-            <select class="form-select" name="authorId">
-              <option value="">Any</option>
+          <div class="sl-search-stat sl-search-stat--read">
+            <i class="bi bi-bookmark-check"></i>
+            <span><span th:text="${studentReturnedCount}">0</span> Read</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sl-search-panel">
+        <form method="get" th:action="@{/search}" class="sl-search-form">
+          <div class="sl-search-field sl-search-field--grow">
+            <label for="searchQ">Search</label>
+            <input id="searchQ" name="q" th:value="${q}" placeholder="Search by title, author, ISBN..."/>
+          </div>
+          <div class="sl-search-field">
+            <label for="searchCategory">Category</label>
+            <select id="searchCategory" name="categoryId">
+              <option value="">All categories</option>
+              <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
+                      th:selected="${categoryId == c.id}"></option>
+            </select>
+          </div>
+          <div class="sl-search-field">
+            <label for="searchAuthor">Author</label>
+            <select id="searchAuthor" name="authorId">
+              <option value="">Any author</option>
               <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.name}"
                       th:selected="${authorId == a.id}"></option>
             </select>
           </div>
-          <div class="col-md-1 d-flex align-items-end">
-            <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="availableOnly" value="true" id="av"
-                     th:checked="${availableOnly}"/>
-              <label class="form-check-label small" for="av">Available</label>
-            </div>
-          </div>
-        </div>
-        <div class="row mt-3">
-          <div class="col-12 d-flex justify-content-end gap-2">
-            <button type="submit" class="btn btn-accent">
-              <i class="bi bi-search me-1"></i>Search
+          <div class="sl-search-actions">
+            <label class="sl-search-check">
+              <input type="checkbox" name="availableOnly" value="true" th:checked="${availableOnly}"/>
+              Available only
+            </label>
+            <button type="submit" class="sl-search-submit">
+              <i class="bi bi-search"></i> Search
             </button>
           </div>
+        </form>
+
+        <div class="sl-category-row" th:if="${!#lists.isEmpty(categories)}">
+          <span class="sl-category-label">Browse:</span>
+          <a class="sl-category-pill"
+             th:classappend="${categoryId == null ? ' is-active' : ''}"
+             th:href="@{/search(q=${q}, authorId=${authorId}, availableOnly=${availableOnly})}">All</a>
+          <a class="sl-category-pill"
+             th:each="c : ${categories}"
+             th:text="${c.name}"
+             th:classappend="${categoryId == c.id ? ' is-active' : ''}"
+             th:href="@{/search(q=${q}, categoryId=${c.id}, authorId=${authorId}, availableOnly=${availableOnly})}"></a>
         </div>
-      </form>
+      </div>
+
+      <div class="sl-results-bar" th:if="${!#lists.isEmpty(books)}">
+        <p class="sl-results-count">Showing <strong th:text="${#lists.size(books)}">0</strong> books</p>
+      </div>
+
+      <div th:if="${#lists.isEmpty(books)}" class="sl-search-empty">
+        <i class="bi bi-inbox"></i>
+        <p>No books found. Try adjusting your search or filters.</p>
+      </div>
+
+      <div class="sl-search-grid" th:if="${!#lists.isEmpty(books)}">
+        <th:block th:each="b : ${books}">
+          <div th:replace="~{fragments/book-card-search :: card(${b})}"></div>
+        </th:block>
+      </div>
     </div>
 
-    <div th:if="${#lists.isEmpty(books)}" class="card-lib p-5 text-center text-muted-lib">
-      <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-      No books found
-    </div>
-
-    <div class="books-grid" th:if="${!#lists.isEmpty(books)}">
-      <div class="book-card" th:each="b : ${books}">
-        <div class="book-card-header">
-          <div class="book-icon"><i class="bi bi-book"></i></div>
-          <div class="book-status" th:classappend="${b.availableCopies > 0 ? 'available' : 'unavailable'}"
-               th:text="${b.availableCopies + '/' + b.totalCopies}"></div>
-        </div>
-        <div class="book-card-body">
-          <h5 class="book-title" th:text="${b.title}">Book Title</h5>
-          <div class="book-details">
-            <p class="book-isbn" th:if="${b.isbn != null && !b.isbn.isEmpty()}">
-              <i class="bi bi-upc"></i><span th:text="${b.isbn}"></span>
-            </p>
-            <p class="book-author" th:if="${b.author != null}">
-              <i class="bi bi-person"></i><span th:text="${b.author.name}"></span>
-            </p>
-            <p class="book-category" th:if="${b.category != null}">
-              <i class="bi bi-folder"></i><span th:text="${b.category.name}"></span>
-            </p>
+    <!-- Guest / non-student fallback (unchanged behavior, lighter layout) -->
+    <div sec:authorize="!hasRole('STUDENT')">
+      <div class="dashboard-header">
+        <h1 class="dashboard-title">Search Books</h1>
+        <p class="dashboard-subtitle">Find books in the library collection</p>
+      </div>
+      <div class="card-lib p-4 mb-4">
+        <form method="get" th:action="@{/search}">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">Keyword</label>
+              <input class="form-control" name="q" th:value="${q}" placeholder="Search books..."/>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">ISBN (exact)</label>
+              <input class="form-control" name="isbn" th:value="${isbn}" placeholder="978..."/>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Author</label>
+              <select class="form-select" name="authorId">
+                <option value="">Any</option>
+                <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.name}"
+                        th:selected="${authorId == a.id}"></option>
+              </select>
+            </div>
+            <div class="col-md-1 d-flex align-items-end">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="availableOnly" value="true" id="av"
+                       th:checked="${availableOnly}"/>
+                <label class="form-check-label small" for="av">Available</label>
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="book-card-footer">
-          <a class="btn btn-sm btn-outline-primary" th:href="@{/books/{id}(id=${b.id})}">
-            <i class="bi bi-eye"></i> Details
-          </a>
+          <div class="row mt-3">
+            <div class="col-12 d-flex justify-content-end gap-2">
+              <button type="submit" class="btn btn-accent"><i class="bi bi-search me-1"></i>Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div th:if="${#lists.isEmpty(books)}" class="card-lib p-5 text-center text-muted-lib">
+        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+        No books found
+      </div>
+      <div class="books-grid" th:if="${!#lists.isEmpty(books)}">
+        <div class="book-card" th:each="b : ${books}">
+          <div class="book-card-header">
+            <div class="book-icon"><i class="bi bi-book"></i></div>
+            <div class="book-status" th:classappend="${b.availableCopies > 0 ? 'available' : 'unavailable'}"
+                 th:text="${b.availableCopies + '/' + b.totalCopies}"></div>
+          </div>
+          <div class="book-card-body">
+            <h5 class="book-title" th:text="${b.title}">Book Title</h5>
+          </div>
+          <div class="book-card-footer">
+            <a class="btn btn-sm btn-outline-primary" th:href="@{/books/{id}(id=${b.id})}">
+              <i class="bi bi-eye"></i> Details
+            </a>
+          </div>
         </div>
       </div>
     </div>

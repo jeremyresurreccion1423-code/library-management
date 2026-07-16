@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="cover(book)">
+  <div class="sl-book-cover"
+       th:style="|background: ${@bookCoverHelper.gradientFor(book)}|"
+       th:attr="data-category=${@bookCoverHelper.categoryLine(book)}">
+    <div class="sl-book-cover__shine" aria-hidden="true"></div>
+    <div class="sl-book-cover__spine" aria-hidden="true"></div>
+    <div class="sl-book-cover__content">
+      <span class="sl-book-cover__initial" th:text="${@bookCoverHelper.initials(book)}">BK</span>
+      <span class="sl-book-cover__title" th:text="${@bookCoverHelper.shortTitle(book)}">Book Title</span>
+      <span class="sl-book-cover__author" th:text="${@bookCoverHelper.authorLine(book)}">Author</span>
+    </div>
+  </div>
+</th:block>
+</body>
+</html>
