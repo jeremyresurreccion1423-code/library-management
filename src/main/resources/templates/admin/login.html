@@ -8,9 +8,10 @@
   <title>EduLibrary - Admin Login</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-  <link th:href="@{/css/login-new.css(v=admin-premium-1)}" rel="stylesheet"/>
+  <link th:href="@{/css/login-new.css(v=admin-premium-2)}" rel="stylesheet"/>
+  <link th:href="@{/css/login-admin.css(v=admin-orange-1)}" rel="stylesheet"/>
 </head>
-<body data-auth-page="true" class="auth-page-body">
+<body data-auth-page="true" class="auth-page-body auth-page-admin">
 <div class="auth-page">
   <div class="auth-card">
     <div class="auth-brand">
@@ -19,17 +20,16 @@
 
       <div class="auth-brand-top">
         <div class="auth-brand-logo">
-          <span class="auth-brand-logo-icon" aria-hidden="true"><i class="bi bi-shield-lock"></i></span>
+          <span class="auth-brand-logo-icon" aria-hidden="true"><i class="bi bi-briefcase-fill"></i></span>
           <div class="auth-brand-logo-text">
             <strong>EduLibrary</strong>
-            <span>ADMIN</span>
+            <span>ADMIN PORTAL</span>
           </div>
         </div>
-        <span class="auth-portal-badge">Admin Portal</span>
       </div>
 
       <div class="auth-brand-content">
-        <h1 class="auth-brand-welcome">Library Admin Portal</h1>
+        <h1 class="auth-brand-welcome">Library Administration</h1>
         <p class="auth-brand-subtitle">Smart Library System | Laguna University</p>
         <div class="auth-brand-rule" aria-hidden="true"></div>
         <p class="auth-brand-copy">
@@ -94,7 +94,10 @@
         </div>
 
         <div class="auth-row">
-          <span></span>
+          <label class="auth-remember">
+            <input type="checkbox" name="remember-me"/>
+            <span>Remember me</span>
+          </label>
           <a th:href="@{/forgot-password}" class="auth-forgot">Forgot password?</a>
         </div>
 
