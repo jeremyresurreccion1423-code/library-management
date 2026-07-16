@@ -59,11 +59,11 @@ body.auth-page-super-admin .auth-card:hover .auth-brand-bg--super {
 body.auth-page-super-admin .auth-brand-fade {
   background: linear-gradient(
     90deg,
-    rgba(245, 243, 255, 0.97) 0%,
-    rgba(245, 243, 255, 0.86) 20%,
-    rgba(245, 243, 255, 0.52) 38%,
-    rgba(245, 243, 255, 0.18) 55%,
-    rgba(245, 243, 255, 0.04) 70%,
+    rgba(245, 243, 255, 0.99) 0%,
+    rgba(245, 243, 255, 0.96) 28%,
+    rgba(245, 243, 255, 0.82) 48%,
+    rgba(245, 243, 255, 0.45) 62%,
+    rgba(245, 243, 255, 0.12) 78%,
     transparent 100%
   );
 }
@@ -92,6 +92,17 @@ body.auth-page-super-admin .auth-brand-logo-text span {
 
 body.auth-page-super-admin .auth-brand-welcome {
   color: var(--sa-primary-deep);
+}
+
+body.auth-page-super-admin .auth-brand-subtitle {
+  color: #5B21B6;
+  font-weight: 600;
+}
+
+body.auth-page-super-admin .auth-brand-copy {
+  color: #1E293B;
+  font-weight: 500;
+  line-height: 1.6;
 }
 
 body.auth-page-super-admin .auth-brand-rule {
