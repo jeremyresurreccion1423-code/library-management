@@ -1,0 +1,151 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{fragments/superadmin-page-shell :: shell('Books — Library', 'Books', 'Manage and organize the library collection', ~{::content})}">
+<th:block th:fragment="content">
+
+  <div class="sa-toolbar">
+    <p class="sa-lead" style="margin:0;" th:if="${!#lists.isEmpty(books)}"
+       th:text="${'Showing ' + bookCount + ' book' + (bookCount == 1 ? '' : 's')}">Showing 0 books</p>
+    <p class="sa-lead" style="margin:0;" th:if="${#lists.isEmpty(books)}">Search and filter the library collection.</p>
+    <a class="sa-btn sa-btn--primary" th:href="@{/superadmin/library/books/new}">
+      <i data-lucide="plus"></i> Add Book
+    </a>
+  </div>
+
+  <section class="sa-card sa-glass">
+    <form method="get" th:action="@{/superadmin/library/books}" class="sa-filter-bar">
+      <input type="hidden" name="statusFilter" th:value="${statusFilter}"/>
+      <div class="sa-form-field sa-form-field--grow">
+        <label for="bookSearch">Search</label>
+        <input id="bookSearch" class="sa-input" name="q" th:value="${q}"
+               placeholder="Search by title, ISBN, or barcode..."/>
+      </div>
+      <div class="sa-form-field">
+        <label for="bookCategory">Category</label>
+        <select id="bookCategory" class="sa-select" name="categoryId">
+          <option value="">All Categories</option>
+          <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
+                  th:selected="${categoryId == c.id}"></option>
+        </select>
+      </div>
+      <div class="sa-form-field">
+        <label for="bookAuthor">Author</label>
+        <select id="bookAuthor" class="sa-select" name="authorId">
+          <option value="">All Authors</option>
+          <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.name}"
+                  th:selected="${authorId == a.id}"></option>
+        </select>
+      </div>
+      <button type="submit" class="sa-btn sa-btn--primary sa-btn--sm">
+        <i data-lucide="search"></i> Search
+      </button>
+      <a th:href="@{/superadmin/library/books}" class="sa-btn sa-btn--ghost sa-btn--sm">
+        <i data-lucide="rotate-ccw"></i> Reset
+      </a>
+    </form>
+
+    <div class="sa-pills">
+      <span class="sa-muted-inline"><i data-lucide="filter"></i> Quick filters:</span>
+      <a th:href="@{/superadmin/library/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='all')}"
+         class="sa-pill-link" th:classappend="${statusFilter == 'all'} ? ' sa-pill-link--active'">All</a>
+      <a th:href="@{/superadmin/library/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='available')}"
+         class="sa-pill-link" th:classappend="${statusFilter == 'available'} ? ' sa-pill-link--active'">Available</a>
+      <a th:href="@{/superadmin/library/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='borrowed')}"
+         class="sa-pill-link" th:classappend="${statusFilter == 'borrowed'} ? ' sa-pill-link--active'">Borrowed</a>
+      <a th:href="@{/superadmin/library/books(q=${q}, categoryId=${categoryId}, authorId=${authorId}, statusFilter='unavailable')}"
+         class="sa-pill-link" th:classappend="${statusFilter == 'unavailable'} ? ' sa-pill-link--active'">Unavailable</a>
+    </div>
+  </section>
+
+  <section class="sa-card sa-glass">
+    <div class="sa-table-wrap" th:if="${!#lists.isEmpty(books)}">
+      <table class="sa-table">
+        <thead>
+        <tr>
+          <th>Title</th>
+          <th>Author</th>
+          <th>Category</th>
+          <th>ISBN</th>
+          <th>Copies</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="b : ${books}">
+          <td><strong th:text="${b.title}">Title</strong></td>
+          <td th:text="${b.author != null ? b.author.name : '—'}">Author</td>
+          <td th:text="${b.category != null ? b.category.name : '—'}">Category</td>
+          <td th:text="${b.isbn != null ? b.isbn : '—'}">ISBN</td>
+          <td th:text="${b.availableCopies + '/' + b.totalCopies}">0/0</td>
+          <td>
+            <span class="sa-badge sa-badge--success"
+                  th:if="${b.availableCopies == b.totalCopies and b.totalCopies > 0}">Available</span>
+            <span class="sa-badge sa-badge--warning"
+                  th:if="${b.availableCopies > 0 and b.availableCopies < b.totalCopies}">Borrowed</span>
+            <span class="sa-badge sa-badge--warning"
+                  th:if="${b.availableCopies == 0 and b.totalCopies > 0}">Borrowed</span>
+            <span class="sa-badge sa-badge--muted"
+                  th:if="${b.totalCopies == 0}">Maintenance</span>
+          </td>
+          <td class="sa-table__actions">
+            <a class="sa-btn sa-btn--ghost sa-btn--sm" th:href="@{/books/{id}(id=${b.id})}" title="View">
+              <i data-lucide="eye"></i>
+            </a>
+            <a th:if="${b.ebook != null}" class="sa-btn sa-btn--ghost sa-btn--sm"
+               th:href="@{/ebook/read/{id}(id=${b.id})}" target="_blank" title="View PDF">
+              <i data-lucide="file-text"></i>
+            </a>
+            <a class="sa-btn sa-btn--ghost sa-btn--sm"
+               th:href="@{/superadmin/library/books/{id}/edit(id=${b.id})}" title="Edit">
+              <i data-lucide="pencil"></i>
+            </a>
+            <button type="button" class="sa-btn sa-btn--outline-danger sa-btn--sm delete-book-btn"
+                    title="Delete"
+                    th:attr="data-book-id=${b.id},data-book-title=${b.title}">
+              <i data-lucide="trash-2"></i>
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p th:if="${#lists.isEmpty(books)}" class="sa-empty">
+      <i data-lucide="inbox"></i><br/>
+      No books found. Try adjusting your filters or add a new book.
+    </p>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.delete-book-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+          const bookId = button.getAttribute('data-book-id');
+          const bookTitle = button.getAttribute('data-book-title');
+          const message = 'Delete "' + bookTitle + '"? This action cannot be undone.';
+          const submitDelete = function() {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/superadmin/library/books/' + bookId + '/delete';
+            const csrfToken = document.querySelector('meta[name="_csrf"]');
+            if (csrfToken) {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = '_csrf';
+              input.value = csrfToken.getAttribute('content');
+              form.appendChild(input);
+            }
+            document.body.appendChild(form);
+            form.submit();
+          };
+          if (typeof confirmAction === 'function') {
+            confirmAction(message, { type: 'danger', title: 'Confirm Delete', okText: 'Yes, Delete' }, submitDelete);
+          } else if (confirm(message)) {
+            submitDelete();
+          }
+        });
+      });
+    });
+  </script>
+</th:block>
+</body>
+</html>

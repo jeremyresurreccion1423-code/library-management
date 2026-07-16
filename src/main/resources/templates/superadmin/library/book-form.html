@@ -1,0 +1,78 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{fragments/superadmin-page-shell :: shell(${book != null and book.id != null ? 'Edit Book — Library' : 'New Book — Library'}, ${book != null and book.id != null ? 'Edit Book' : 'New Book'}, 'Manage book details', ~{::content})}">
+<th:block th:fragment="content">
+
+  <section class="sa-card sa-glass" style="max-width:720px;">
+    <form th:action="@{/superadmin/library/books/save}" method="post" enctype="multipart/form-data">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <input type="hidden" name="id" th:if="${book != null and book.id != null}" th:value="${book.id}"/>
+
+      <div class="sa-form-field">
+        <label for="title">Title</label>
+        <input class="sa-input" id="title" name="title" required th:value="${book != null ? book.title : ''}"/>
+      </div>
+      <div class="sa-form-field">
+        <label for="isbn">ISBN</label>
+        <input class="sa-input" id="isbn" name="isbn" th:value="${book != null ? book.isbn : ''}"/>
+      </div>
+      <div class="sa-form-field">
+        <label for="barcode">Barcode (para sa scanner)</label>
+        <input class="sa-input" id="barcode" name="barcode" th:value="${book != null ? book.barcode : ''}" placeholder="Optional unique code"/>
+      </div>
+      <div class="sa-form-field">
+        <label for="totalCopies">Total copies</label>
+        <input class="sa-input" id="totalCopies" type="number" name="totalCopies" min="0" required
+               th:value="${book != null and book.totalCopies != null ? book.totalCopies : 1}"/>
+        <small class="sa-form-hint">
+          Use 0 for reservation-only books (no copies to borrow yet). Students can join the queue when nothing is available.
+        </small>
+      </div>
+      <div class="sa-form-field">
+        <label for="finePerDay">Overdue fine per day (PHP)</label>
+        <input class="sa-input" id="finePerDay" type="number" name="finePerDay" min="0" step="0.01"
+               th:value="${book != null and book.finePerDay != null ? book.finePerDay : ''}"
+               th:placeholder="${'Leave blank for default (₱' + defaultFinePerDay + '/day)'}"/>
+        <small class="sa-form-hint">
+          Set a higher fine for expensive or high-value books. Blank uses the library default of
+          ₱<span th:text="${defaultFinePerDay}"></span>/day.
+        </small>
+      </div>
+      <div class="sa-form-field">
+        <label for="categoryId">Category</label>
+        <select class="sa-select" id="categoryId" name="categoryId">
+          <option value="">—</option>
+          <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"
+                  th:selected="${book != null and book.categoryId != null and book.categoryId == c.id}"></option>
+        </select>
+      </div>
+      <div class="sa-form-field">
+        <label for="authorId">Author</label>
+        <select class="sa-select" id="authorId" name="authorId">
+          <option value="">—</option>
+          <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.name}"
+                  th:selected="${book != null and book.authorId != null and book.authorId == a.id}"></option>
+        </select>
+      </div>
+      <div class="sa-form-field">
+        <label for="ebookFile">E-book (PDF)</label>
+        <input class="sa-input" id="ebookFile" type="file" name="ebookFile" accept=".pdf"/>
+      </div>
+
+      <div class="sa-form-actions">
+        <button type="submit" class="sa-btn sa-btn--primary">
+          <i data-lucide="save"></i> Save
+        </button>
+        <a class="sa-btn sa-btn--ghost" th:href="@{/superadmin/library/books}">
+          <i data-lucide="x"></i> Cancel
+        </a>
+      </div>
+    </form>
+  </section>
+
+  <section class="sa-card sa-glass" style="max-width:720px;" th:if="${book != null and book.id != null}">
+    <div class="sa-card__head"><h2>QR Code</h2></div>
+    <img th:src="@{/api/books/{id}/qr.png(id=${book.id})}" alt="QR" style="max-width:200px;border-radius:12px;"/>
+  </section>
+</th:block>
+</body>
+</html>

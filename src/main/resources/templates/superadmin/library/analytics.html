@@ -1,0 +1,349 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{fragments/superadmin-page-shell :: shell('Analytics — Library', 'Library Analytics', 'Borrowing trends, loan health, and student reading activity', ~{::content})}">
+<th:block th:fragment="content">
+
+  <div class="sa-stats">
+    <article class="sa-stat sa-stat--glass">
+      <div class="sa-stat__head">
+        <div class="sa-stat__icon"><i data-lucide="book-open"></i></div>
+      </div>
+      <div class="sa-stat__value" th:text="${totalIssues}">0</div>
+      <div class="sa-stat__label">Total Issues</div>
+    </article>
+    <article class="sa-stat sa-stat--glass">
+      <div class="sa-stat__head">
+        <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="bookmark"></i></div>
+      </div>
+      <div class="sa-stat__value" style="color:#059669;" th:text="${statusCounts['borrowed']}">0</div>
+      <div class="sa-stat__label">Currently Borrowed</div>
+    </article>
+    <article class="sa-stat sa-stat--glass">
+      <div class="sa-stat__head">
+        <div class="sa-stat__icon sa-stat__icon--sky"><i data-lucide="check-circle"></i></div>
+      </div>
+      <div class="sa-stat__value" th:text="${statusCounts['returned']}">0</div>
+      <div class="sa-stat__label">Returned</div>
+    </article>
+    <article class="sa-stat sa-stat--glass">
+      <div class="sa-stat__head">
+        <div class="sa-stat__icon sa-stat__icon--rose"><i data-lucide="alert-triangle"></i></div>
+      </div>
+      <div class="sa-stat__value sa-stat__value--danger" th:text="${overdueRate + '%'}">0%</div>
+      <div class="sa-stat__label">Overdue Rate</div>
+    </article>
+  </div>
+
+  <div class="sa-section-title">
+    <i data-lucide="calendar"></i>
+    When Do Students Borrow Most?
+  </div>
+
+  <div class="sa-grid-2">
+    <section class="sa-card sa-glass">
+      <div class="sa-card__head">
+        <h2>Borrowing by Day of Week</h2>
+        <span class="sa-badge sa-badge--success" th:if="${busiestDayOfWeek != null}">
+          Busiest: <span th:text="${busiestDayOfWeek}"></span>
+        </span>
+      </div>
+      <p class="sa-lead">Shows which weekdays have the most book borrowings overall.</p>
+      <div class="sa-chart-wrap sa-chart-wrap--sm" th:if="${totalIssues > 0}">
+        <canvas id="weekdayChart"></canvas>
+      </div>
+      <p th:if="${totalIssues == 0}" class="sa-empty">No borrowing activity recorded yet.</p>
+    </section>
+
+    <section class="sa-card sa-glass">
+      <div class="sa-card__head">
+        <h2>Daily Borrowing (Last 14 Days)</h2>
+        <span class="sa-badge sa-badge--primary" th:if="${busiestRecentDay != null}">
+          Peak: <span th:text="${busiestRecentDay['label']}"></span>
+          (<span th:text="${busiestRecentDay['count']}"></span>)
+        </span>
+      </div>
+      <p class="sa-lead">Tracks how many books were borrowed on each calendar day.</p>
+      <div class="sa-chart-wrap sa-chart-wrap--sm" th:if="${totalIssues > 0}">
+        <canvas id="dailyTrendChart"></canvas>
+      </div>
+      <p th:if="${totalIssues == 0}" class="sa-empty">No daily trend data yet.</p>
+    </section>
+  </div>
+
+  <div class="sa-grid-2">
+    <section class="sa-card sa-glass">
+      <div class="sa-card__head"><h2>Issues by Status</h2></div>
+      <div class="sa-chart-wrap sa-chart-wrap--sm" th:if="${totalIssues > 0}">
+        <canvas id="statusChart"></canvas>
+      </div>
+      <p th:if="${totalIssues == 0}" class="sa-empty">No borrowing data yet.</p>
+    </section>
+
+    <section class="sa-card sa-glass">
+      <div class="sa-card__head"><h2>Most Borrowed Books</h2></div>
+      <div th:if="${!#lists.isEmpty(topBooks)}" th:with="maxBorrow=${topBooks[0]['borrowCount'] > 0 ? topBooks[0]['borrowCount'] : 1}">
+        <div th:each="row, iter : ${topBooks}" class="sa-analytics-bar-row">
+          <span class="sa-rank-num" th:text="${iter.count}">1</span>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:0.88rem;" th:text="${row.title}">Book title</div>
+            <div class="sa-analytics-bar-track">
+              <div class="sa-analytics-bar-fill"
+                   th:style="|width: ${row['borrowCount'] * 100 / maxBorrow}%|"></div>
+            </div>
+          </div>
+          <span class="sa-badge sa-badge--primary" th:text="${row['borrowCount']}">0</span>
+        </div>
+      </div>
+      <p th:if="${#lists.isEmpty(topBooks)}" class="sa-empty">No books have been borrowed yet.</p>
+    </section>
+  </div>
+
+  <div class="sa-section-title">
+    <i data-lucide="users"></i>
+    Student Reading History
+  </div>
+
+  <section class="sa-card sa-glass">
+    <form th:action="@{/superadmin/library/analytics}" method="get" class="sa-filter-bar">
+      <div class="sa-form-field sa-form-field--grow">
+        <label for="studentQuery">Search Student</label>
+        <input class="sa-input" id="studentQuery" name="query" placeholder="Search by ID, name, email, or phone..."
+               th:value="${query}"/>
+      </div>
+      <button class="sa-btn sa-btn--primary" type="submit">
+        <i data-lucide="search"></i> View History
+      </button>
+    </form>
+  </section>
+
+  <section class="sa-card sa-glass" th:if="${!#lists.isEmpty(searchResults) and selectedStudent == null}">
+    <div class="sa-table-wrap">
+      <table class="sa-table">
+        <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Course</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${searchResults}">
+          <td th:text="${s.studentId}"></td>
+          <td th:text="${s.fullName}"></td>
+          <td th:text="${s.user.email}"></td>
+          <td th:text="${s.course}"></td>
+          <td class="sa-table__actions">
+            <a class="sa-btn sa-btn--primary sa-btn--sm"
+               th:href="@{/superadmin/library/analytics(studentId=${s.studentId},query=${query})}">View History</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="sa-alert sa-alert--warning"
+       th:if="${query != null and !query.isBlank() and selectedStudent == null and #lists.isEmpty(searchResults)}">
+    No students matched "<span th:text="${query}"></span>".
+  </div>
+
+  <div class="sa-student-panel" th:if="${selectedStudent != null}">
+    <strong th:text="${selectedStudent.fullName}">Student Name</strong>
+    <span>
+      <span th:text="'ID: ' + ${selectedStudent.studentId}"></span>
+      <span th:if="${selectedStudent.course != null and !selectedStudent.course.isBlank()}"
+            th:text="' · ' + ${selectedStudent.course}"></span>
+      <span th:text="' · ' + ${selectedStudent.user.email}"></span>
+    </span>
+  </div>
+
+  <section class="sa-card sa-glass">
+    <div class="sa-table-wrap">
+      <table class="sa-table">
+        <thead>
+        <tr>
+          <th>Book</th>
+          <th>Issued</th>
+          <th>Due</th>
+          <th>Returned</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="row : ${readingHistory}">
+          <td style="font-weight:600;" th:text="${row.book.title}"></td>
+          <td th:text="${#temporals.format(row.issuedAt, 'MMM d, yyyy')}"></td>
+          <td th:text="${#temporals.format(row.dueAt, 'MMM d, yyyy')}"></td>
+          <td th:text="${row.returnedAt != null ? #temporals.format(row.returnedAt, 'MMM d, yyyy') : '—'}"></td>
+          <td>
+            <span class="sa-badge"
+                  th:classappend="${row.status.name() == 'RETURNED' ? ' sa-badge--success' : (row.status.name() == 'OVERDUE' ? ' sa-badge--danger' : ' sa-badge--primary')}"
+                  th:text="${row.status}"></span>
+          </td>
+          <td class="sa-table__actions">
+            <button type="button"
+                    class="sa-btn sa-btn--warning sa-btn--sm analytics-remind-btn"
+                    th:if="${row.status.name() == 'BORROWED' or row.status.name() == 'OVERDUE'}"
+                    th:attr="data-issue-id=${row.id},data-student-id=${selectedStudentId}">
+              <i data-lucide="mail"></i> Remind
+            </button>
+            <span th:if="${row.status.name() != 'BORROWED' and row.status.name() != 'OVERDUE'}"
+                  class="sa-muted-inline">—</span>
+          </td>
+        </tr>
+        <tr th:if="${selectedStudent != null and #lists.isEmpty(readingHistory)}">
+          <td colspan="6" class="sa-empty">No reading history for this student.</td>
+        </tr>
+        <tr th:if="${selectedStudent == null and (query == null or query.isBlank())}">
+          <td colspan="6" class="sa-empty">Search for a student above to view their borrowing history.</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      const borrowed = /*[[${statusCounts['borrowed']}]]*/ 0;
+      const returned = /*[[${statusCounts['returned']}]]*/ 0;
+      const overdue = /*[[${statusCounts['overdue']}]]*/ 0;
+      const total = borrowed + returned + overdue;
+
+      const weekdayLabels = /*[[${borrowsByDayOfWeek.![day]}]]*/ [];
+      const weekdayCounts = /*[[${borrowsByDayOfWeek.![count]}]]*/ [];
+      const dailyLabels = /*[[${borrowsByRecentDays.![label]}]]*/ [];
+      const dailyCounts = /*[[${borrowsByRecentDays.![count]}]]*/ [];
+      const busiestWeekday = /*[[${busiestDayOfWeek}]]*/ null;
+
+      if (total > 0) {
+        const canvas = document.getElementById('statusChart');
+        if (canvas && typeof Chart !== 'undefined') {
+          new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+              labels: ['Borrowed', 'Returned', 'Overdue'],
+              datasets: [{
+                data: [borrowed, returned, overdue],
+                backgroundColor: ['#7C3AED', '#059669', '#EF4444'],
+                borderWidth: 0,
+                hoverOffset: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '62%',
+              plugins: {
+                legend: { position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } },
+                tooltip: {
+                  callbacks: {
+                    label: function(ctx) {
+                      const val = ctx.raw || 0;
+                      const pct = total > 0 ? Math.round(val * 100 / total) : 0;
+                      return ' ' + ctx.label + ': ' + val + ' (' + pct + '%)';
+                    }
+                  }
+                }
+              }
+            }
+          });
+        }
+
+        const weekdayCanvas = document.getElementById('weekdayChart');
+        if (weekdayCanvas && typeof Chart !== 'undefined' && weekdayLabels.length) {
+          const weekdayColors = weekdayLabels.map(function(day) {
+            return day === busiestWeekday ? '#7C3AED' : '#DDD6FE';
+          });
+          new Chart(weekdayCanvas, {
+            type: 'bar',
+            data: {
+              labels: weekdayLabels,
+              datasets: [{
+                label: 'Books borrowed',
+                data: weekdayCounts,
+                backgroundColor: weekdayColors,
+                borderRadius: 8,
+                borderSkipped: false
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false } }
+              }
+            }
+          });
+        }
+
+        const dailyCanvas = document.getElementById('dailyTrendChart');
+        if (dailyCanvas && typeof Chart !== 'undefined' && dailyLabels.length) {
+          new Chart(dailyCanvas, {
+            type: 'line',
+            data: {
+              labels: dailyLabels,
+              datasets: [{
+                label: 'Books borrowed',
+                data: dailyCounts,
+                borderColor: '#7C3AED',
+                backgroundColor: 'rgba(124, 58, 237, 0.12)',
+                fill: true,
+                tension: 0.35,
+                pointRadius: 4,
+                pointBackgroundColor: '#7C3AED'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1, precision: 0 }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 11 } } }
+              }
+            }
+          });
+        }
+      }
+
+      document.querySelectorAll('.analytics-remind-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+          const issueId = this.getAttribute('data-issue-id');
+          const studentId = this.getAttribute('data-student-id');
+          const submitRemind = function() {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/superadmin/library/analytics/issues/' + issueId + '/remind';
+            const csrfMeta = document.querySelector('meta[name="_csrf"]');
+            if (csrfMeta) {
+              const csrf = document.createElement('input');
+              csrf.type = 'hidden';
+              csrf.name = '_csrf';
+              csrf.value = csrfMeta.getAttribute('content');
+              form.appendChild(csrf);
+            }
+            const sid = document.createElement('input');
+            sid.type = 'hidden';
+            sid.name = 'studentId';
+            sid.value = studentId || '';
+            form.appendChild(sid);
+            document.body.appendChild(form);
+            form.submit();
+          };
+          if (typeof confirmAction === 'function') {
+            confirmAction('Send reminder email to return this borrowed book?', submitRemind);
+          } else if (confirm('Send reminder email to return this borrowed book?')) {
+            submitRemind();
+          }
+        });
+      });
+    });
+  </script>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Reusable Super Admin page shell — never imports admin layout/CSS -->
+<th:block th:fragment="shell(pageTitle, heading, subheading, content)">
+  <head th:replace="~{layouts/superadmin-layout :: head(${pageTitle})}"></head>
+  <body class="sa-portal">
+  <div class="sa-shell">
+    <div th:replace="~{fragments/superadmin-sidebar :: sidebar}"></div>
+    <div class="sa-main-wrap">
+      <header th:replace="~{fragments/superadmin-navbar :: navbar(${heading}, ${subheading})}"></header>
+      <main class="sa-main">
+        <div th:if="${success}" class="sa-alert sa-alert--success" th:text="${success}"></div>
+        <div th:if="${error}" class="sa-alert sa-alert--danger" th:text="${error}"></div>
+        <div th:if="${warning}" class="sa-alert sa-alert--warning" th:text="${warning}"></div>
+        <th:block th:replace="${content}"></th:block>
+      </main>
+      <footer th:replace="~{layouts/superadmin-layout :: footer}"></footer>
+    </div>
+  </div>
+  <div th:replace="~{layouts/superadmin-layout :: scripts}"></div>
+  </body>
+</th:block>
+</body>
+</html>

@@ -65,7 +65,9 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain superAdminChain(HttpSecurity http) throws Exception {
-        http.securityMatcher(new AntPathRequestMatcher("/super-admin/**"));
+        http.securityMatcher(new OrRequestMatcher(
+                new AntPathRequestMatcher("/super-admin/**"),
+                new AntPathRequestMatcher("/superadmin/**")));
 
         http
                 .authorizeHttpRequests(auth -> auth
@@ -110,7 +112,7 @@ public class SecurityConfig {
                                 LoginPortalPaths.ADMIN_PROCESS,
                                 "/forgot-password")
                         .permitAll()
-                        .requestMatchers("/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")))
@@ -133,6 +135,7 @@ public class SecurityConfig {
         http.securityMatcher(new NegatedRequestMatcher(
                 new OrRequestMatcher(
                         new AntPathRequestMatcher("/super-admin/**"),
+                        new AntPathRequestMatcher("/superadmin/**"),
                         new AntPathRequestMatcher("/admin/**"))));
 
         http

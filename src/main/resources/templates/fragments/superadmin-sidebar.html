@@ -30,8 +30,9 @@
 
       <p class="sa-sidebar__label">Modules</p>
 
-      <div class="sa-nav-group" id="saGroupAttendance">
-        <button type="button" class="sa-nav-group__btn" onclick="saToggleGroup('saGroupAttendance')" aria-expanded="false">
+      <div class="sa-nav-group" th:classappend="${navAttOpen} ? ' sa-nav-group--open'" id="saGroupAttendance">
+        <button type="button" class="sa-nav-group__btn" onclick="saToggleGroup('saGroupAttendance')"
+                th:attr="aria-expanded=${navAttOpen}">
           <span class="sa-nav-group__label">
             <i data-lucide="calendar-check"></i>
             <span>Attendance</span>
@@ -39,15 +40,15 @@
           <i data-lucide="chevron-down" class="sa-nav-group__chevron"></i>
         </button>
         <ul class="sa-nav-group__panel">
-          <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/dashboard')}">Dashboard</a></li>
-          <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/departments')}">Departments</a></li>
-          <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/create')}">Create / Add</a></li>
-          <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/students')}">Students</a></li>
-          <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/teachers')}">Teachers</a></li>
-          <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/subjects')}">Subjects</a></li>
-          <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/sections')}">Sections</a></li>
-          <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/reports')}">Reports</a></li>
-          <li><a th:href="@{/super-admin/bridge/attendance(path='/admin/trends')}">Trends</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/attendance/dashboard" th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/dashboard')}">Dashboard</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/attendance/departments" th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/departments')}">Departments</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/attendance/create" th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/create')}">Create / Add</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/attendance/students" th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/students')}">Students</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/attendance/teachers" th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/teachers')}">Teachers</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/attendance/subjects" th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/subjects')}">Subjects</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/attendance/sections" th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/sections')}">Sections</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/attendance/reports" th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/reports')}">Reports</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/attendance/trends" th:href="@{/super-admin/bridge/attendance(path='/superadmin/attendance/trends')}">Trends</a></li>
         </ul>
       </div>
 
@@ -61,16 +62,16 @@
           <i data-lucide="chevron-down" class="sa-nav-group__chevron"></i>
         </button>
         <ul class="sa-nav-group__panel">
-          <li><a class="sa-sublink" data-nav-prefix="/admin" data-nav-exact="true" th:href="@{/admin}">Dashboard</a></li>
-          <li><a class="sa-sublink" data-nav-prefix="/admin/categories" th:href="@{/admin/categories}">Categories</a></li>
-          <li><a class="sa-sublink" data-nav-prefix="/admin/authors" th:href="@{/admin/authors}">Authors</a></li>
-          <li><a class="sa-sublink" data-nav-prefix="/admin/books" th:href="@{/admin/books}">Books</a></li>
-          <li><a class="sa-sublink" data-nav-prefix="/admin/scan-issue" th:href="@{/admin/scan-issue}">Scan &amp; Issue</a></li>
-          <li><a class="sa-sublink" data-nav-prefix="/admin/issues" data-nav-exclude="/admin/issues/reservations" th:href="@{/admin/issues}">Issue / Return</a></li>
-          <li><a class="sa-sublink" data-nav-prefix="/admin/issues/reservations" th:href="@{/admin/issues/reservations}">Reservations</a></li>
-          <li><a class="sa-sublink" data-nav-prefix="/admin/students" th:href="@{/admin/students}">Students</a></li>
-          <li><a class="sa-sublink" data-nav-prefix="/admin/analytics" th:href="@{/admin/analytics}">Analytics</a></li>
-          <li><a class="sa-sublink" data-nav-prefix="/admin/admins" th:href="@{/admin/admins}">Admins</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/dashboard" data-nav-exact="true" th:href="@{/superadmin/library/dashboard}">Dashboard</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/categories" th:href="@{/superadmin/library/categories}">Categories</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/authors" th:href="@{/superadmin/library/authors}">Authors</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/books" th:href="@{/superadmin/library/books}">Books</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/scan-issue" th:href="@{/superadmin/library/scan-issue}">Scan &amp; Issue</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/issues" data-nav-exclude="/superadmin/library/reservations" th:href="@{/superadmin/library/issues}">Issue / Return</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/reservations" th:href="@{/superadmin/library/reservations}">Reservations</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/students" th:href="@{/superadmin/library/students}">Students</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/analytics" th:href="@{/superadmin/library/analytics}">Analytics</a></li>
+          <li><a class="sa-sublink" data-nav-prefix="/superadmin/library/admins" th:href="@{/superadmin/library/admins}">Admins</a></li>
         </ul>
       </div>
     </nav>

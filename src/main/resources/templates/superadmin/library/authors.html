@@ -1,0 +1,81 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body th:replace="~{fragments/superadmin-page-shell :: shell('Authors — Library', 'Authors', 'Manage book authors', ~{::content})}">
+<th:block th:fragment="content">
+
+  <section class="sa-card sa-glass">
+    <div class="sa-card__head"><h2>Add Author</h2></div>
+    <form class="sa-form-row" th:action="@{/superadmin/library/authors}" method="post">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+      <div class="sa-form-field">
+        <label for="authorName">Author name</label>
+        <input class="sa-input" id="authorName" name="name" placeholder="Author name" required/>
+      </div>
+      <button class="sa-btn sa-btn--primary" type="submit">
+        <i data-lucide="plus"></i> Add
+      </button>
+    </form>
+  </section>
+
+  <section class="sa-card sa-glass">
+    <div class="sa-card__head"><h2>All Authors</h2></div>
+    <div class="sa-table-wrap">
+      <table class="sa-table">
+        <thead><tr><th>Name</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="a : ${authors}">
+          <td>
+            <form th:action="@{/superadmin/library/authors/{id}/edit(id=${a.id})}" method="post" class="sa-form-row">
+              <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+              <div class="sa-form-field">
+                <input class="sa-input" name="name" th:value="${a.name}"/>
+              </div>
+              <button class="sa-btn sa-btn--ghost sa-btn--sm" type="submit">Save</button>
+            </form>
+          </td>
+          <td class="sa-table__actions">
+            <button class="sa-btn sa-btn--outline-danger sa-btn--sm delete-author-btn" type="button"
+                    th:attr="data-author-id=${a.id},data-author-name=${a.name}">
+              <i data-lucide="trash-2"></i> Delete
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <p th:if="${#lists.isEmpty(authors)}" class="sa-empty">No authors yet.</p>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.delete-author-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+          const authorId = button.getAttribute('data-author-id');
+          const authorName = button.getAttribute('data-author-name');
+          const message = 'Are you sure you want to delete "' + authorName + '"?';
+          const submitDelete = function() {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/superadmin/library/authors/' + authorId + '/delete';
+            const csrfToken = document.querySelector('meta[name="_csrf"]');
+            if (csrfToken) {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = '_csrf';
+              input.value = csrfToken.getAttribute('content');
+              form.appendChild(input);
+            }
+            document.body.appendChild(form);
+            form.submit();
+          };
+          if (typeof confirmAction === 'function') {
+            confirmAction(message, submitDelete);
+          } else if (confirm(message)) {
+            submitDelete();
+          }
+        });
+      });
+    });
+  </script>
+</th:block>
+</body>
+</html>

@@ -3,8 +3,8 @@
 <body>
 <th:block th:fragment="sidebar">
 
-  <!-- Regular Admin navigation (Super Admin uses dedicated portal; sees this only when managing /admin/*) -->
-  <th:block sec:authorize="hasAnyRole('ADMIN', 'SUPER_ADMIN')">
+  <!-- Regular Admin navigation only — Super Admin uses /superadmin/* module -->
+  <th:block sec:authorize="hasRole('ADMIN') and !hasRole('SUPER_ADMIN')">
     <div class="dashboard-header-bar">
       <div class="header-bar-left">
         <button type="button" class="header-bar-toggle" onclick="toggleSidebar()" aria-label="Toggle sidebar">
@@ -19,10 +19,7 @@
         </a>
       </div>
       <div class="header-bar-right">
-        <div sec:authorize="hasRole('SUPER_ADMIN')"
-             th:replace="~{fragments/profile-widget :: widget(photoAction=@{/admin/profile/photo}, passwordAction=@{/admin/account/password}, roleLabel='Super Admin', panelId='admin-profile-panel', logoutMode='super-admin')}"></div>
-        <div sec:authorize="hasRole('ADMIN') and !hasRole('SUPER_ADMIN')"
-             th:replace="~{fragments/profile-widget :: widget(photoAction=@{/admin/profile/photo}, passwordAction=@{/admin/account/password}, roleLabel='Admin', panelId='admin-profile-panel', logoutMode='admin')}"></div>
+        <div th:replace="~{fragments/profile-widget :: widget(photoAction=@{/admin/profile/photo}, passwordAction=@{/admin/account/password}, roleLabel='Admin', panelId='admin-profile-panel', logoutMode='admin')}"></div>
       </div>
     </div>
 

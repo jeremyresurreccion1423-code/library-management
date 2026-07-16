@@ -12,7 +12,8 @@ public class NavigationModelAdvice {
     public void addNavigationAttributes(HttpServletRequest request, Model model) {
         String uri = request != null ? request.getRequestURI() : "";
         model.addAttribute("navUri", uri);
-        model.addAttribute("navLibOpen", uri.startsWith("/admin"));
+        model.addAttribute("navLibOpen", uri.startsWith("/superadmin/library"));
+        model.addAttribute("navAttOpen", uri.startsWith("/superadmin/attendance"));
         model.addAttribute("navDashboardActive", "/super-admin".equals(uri) || "/super-admin/".equals(uri));
         model.addAttribute("navSecurityActive", uri.startsWith("/super-admin/security"));
         model.addAttribute("navUsersActive", uri.startsWith("/super-admin/users"));
