@@ -2,9 +2,13 @@ package com.smartlibrary.service;
 
 import com.smartlibrary.config.LibraryProperties;
 import com.smartlibrary.model.IssueStatus;
+import com.smartlibrary.model.ReservationStatus;
+import com.smartlibrary.repository.AuditLogRepository;
 import com.smartlibrary.repository.BookIssueRepository;
 import com.smartlibrary.repository.BookRepository;
+import com.smartlibrary.repository.ReservationRepository;
 import com.smartlibrary.repository.StudentProfileRepository;
+import com.smartlibrary.service.SecurityDashboardService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -23,6 +27,9 @@ public class SuperAdminDashboardService {
     private final BookRepository bookRepository;
     private final StudentProfileRepository studentProfileRepository;
     private final BookIssueRepository bookIssueRepository;
+    private final ReservationRepository reservationRepository;
+    private final AuditLogRepository auditLogRepository;
+    private final SecurityDashboardService securityDashboardService;
     private final RestTemplate restTemplate;
     private final LibraryProperties libraryProperties;
     private final String ssoSecret;
@@ -31,12 +38,18 @@ public class SuperAdminDashboardService {
             BookRepository bookRepository,
             StudentProfileRepository studentProfileRepository,
             BookIssueRepository bookIssueRepository,
+            ReservationRepository reservationRepository,
+            AuditLogRepository auditLogRepository,
+            SecurityDashboardService securityDashboardService,
             RestTemplate restTemplate,
             LibraryProperties libraryProperties,
             @Value("${super-admin.sso-secret}") String ssoSecret) {
         this.bookRepository = bookRepository;
         this.studentProfileRepository = studentProfileRepository;
         this.bookIssueRepository = bookIssueRepository;
+        this.reservationRepository = reservationRepository;
+        this.auditLogRepository = auditLogRepository;
+        this.securityDashboardService = securityDashboardService;
         this.restTemplate = restTemplate;
         this.libraryProperties = libraryProperties;
         this.ssoSecret = ssoSecret;
@@ -70,6 +83,12 @@ public class SuperAdminDashboardService {
         model.put("libStudentCount", toLong(library.get("studentCount")));
         model.put("libActiveLoans", toLong(library.get("activeLoans")));
         model.put("libOverdueLoans", toLong(library.get("overdueLoans")));
+        model.put("libReservationCount", toLong(library.get("reservationCount")));
+
+        var security = securityDashboardService.getDashboard();
+        model.put("secAlertFailedLogins", security.todayFailedLogins());
+        model.put("secAlertLockouts", security.lockedAccountsCount());
+        model.put("recentActivities", auditLogRepository.findTop50ByOrderByCreatedAtDesc().stream().limit(8).toList());
         return model;
     }
 
@@ -90,6 +109,7 @@ public class SuperAdminDashboardService {
         fallback.put("studentCount", 0L);
         fallback.put("activeLoans", 0L);
         fallback.put("overdueLoans", 0L);
+        fallback.put("reservationCount", 0L);
         return fallback;
     }
 
@@ -121,6 +141,7 @@ public class SuperAdminDashboardService {
         stats.put("studentCount", studentProfileRepository.count());
         stats.put("activeLoans", bookIssueRepository.countByStatus(IssueStatus.BORROWED));
         stats.put("overdueLoans", bookIssueRepository.countByStatus(IssueStatus.OVERDUE));
+        stats.put("reservationCount", reservationRepository.countByStatus(ReservationStatus.WAITING));
         return stats;
     }
 

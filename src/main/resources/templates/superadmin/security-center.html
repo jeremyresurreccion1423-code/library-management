@@ -1,39 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/super-admin-layout :: head('Security Center — System Control Center')}"></head>
+<head th:replace="~{layouts/superadmin-layout :: head('Security Center — System Control Center')}"></head>
 <body class="sa-portal" data-session-minutes="20">
 <div class="sa-shell">
-  <div th:replace="~{fragments/super-admin-layout :: sidebar}"></div>
+  <div th:replace="~{fragments/superadmin-sidebar :: sidebar}"></div>
   <div class="sa-main-wrap">
-    <header th:replace="~{fragments/super-admin-layout :: topbar('Security Center', 'Audit trail, lockouts, and login activity')}"></header>
+    <header th:replace="~{fragments/superadmin-navbar :: navbar('Security Center', 'Audit trail, lockouts, and login activity')}"></header>
 
     <main class="sa-main">
       <div th:if="${success}" class="sa-alert sa-alert--success" th:text="${success}"></div>
       <div th:if="${error}" class="sa-alert sa-alert--danger" th:text="${error}"></div>
 
       <div class="sa-stats">
-        <article class="sa-stat">
+        <article class="sa-stat sa-stat--glass">
           <div class="sa-stat__head">
             <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="log-in"></i></div>
           </div>
           <div class="sa-stat__value" th:text="${sec.todayLogins}">0</div>
           <div class="sa-stat__label">Today's Logins</div>
         </article>
-        <article class="sa-stat">
+        <article class="sa-stat sa-stat--glass">
           <div class="sa-stat__head">
             <div class="sa-stat__icon sa-stat__icon--rose"><i data-lucide="x-circle"></i></div>
           </div>
           <div class="sa-stat__value sa-stat__value--danger" th:text="${sec.todayFailedLogins}">0</div>
           <div class="sa-stat__label">Failed Logins Today</div>
         </article>
-        <article class="sa-stat">
+        <article class="sa-stat sa-stat--glass">
           <div class="sa-stat__head">
             <div class="sa-stat__icon sa-stat__icon--amber"><i data-lucide="lock"></i></div>
           </div>
           <div class="sa-stat__value" th:text="${sec.todayLockouts}">0</div>
           <div class="sa-stat__label">Lockouts Today</div>
         </article>
-        <article class="sa-stat">
+        <article class="sa-stat sa-stat--glass">
           <div class="sa-stat__head">
             <div class="sa-stat__icon"><i data-lucide="shield-alert"></i></div>
           </div>
@@ -42,7 +42,7 @@
         </article>
       </div>
 
-      <section class="sa-card">
+      <section class="sa-card sa-glass">
         <div class="sa-card__head">
           <h2>Locked Accounts</h2>
         </div>
@@ -76,7 +76,7 @@
         <p th:if="${#lists.isEmpty(sec.lockedAccounts)}" class="sa-empty">No accounts are locked right now.</p>
       </section>
 
-      <section class="sa-card">
+      <section class="sa-card sa-glass">
         <div class="sa-card__head">
           <h2>Recent Failed Logins</h2>
         </div>
@@ -105,9 +105,9 @@
         </div>
       </section>
 
-      <section class="sa-card">
+      <section class="sa-card sa-glass">
         <div class="sa-card__head">
-          <h2>Audit Trail <span style="font-weight:500;color:var(--sa-muted);font-size:0.82rem">(latest 100)</span></h2>
+          <h2>Audit Trail <span class="sa-muted-inline">(latest 100)</span></h2>
         </div>
         <div class="sa-table-wrap">
           <table class="sa-table">
@@ -136,9 +136,11 @@
         </div>
       </section>
     </main>
+
+    <footer th:replace="~{layouts/superadmin-layout :: footer}"></footer>
   </div>
 </div>
 
-<div th:replace="~{fragments/super-admin-layout :: scripts}"></div>
+<div th:replace="~{layouts/superadmin-layout :: scripts}"></div>
 </body>
 </html>

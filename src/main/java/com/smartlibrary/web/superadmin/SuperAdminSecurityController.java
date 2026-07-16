@@ -32,7 +32,7 @@ public class SuperAdminSecurityController {
     @GetMapping("/super-admin/security")
     public String securityCenter(Model model) {
         model.addAttribute("sec", securityDashboardService.getDashboard());
-        return "super-admin/security";
+        return "superadmin/security-center";
     }
 
     @PostMapping("/super-admin/security/unlock/{userId}")

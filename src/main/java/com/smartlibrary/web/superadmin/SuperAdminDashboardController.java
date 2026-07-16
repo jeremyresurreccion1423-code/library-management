@@ -23,6 +23,11 @@ public class SuperAdminDashboardController {
     @GetMapping("/super-admin")
     public String dashboard(Model model) {
         model.addAllAttributes(superAdminDashboardService.getCombinedDashboard());
-        return "super-admin/dashboard";
+        return "superadmin/dashboard";
+    }
+
+    @GetMapping("/super-admin/users")
+    public String users() {
+        return "superadmin/users";
     }
 }

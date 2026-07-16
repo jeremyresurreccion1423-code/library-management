@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{layouts/superadmin-layout :: head('Dashboard — System Control Center')}"></head>
+<body class="sa-portal">
+<div class="sa-shell">
+  <div th:replace="~{fragments/superadmin-sidebar :: sidebar}"></div>
+  <div class="sa-main-wrap">
+    <header th:replace="~{fragments/superadmin-navbar :: navbar('Executive Dashboard', 'Combined overview of Attendance and Library systems')}"></header>
+
+    <main class="sa-main">
+      <div th:if="${success}" class="sa-alert sa-alert--success" th:text="${success}"></div>
+      <div th:if="${error}" class="sa-alert sa-alert--danger" th:text="${error}"></div>
+      <div th:if="${attendanceAvailable == false}" class="sa-alert sa-alert--warning">
+        Attendance stats are temporarily unavailable. Library data below is still current.
+      </div>
+
+      <section class="sa-welcome sa-glass">
+        <div>
+          <p class="sa-welcome__eyebrow">University System Control Center</p>
+          <h2 class="sa-welcome__title">Welcome back, <span sec:authentication="name">Super Admin</span></h2>
+          <p class="sa-welcome__text">Monitor system performance, manage users, and ensure platform security across Laguna University services.</p>
+        </div>
+        <div class="sa-welcome__badge">
+          <i data-lucide="sparkles"></i>
+          <span>Executive Overview</span>
+        </div>
+      </section>
+
+      <div class="sa-stats">
+        <article class="sa-stat sa-stat--glass">
+          <div class="sa-stat__head">
+            <div class="sa-stat__icon"><i data-lucide="users"></i></div>
+            <span class="sa-stat__tag sa-stat__tag--att">Attendance</span>
+          </div>
+          <div class="sa-stat__value" th:text="${attTotalStudents}">0</div>
+          <div class="sa-stat__label">Total Students</div>
+        </article>
+        <article class="sa-stat sa-stat--glass">
+          <div class="sa-stat__head">
+            <div class="sa-stat__icon sa-stat__icon--sky"><i data-lucide="book-open"></i></div>
+            <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
+          </div>
+          <div class="sa-stat__value" th:text="${libBookCount}">0</div>
+          <div class="sa-stat__label">Total Books</div>
+        </article>
+        <article class="sa-stat sa-stat--glass">
+          <div class="sa-stat__head">
+            <div class="sa-stat__icon sa-stat__icon--emerald"><i data-lucide="clipboard-check"></i></div>
+            <span class="sa-stat__tag sa-stat__tag--att">Attendance</span>
+          </div>
+          <div class="sa-stat__value" th:text="${attTodayAttendance}">0</div>
+          <div class="sa-stat__label">Today's Attendance</div>
+        </article>
+        <article class="sa-stat sa-stat--glass">
+          <div class="sa-stat__head">
+            <div class="sa-stat__icon sa-stat__icon--amber"><i data-lucide="arrow-left-right"></i></div>
+            <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
+          </div>
+          <div class="sa-stat__value" th:text="${libActiveLoans}">0</div>
+          <div class="sa-stat__label">Active Loans</div>
+        </article>
+        <article class="sa-stat sa-stat--glass">
+          <div class="sa-stat__head">
+            <div class="sa-stat__icon"><i data-lucide="bookmark"></i></div>
+            <span class="sa-stat__tag sa-stat__tag--lib">Library</span>
+          </div>
+          <div class="sa-stat__value" th:text="${libReservationCount}">0</div>
+          <div class="sa-stat__label">Reservations</div>
+        </article>
+      </div>
+
+      <div class="sa-grid-2">
+        <section class="sa-card sa-glass">
+          <div class="sa-card__head">
+            <h2>Attendance Analytics</h2>
+            <span class="sa-pill sa-pill--att">Live</span>
+          </div>
+          <div class="sa-chart-wrap sa-chart-wrap--sm">
+            <canvas id="saAttendanceChart"
+                    th:attr="data-att-students=${attTotalStudents},data-att-today=${attTodayAttendance},data-att-low=${attLowAttendanceCount}"></canvas>
+          </div>
+        </section>
+
+        <section class="sa-card sa-glass">
+          <div class="sa-card__head">
+            <h2>Library Analytics</h2>
+            <span class="sa-pill sa-pill--lib">Live</span>
+          </div>
+          <div class="sa-chart-wrap sa-chart-wrap--sm">
+            <canvas id="saLibraryChart"
+                    th:attr="data-lib-books=${libBookCount},data-lib-loans=${libActiveLoans},data-lib-overdue=${libOverdueLoans}"></canvas>
+          </div>
+        </section>
+      </div>
+
+      <div class="sa-grid-2">
+        <section class="sa-card sa-glass">
+          <div class="sa-card__head">
+            <h2>Combined System Analytics</h2>
+            <span class="sa-pill sa-pill--lib">Overview</span>
+          </div>
+          <div class="sa-chart-wrap">
+            <canvas id="saOverviewChart"
+                    th:attr="data-att-students=${attTotalStudents},data-att-subjects=${attTotalSubjects},data-att-today=${attTodayAttendance},data-lib-books=${libBookCount},data-lib-students=${libStudentCount},data-lib-loans=${libActiveLoans}"></canvas>
+          </div>
+        </section>
+
+        <section class="sa-card sa-glass">
+          <div class="sa-card__head">
+            <h2>System Status</h2>
+          </div>
+          <div class="sa-status-list">
+            <div class="sa-status-item" th:classappend="${attendanceAvailable} ? ' sa-status-item--ok' : ' sa-status-item--warn'">
+              <i data-lucide="calendar-check"></i>
+              <div>
+                <strong>Attendance Management</strong>
+                <span th:text="${attendanceAvailable} ? 'Connected and reporting live stats' : 'Temporarily unavailable'">Status</span>
+              </div>
+            </div>
+            <div class="sa-status-item sa-status-item--ok">
+              <i data-lucide="book-open"></i>
+              <div>
+                <strong>Library Management</strong>
+                <span>Operational — all library metrics current</span>
+              </div>
+            </div>
+            <div class="sa-status-item" th:classappend="${attLowAttendanceCount > 0} ? ' sa-status-item--warn' : ' sa-status-item--ok'">
+              <i data-lucide="alert-triangle"></i>
+              <div>
+                <strong>Low Attendance Alerts</strong>
+                <span th:text="${attLowAttendanceCount} + ' alert(s) require review'">0 alerts</span>
+              </div>
+            </div>
+            <div class="sa-status-item" th:classappend="${libOverdueLoans > 0} ? ' sa-status-item--warn' : ' sa-status-item--ok'">
+              <i data-lucide="clock"></i>
+              <div>
+                <strong>Overdue Library Loans</strong>
+                <span th:text="${libOverdueLoans} + ' overdue item(s)'">0 overdue</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="sa-grid-2">
+        <section class="sa-card sa-glass">
+          <div class="sa-card__head">
+            <h2>Recent Activities</h2>
+            <a th:href="@{/super-admin/security}" class="sa-link">View all</a>
+          </div>
+          <ul class="sa-activity-list" th:if="${!#lists.isEmpty(recentActivities)}">
+            <li th:each="log : ${recentActivities}" class="sa-activity-item">
+              <span class="sa-activity-item__icon"><i data-lucide="activity"></i></span>
+              <div class="sa-activity-item__body">
+                <strong th:text="${log.action}">LOGIN</strong>
+                <span th:text="${log.details}">Details</span>
+                <small th:text="${log.createdAt}">-</small>
+              </div>
+            </li>
+          </ul>
+          <p th:if="${#lists.isEmpty(recentActivities)}" class="sa-empty">No recent activity recorded yet.</p>
+        </section>
+
+        <section class="sa-card sa-glass">
+          <div class="sa-card__head">
+            <h2>Security Alerts</h2>
+            <a th:href="@{/super-admin/security}" class="sa-link">Security Center</a>
+          </div>
+          <div class="sa-alert-stack">
+            <div class="sa-security-alert" th:classappend="${secAlertFailedLogins > 0} ? ' sa-security-alert--warn' : ' sa-security-alert--ok'">
+              <i data-lucide="shield-alert"></i>
+              <div>
+                <strong>Failed Logins Today</strong>
+                <span th:text="${secAlertFailedLogins} + ' attempt(s)'">0</span>
+              </div>
+            </div>
+            <div class="sa-security-alert" th:classappend="${secAlertLockouts > 0} ? ' sa-security-alert--danger' : ' sa-security-alert--ok'">
+              <i data-lucide="lock"></i>
+              <div>
+                <strong>Accounts Locked</strong>
+                <span th:text="${secAlertLockouts} + ' account(s)'">0</span>
+              </div>
+            </div>
+            <div class="sa-security-alert" th:classappend="${attLowAttendanceCount > 0} ? ' sa-security-alert--warn' : ' sa-security-alert--ok'">
+              <i data-lucide="alert-circle"></i>
+              <div>
+                <strong>Attendance Alerts</strong>
+                <span th:text="${attLowAttendanceCount} + ' low-attendance flag(s)'">0</span>
+              </div>
+            </div>
+            <div class="sa-security-alert" th:classappend="${libOverdueLoans > 0} ? ' sa-security-alert--warn' : ' sa-security-alert--ok'">
+              <i data-lucide="book-x"></i>
+              <div>
+                <strong>Overdue Loans</strong>
+                <span th:text="${libOverdueLoans} + ' item(s)'">0</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <section class="sa-card sa-glass">
+        <div class="sa-card__head">
+          <h2>Quick Actions</h2>
+        </div>
+        <div class="sa-actions">
+          <a th:href="@{/super-admin/security}" class="sa-action">
+            <span class="sa-action__icon"><i data-lucide="shield"></i></span>
+            <span>
+              <strong>Security Center</strong>
+              <span>Audit trail &amp; lockouts</span>
+            </span>
+          </a>
+          <a th:href="@{/admin}" class="sa-action">
+            <span class="sa-action__icon"><i data-lucide="book-open"></i></span>
+            <span>
+              <strong>Library Admin</strong>
+              <span>Manage books &amp; circulation</span>
+            </span>
+          </a>
+          <a th:href="@{/super-admin/bridge/attendance(path='/admin/dashboard')}" class="sa-action">
+            <span class="sa-action__icon"><i data-lucide="calendar-check"></i></span>
+            <span>
+              <strong>Attendance Admin</strong>
+              <span>Departments, reports &amp; trends</span>
+            </span>
+          </a>
+          <a th:href="@{/admin/analytics}" class="sa-action">
+            <span class="sa-action__icon"><i data-lucide="bar-chart-3"></i></span>
+            <span>
+              <strong>Library Analytics</strong>
+              <span>Usage insights &amp; reports</span>
+            </span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer th:replace="~{layouts/superadmin-layout :: footer}"></footer>
+  </div>
+</div>
+
+<div th:replace="~{layouts/superadmin-layout :: scripts}"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</body>
+</html>
