@@ -80,7 +80,7 @@ public class AdminProfileController {
 
         User currentUser = userRepository.findById(user.getUser().getId()).orElseThrow();
         if (currentUser.getEmail() == null || currentUser.getEmail().isBlank()) {
-            currentUser.setEmail("resurreccionjeremy9@gmail.com");
+            currentUser.setEmail("mercadocarlo645@gmail.com");
         }
         if (!trimmedUsername.equals(currentUser.getUsername())
                 && userRepository.existsByUsername(trimmedUsername)) {

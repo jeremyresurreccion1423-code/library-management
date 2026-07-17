@@ -50,27 +50,20 @@ public class SharedLibraryStudentProfileBridgeService {
     public Optional<StudentProfile> ensureLibraryStudentProfile(User user) {
         if (user == null) {
             log.warn("ensureLibraryStudentProfile: user is null — returning empty");
-            log.info("[TEMP] ensureLibraryStudentProfile: returning Optional.empty() — branch=user is null");
-            return Optional.empty();
+return Optional.empty();
         }
         if (user.getId() == null) {
             log.warn("ensureLibraryStudentProfile: user id is null for username={} email={} — returning empty",
                     user.getUsername(), user.getEmail());
-            log.info("[TEMP] ensureLibraryStudentProfile: returning Optional.empty() — branch=user.getId() is null");
-            return Optional.empty();
+return Optional.empty();
         }
 
-        log.info("[TEMP] ensureLibraryStudentProfile: user.getId()={}, user.getUsername()={}, user.getEmail()={}",
-                user.getId(), user.getUsername(), user.getEmail());
-
-        Optional<StudentProfile> existing = findProfileRecord(user);
+Optional<StudentProfile> existing = findProfileRecord(user);
         if (existing.isPresent()) {
             repairUserLinkIfNeeded(existing.get(), user);
             Optional<StudentProfile> reloaded = loadProfileById(existing.get().getId());
             if (reloaded.isPresent()) {
-                log.info("[TEMP] ensureLibraryStudentProfile: returning Optional.of(profile) profileId={} — branch=findProfileRecord reload succeeded",
-                        reloaded.get().getId());
-                return reloaded;
+return reloaded;
             }
             log.error(
                     "ensureLibraryStudentProfile: JDBC found profile id={} for userId={} username={} but reload failed",
@@ -83,9 +76,7 @@ public class SharedLibraryStudentProfileBridgeService {
             Optional<StudentProfile> reloaded = loadProfileById(fromAttendance.get().getId());
             if (reloaded.isPresent()) {
                 log.info("ensureLibraryStudentProfile: provisioned from public.students for username={}", user.getUsername());
-                log.info("[TEMP] ensureLibraryStudentProfile: returning Optional.of(profile) profileId={} — branch=provisionFromAttendanceStudent reload succeeded",
-                        reloaded.get().getId());
-                return reloaded;
+return reloaded;
             }
             log.error(
                     "ensureLibraryStudentProfile: provisionFromAttendanceStudent returned id={} for username={} but reload failed",
@@ -95,9 +86,7 @@ public class SharedLibraryStudentProfileBridgeService {
         Optional<StudentProfile> fromUser = provisionFromSharedUserAccount(user);
         if (fromUser.isPresent()) {
             log.info("ensureLibraryStudentProfile: provisioned from shared user account for username={}", user.getUsername());
-            log.info("[TEMP] ensureLibraryStudentProfile: returning Optional.of(profile) profileId={} — branch=provisionFromSharedUserAccount succeeded",
-                    fromUser.get().getId());
-            return fromUser;
+return fromUser;
         }
 
         log.warn(
@@ -110,8 +99,7 @@ public class SharedLibraryStudentProfileBridgeService {
                 existing.isPresent() ? "found-but-unloadable" : "miss",
                 fromAttendance.isPresent() ? "returned-but-unloadable" : "miss",
                 "miss");
-        log.info("[TEMP] ensureLibraryStudentProfile: returning Optional.empty() — branch=final fallback (all paths failed)");
-        return Optional.empty();
+return Optional.empty();
     }
 
     private Optional<StudentProfile> findProfileRecord(User user) {
@@ -123,10 +111,8 @@ public class SharedLibraryStudentProfileBridgeService {
                 "SELECT id FROM library.student_profiles WHERE user_id = ? LIMIT 1",
                 user.getId());
         if (profileId.isPresent()) {
-            log.info("[TEMP] findProfileRecord Query1 (by user_id): profile id FOUND={}", profileId.get());
-        } else {
-            log.info("[TEMP] findProfileRecord Query1 (by user_id): profile id NOT FOUND for user_id={}", user.getId());
-        }
+} else {
+}
         if (profileId.isPresent()) {
             return loadProfileById(profileId.get());
         }
@@ -216,17 +202,14 @@ public class SharedLibraryStudentProfileBridgeService {
             Optional<StudentProfile> profile = loadProfileById(profileId.get());
             profile.ifPresent(value -> repairUserLinkIfNeeded(value, user));
             if (profile.isPresent()) {
-                log.info("[TEMP] findProfileRecord: returning Optional.of(profile) profileId={} — branch=orphan repair query",
-                        profile.get().getId());
-            }
+}
             return profile;
         }
 
         log.debug(
                 "findProfileRecord: no library.student_profiles match for userId={} username={} email={}",
                 user.getId(), username, email);
-        log.info("[TEMP] findProfileRecord: returning Optional.empty() — branch=no query matched");
-        return Optional.empty();
+return Optional.empty();
     }
 
     private Optional<StudentProfile> findProfileByAttendanceStudentNumber(User user) {
@@ -272,22 +255,19 @@ public class SharedLibraryStudentProfileBridgeService {
             List<Long> profileIds = jdbcTemplate.queryForList(sql, Long.class, args);
             if (profileIds.isEmpty()) {
                 log.debug("findProfileRecord: {} returned no rows", queryLabel);
-                log.info("[TEMP] findProfileId: returning Optional.empty() — branch={} returned no rows", queryLabel);
-                return Optional.empty();
+return Optional.empty();
             }
             log.debug("findProfileRecord: {} returned profile id={}", queryLabel, profileIds.get(0));
             return Optional.of(profileIds.get(0));
         } catch (DataAccessException ex) {
             log.error("findProfileRecord: {} failed for args={}: {}", queryLabel, args, ex.getMessage(), ex);
-            log.info("[TEMP] findProfileId: returning Optional.empty() — branch={} DataAccessException", queryLabel);
-            return Optional.empty();
+return Optional.empty();
         }
     }
 
     private Optional<StudentProfile> loadProfileById(Long profileId) {
         if (profileId == null) {
-            log.info("[TEMP] loadProfileById: returning Optional.empty() — branch=profileId is null");
-            return Optional.empty();
+return Optional.empty();
         }
         try {
             List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
@@ -297,23 +277,19 @@ public class SharedLibraryStudentProfileBridgeService {
                     """, profileId);
             if (rows.isEmpty()) {
                 log.warn("loadProfileById: no row in library.student_profiles for id={}", profileId);
-                log.info("[TEMP] loadProfileById: returning Optional.empty() — branch=JDBC query returned no rows for id={}", profileId);
-                return Optional.empty();
+return Optional.empty();
             }
             StudentProfile profile = mapRowToProfile(rows.get(0));
-            log.info("[TEMP] loadProfileById: returning Optional.of(profile) profileId={}", profile.getId());
-            return Optional.of(profile);
+return Optional.of(profile);
         } catch (DataAccessException ex) {
             log.error("loadProfileById: JDBC load failed for id={}: {}", profileId, ex.getMessage(), ex);
-            log.info("[TEMP] loadProfileById: returning Optional.empty() — branch=DataAccessException for id={}", profileId);
-            return Optional.empty();
+return Optional.empty();
         }
     }
 
     private Optional<StudentProfile> loadProfileByStudentId(String studentId) {
         if (studentId == null || studentId.isBlank()) {
-            log.info("[TEMP] loadProfileByStudentId: returning Optional.empty() — branch=studentId is null or blank");
-            return Optional.empty();
+return Optional.empty();
         }
         try {
             List<Map<String, Object>> rows = jdbcTemplate.queryForList("""
@@ -324,16 +300,13 @@ public class SharedLibraryStudentProfileBridgeService {
                     """, studentId);
             if (rows.isEmpty()) {
                 log.debug("loadProfileByStudentId: no row for studentId={}", studentId);
-                log.info("[TEMP] loadProfileByStudentId: returning Optional.empty() — branch=JDBC query returned no rows for studentId={}", studentId);
-                return Optional.empty();
+return Optional.empty();
             }
             StudentProfile profile = mapRowToProfile(rows.get(0));
-            log.info("[TEMP] loadProfileByStudentId: returning Optional.of(profile) profileId={}", profile.getId());
-            return Optional.of(profile);
+return Optional.of(profile);
         } catch (DataAccessException ex) {
             log.error("loadProfileByStudentId: JDBC load failed for studentId={}: {}", studentId, ex.getMessage(), ex);
-            log.info("[TEMP] loadProfileByStudentId: returning Optional.empty() — branch=DataAccessException for studentId={}", studentId);
-            return Optional.empty();
+return Optional.empty();
         }
     }
 
@@ -434,16 +407,14 @@ public class SharedLibraryStudentProfileBridgeService {
             log.error(
                     "provisionFromAttendanceStudent: public.students lookup failed for userId={} username={} email={}: {}",
                     user.getId(), user.getUsername(), user.getEmail(), ex.getMessage(), ex);
-            log.info("[TEMP] provisionFromAttendanceStudent: returning Optional.empty() — branch=public.students lookup DataAccessException");
-            return Optional.empty();
+return Optional.empty();
         }
 
         if (attendanceStudents.isEmpty()) {
             log.debug(
                     "provisionFromAttendanceStudent: no public.students row for userId={} username={} email={}",
                     user.getId(), user.getUsername(), user.getEmail());
-            log.info("[TEMP] provisionFromAttendanceStudent: returning Optional.empty() — branch=no public.students row");
-            return Optional.empty();
+return Optional.empty();
         }
 
         Map<String, Object> row = attendanceStudents.get(0);
@@ -484,8 +455,7 @@ public class SharedLibraryStudentProfileBridgeService {
             log.debug(
                     "provisionFromSharedUserAccount: skipping userId={} username={} — role is {} not STUDENT",
                     user.getId(), user.getUsername(), user.getRole());
-            log.info("[TEMP] provisionFromSharedUserAccount: returning Optional.empty() — branch=role is not STUDENT (role={})", user.getRole());
-            return Optional.empty();
+return Optional.empty();
         }
 
         String fullName = resolveFullName(user);
@@ -493,8 +463,7 @@ public class SharedLibraryStudentProfileBridgeService {
             log.warn(
                     "provisionFromSharedUserAccount: blank full name for userId={} username={} email={}",
                     user.getId(), user.getUsername(), user.getEmail());
-            log.info("[TEMP] provisionFromSharedUserAccount: returning Optional.empty() — branch=blank full name");
-            return Optional.empty();
+return Optional.empty();
         }
 
         String studentId = studentIdService.generateNextStudentId();
@@ -518,16 +487,14 @@ public class SharedLibraryStudentProfileBridgeService {
             log.error(
                     "saveNewProfile: public.users existence check failed for userId={} username={}: {}",
                     userId, user.getUsername(), ex.getMessage(), ex);
-            log.info("[TEMP] saveNewProfile: returning Optional.empty() — branch=public.users existence check DataAccessException");
-            return Optional.empty();
+return Optional.empty();
         }
 
         if (userExists == null || userExists == 0) {
             log.error(
                     "saveNewProfile: cannot insert — userId={} username={} not found in public.users",
                     userId, user.getUsername());
-            log.info("[TEMP] saveNewProfile: returning Optional.empty() — branch=user not found in public.users");
-            return Optional.empty();
+return Optional.empty();
         }
 
         String resolvedName = fullName.isBlank() ? user.getUsername() : fullName;
@@ -551,12 +518,8 @@ public class SharedLibraryStudentProfileBridgeService {
                 log.error(
                         "saveNewProfile: INSERT succeeded (id={}) but JDBC reload failed for userId={} username={} studentId={}",
                         profileId, userId, user.getUsername(), studentId);
-                log.info("[TEMP] saveNewProfile: returning Optional.empty() — branch=INSERT succeeded but reload failed (insertedId={})",
-                        profileId);
-            } else {
-                log.info("[TEMP] saveNewProfile: returning Optional.of(profile) profileId={} — branch=INSERT succeeded",
-                        loaded.get().getId());
-            }
+} else {
+}
             return loaded;
         } catch (DuplicateKeyException ex) {
             log.warn(
@@ -567,21 +530,17 @@ public class SharedLibraryStudentProfileBridgeService {
                 log.info(
                         "saveNewProfile: recovered existing library.student_profiles id={} studentId={} for username={}",
                         existing.get().getId(), studentId, user.getUsername());
-                log.info("[TEMP] saveNewProfile: returning Optional.of(profile) profileId={} — branch=duplicate student_id recovery",
-                        existing.get().getId());
-                return existing;
+return existing;
             }
             log.error(
                     "saveNewProfile: duplicate student_id={} but could not load existing row for username={}",
                     studentId, user.getUsername(), ex);
-            log.info("[TEMP] saveNewProfile: returning Optional.empty() — branch=duplicate student_id but reload failed");
-            return Optional.empty();
+return Optional.empty();
         } catch (DataAccessException ex) {
             log.error(
                     "saveNewProfile: INSERT into library.student_profiles failed for userId={} username={} email={} studentId={}: {}",
                     userId, user.getUsername(), user.getEmail(), studentId, ex.getMessage(), ex);
-            log.info("[TEMP] saveNewProfile: returning Optional.empty() — branch=INSERT DataAccessException");
-            return Optional.empty();
+return Optional.empty();
         }
     }
 

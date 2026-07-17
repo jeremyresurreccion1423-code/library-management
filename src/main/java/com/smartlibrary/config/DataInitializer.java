@@ -90,7 +90,7 @@ public class DataInitializer implements CommandLineRunner {
             User admin = new User();
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setEmail("resurreccionjeremy9@gmail.com");
+            admin.setEmail("mercadocarlo645@gmail.com");
             admin.setRole(UserRole.ADMIN);
             admin.setEnabled(true);
             userRepository.save(admin);
@@ -615,16 +615,19 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void ensureAdminContactEmails() {
-        userRepository.findByUsername("admin").ifPresent(admin -> {
-            String email = admin.getEmail();
-            if (email == null || email.isBlank()
-                    || email.endsWith("@admin.local")
-                    || email.endsWith("@library.local")) {
-                admin.setEmail("resurreccionjeremy9@gmail.com");
-                userRepository.save(admin);
-                log.info("Set admin contact email to resurreccionjeremy9@gmail.com");
-            }
-        });
+        userRepository.findAll().stream()
+                .filter(u -> u.getRole() == com.smartlibrary.model.UserRole.ADMIN)
+                .forEach(admin -> {
+                    String email = admin.getEmail();
+                    if (email == null || email.isBlank()
+                            || email.endsWith("@admin.local")
+                            || email.endsWith("@library.local")
+                            || "resurreccionjeremy9@gmail.com".equalsIgnoreCase(email.trim())) {
+                        admin.setEmail("mercadocarlo645@gmail.com");
+                        userRepository.save(admin);
+                        log.info("Set admin {} contact email to mercadocarlo645@gmail.com", admin.getUsername());
+                    }
+                });
     }
 
     private void fixInvalidEmails() {

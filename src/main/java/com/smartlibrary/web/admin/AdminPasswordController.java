@@ -20,7 +20,7 @@ public class AdminPasswordController {
 
     private static final String SESSION_PWD_STEP = "adminPwdChangeStep";
     private static final String SESSION_PWD_OTP_VERIFIED = "adminPwdOtpVerified";
-    private static final String DEFAULT_ADMIN_EMAIL = "resurreccionjeremy9@gmail.com";
+    private static final String DEFAULT_ADMIN_EMAIL = "mercadocarlo645@gmail.com";
 
     private final UserAccountService userAccountService;
 
