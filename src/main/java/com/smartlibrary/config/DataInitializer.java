@@ -615,19 +615,33 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void ensureAdminContactEmails() {
-        userRepository.findAll().stream()
-                .filter(u -> u.getRole() == com.smartlibrary.model.UserRole.ADMIN)
-                .forEach(admin -> {
-                    String email = admin.getEmail();
-                    if (email == null || email.isBlank()
-                            || email.endsWith("@admin.local")
-                            || email.endsWith("@library.local")
-                            || "resurreccionjeremy9@gmail.com".equalsIgnoreCase(email.trim())) {
-                        admin.setEmail("mercadocarlo645@gmail.com");
-                        userRepository.save(admin);
-                        log.info("Set admin {} contact email to mercadocarlo645@gmail.com", admin.getUsername());
-                    }
-                });
+        assignAdminEmailIfAvailable("jeremy", "mercadocarlo645@gmail.com");
+        assignAdminEmailIfAvailable("admin", "mercadocarlo645@gmail.com");
+    }
+
+    private void assignAdminEmailIfAvailable(String username, String email) {
+        userRepository.findByUsername(username).ifPresent(user -> {
+            if (user.getRole() != com.smartlibrary.model.UserRole.ADMIN || email == null || email.isBlank()) {
+                return;
+            }
+            String current = user.getEmail();
+            if (current != null && !current.isBlank()
+                    && !current.endsWith("@admin.local")
+                    && !current.endsWith("@library.local")
+                    && !"resurreccionjeremy9@gmail.com".equalsIgnoreCase(current.trim())) {
+                return;
+            }
+            String normalizedEmail = email.trim().toLowerCase();
+            var existingOwner = userRepository.findByEmailIgnoreCase(normalizedEmail);
+            if (existingOwner.isPresent() && !existingOwner.get().getId().equals(user.getId())) {
+                log.warn("Skipped email update for {} — {} already used by {}",
+                        username, normalizedEmail, existingOwner.get().getUsername());
+                return;
+            }
+            user.setEmail(normalizedEmail);
+            userRepository.save(user);
+            log.info("Set admin {} contact email to {}", username, normalizedEmail);
+        });
     }
 
     private void fixInvalidEmails() {
